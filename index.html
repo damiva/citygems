@@ -14,13 +14,10 @@
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Montserrat:wght@200;400&display=swap');
         
         body { font-family: 'Montserrat', sans-serif; background-color: #0d0d0d; }
-        h1, .serif { font-family: 'Cormorant Garamond', serif; }
-        
+        h1, .serif { font-family: 'Cormorant Garamond', serif; }    
         .diamond-gradient {
             background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 70%);
         }
-
-        /* Эффект мерцания для кнопок */
         .btn-shine {
             position: relative;
             overflow: hidden;
@@ -36,6 +33,11 @@
         }
         .btn-shine:hover::after {
             left: 120%;
+        }
+        @media (max-height: 720px) {
+            footer {
+                display: none !important;
+            }
         }
     </style>
 </head>
@@ -77,8 +79,10 @@
         </div>
     </main>
 
-    <footer class="absolute bottom-10 w-full text-center">
-        <p class="text-[9px] uppercase tracking-[0.5em] text-stone-800 italic">Москва &nbsp;•&nbsp; 2026</p>
+    <footer class="fixed bottom-8 w-full text-center pointer-events-none">
+        <p class="text-[9px] uppercase tracking-[0.5em] text-stone-800 italic">
+            Москва &nbsp;•&nbsp; 2026
+        </p>
     </footer>
 
 <div id="qr-modal" onclick="closeQR()" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md transition-all duration-500">
