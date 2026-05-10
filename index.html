@@ -3,37 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Under Construction</title>
-    <!-- Подключаем Tailwind для быстрой стилизации -->
+    <title>CityGems — бриллианты</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        let qrCreated = false;
+        const vault = { t: { u: "ZmFuY3lkaWFtcw==", h: "dC5tZQ==" }, m: { u: "aXJpbmE=", h: "Y2l0eWdlbXMucnU=" } };
+    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Montserrat:wght@200;400&display=swap');
+        
+        body { font-family: 'Montserrat', sans-serif; background-color: #0d0d0d; }
+        h1, .serif { font-family: 'Cormorant Garamond', serif; }
+        
+        .diamond-gradient {
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0%, transparent 70%);
+        }
+
+        /* Эффект мерцания для кнопок */
+        .btn-shine {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-shine::after {
+            content: "";
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: 0.8s;
+        }
+        .btn-shine:hover::after {
+            left: 120%;
         }
     </style>
 </head>
-<body class="bg-slate-900 flex items-center justify-center min-h-screen">
+<body class="text-stone-300 min-h-screen flex flex-col items-center justify-center p-8">
 
-    <div class="text-center px-4">
-        <!-- Декоративный элемент (светящийся круг на фоне) -->
-        <div class="absolute inset-0 overflow-hidden -z-10">
-            <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-blue-500/10 blur-[120px]"></div>
-            <div class="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] rounded-full bg-purple-500/10 blur-[120px]"></div>
+    <div class="absolute inset-0 diamond-gradient pointer-events-none"></div>
+
+    <main class="max-w-xl w-full text-center z-10 relative">
+        
+        <div class="mb-16">
+            <h1 class="text-5xl md:text-7xl font-light tracking-[0.15em] text-white uppercase mb-4">
+                City<span class="serif italic text-stone-500 lowercase">Gems</span>
+            </h1>
+            <div class="w-12 h-[1px] bg-stone-700 mx-auto mb-6"></div>
+            <p class="serif text-xl md:text-2xl text-stone-400 font-light tracking-widest italic">
+                Камни,<br>которые рассказывают истории
+            </p>
         </div>
 
-        <!-- Основной текст -->
-        <h1 class="text-5xl md:text-7xl font-light tracking-tighter text-white opacity-90 mb-4">
-            under<span class="font-semibold text-blue-400">construction</span>
-        </h1>
-        
-        <!-- Разделитель -->
-        <div class="w-12 h-[1px] bg-slate-500 mx-auto mb-6"></div>
-        
-        <p class="text-slate-400 text-sm md:text-base uppercase tracking-[0.3em] font-light">
-            Coming Soon
-        </p>
-    </div>
+        <div class="space-y-4 mb-20">
+            <p class="text-[10px] uppercase tracking-[0.6em] text-stone-600">Скоро открытие</p>
+            <p class="text-stone-400 font-light leading-relaxed max-w-xs mx-auto text-sm">
+                Мы работаем над созданием закрытой онлайн-витрины. Сейчас коллекция доступна только по частному запросу.
+            </p>
+        </div>
 
+        <div class="flex flex-col gap-8 items-center">
+            
+            <button onclick="tot()" class="btn-shine group px-14 py-4 border border-stone-800 rounded-none hover:border-stone-400 transition-all duration-1000 bg-transparent">
+                <span id="tg-label" class="text-[11px] uppercase tracking-[0.3em] text-stone-200">Связаться в Telegram</span>
+            </button>
+
+            <button onclick="tom()" class="group">
+                <span id="mail-label" class="text-[10px] uppercase tracking-[0.4em] text-stone-600 group-hover:text-stone-300 transition-colors duration-700 border-b border-transparent group-hover:border-stone-800 pb-1">
+                    Отправить email-запрос
+                </span>
+            </button>
+            
+        </div>
+    </main>
+
+    <footer class="absolute bottom-10 w-full text-center">
+        <p class="text-[9px] uppercase tracking-[0.5em] text-stone-800 italic">Москва &nbsp;•&nbsp; 2026</p>
+    </footer>
+
+<div id="qr-modal" onclick="closeQR()" class="fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md transition-all duration-500">
+    <div class="bg-[#111] p-10 border border-stone-800 text-center relative shadow-2xl max-w-sm mx-4" onclick="event.stopPropagation()">
+        
+        <h3 class="serif italic text-stone-200 mb-8 tracking-[0.3em] uppercase text-xs leading-relaxed">
+            Сканируйте или нажмите на код
+        </h3>
+        
+        <div class="relative inline-block mx-auto">
+            <a id="qr-link" target="_blank" class="relative block bg-white p-4 mb-8 transition-transform hover:scale-105 active:scale-95 duration-300 shadow-[0_0_50px_rgba(255,255,255,0.1)] w-[252px] h-[252px]">
+                <!-- Место под QR -->
+                <div id="qrcode" class="flex justify-center"></div>
+                
+                <!-- Квадратный логотип Telegram -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white p-1 rounded-sm shadow-sm">
+                    <svg width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Фон иконки теперь квадратный со слегка скругленными углами -->
+                        <rect width="24" height="24" rx="2" fill="#24A1DE"/>
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M5.41423 11.9332L17.514 7.2662C18.0754 7.0544 18.563 7.4116 18.3845 8.1966L16.3262 17.8946C16.1706 18.5919 15.757 18.7663 15.1729 18.4386L12.0366 16.1265L10.5235 17.5833C10.3557 17.7511 10.2157 17.8911 9.89143 17.8911L10.1165 14.7042L15.9168 9.4627C16.1691 9.2383 15.8617 9.1137 15.5255 9.3377L8.35533 13.8523L5.26713 12.8858C4.59563 12.6756 4.58283 12.2136 5.41423 11.9332Z" fill="white"/>
+                    </svg>
+                </div>
+            </a>
+        </div>
+
+        <button onclick="closeQR()" class="block w-full text-[9px] uppercase tracking-[0.5em] text-stone-600 hover:text-stone-300 transition-colors">
+            Закрыть
+        </button>
+    </div>
+</div>
+<script>
+    function tot() { showQR(`https://${atob(vault.t.h)}/${atob(vault.t.u)}`); }
+    
+    function tom() {
+        const address = `${atob(vault.m.u)}@${atob(vault.m.h)}`;
+        const el = document.getElementById('mail-label');
+        navigator.clipboard.writeText(address).then(() => {
+            const original = el.innerText;
+            el.innerText = "Адрес скопирован";
+            setTimeout(() => { el.innerText = original; }, 2500);
+        });
+    }
+
+    function showQR(link) {
+        const modal = document.getElementById('qr-modal');
+        const qrContainer = document.getElementById('qrcode');
+        const qrLink = document.getElementById('qr-link');
+        
+        qrLink.href = link;
+
+        if (!qrCreated) {
+            new QRCode(qrContainer, {
+                text: link,
+                width: 220,
+                height: 220,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            qrCreated = true;
+        }
+        
+        modal.classList.remove('hidden');
+        modal.style.opacity = "0";
+        setTimeout(() => { modal.style.opacity = "1"; }, 10);
+    }
+
+    function closeQR() {
+        const modal = document.getElementById('qr-modal');
+        modal.classList.add('hidden');
+    }
+</script>
 </body>
 </html>
