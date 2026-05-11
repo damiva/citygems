@@ -3,74 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CityGems — Каталог</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400;1,600&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <title>CityGems — Эксклюзивные Бриллианты</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Montserrat:wght@200;400;500&display=swap" rel="stylesheet">
     <script src="config.js"></script>
     <style>
-        /* Дополнительные стили для красоты, которые сложно вынести в мелкий CSS */
-        body { font-family: 'Montserrat', sans-serif; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #080808; color: #d1d5db; }
         .serif { font-family: 'Cormorant Garamond', serif; }
-        .verified-icon { color: #d4af37; margin-left: 4px; display: inline-flex; align-items: center; }
-        .diamond-shape-img { filter: invert(1); opacity: 0.8; width: 24px; height: 24px; vertical-align: middle; margin-right: 8px; }
-        .specs-table { font-size: 11px; color: #a8a29e; width: 100%; border-top: 1px solid #1c1917; margin-top: 10px; padding-top: 10px; }
-        .spec-item { display: flex; justify-content: space-between; margin-bottom: 4px; }
-        .spec-label { color: #57534e; text-transform: uppercase; letter-spacing: 0.05em; }
+        .gold-gradient { background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .diamond-card { background: linear-gradient(145deg, #0f0f0f, #050505); border: 1px solid #1a1a1a; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .diamond-card:hover { border-color: #4b4433; transform: translateY(-5px); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+        select, input { background: #111 !important; border: 1px solid #222 !important; color: #fff !important; }
+        .btn-main { background: #111; border: 1px solid #333; color: #fff; letter-spacing: 0.2em; transition: 0.3s; }
+        .btn-main:hover { background: #fff; color: #000; border-color: #fff; }
     </style>
 </head>
-<body>
+<body class="min-h-screen">
 
-<header class="header">
-    <div class="container flex-between">
-        <h1 class="logo text-white uppercase font-light tracking-[0.2em]">City<span class="serif italic text-stone-500 lowercase">Gems</span></h1>
-        <div id="stats" class="stats text-[10px] uppercase tracking-widest text-stone-600">Подготовка данных...</div>
-        <button onclick="openContactModal()" class="btn-sm border border-stone-800 px-4 py-2 hover:bg-stone-200 hover:text-black transition-all text-[10px] uppercase">Связь</button>
+<header class="border-b border-stone-900 sticky top-0 bg-black/80 backdrop-blur-lg z-50">
+    <div class="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
+        <h1 class="text-2xl tracking-[0.3em] font-light uppercase">City<span class="serif italic lowercase opacity-60">Gems</span></h1>
+        <div id="stats" class="text-[10px] uppercase tracking-widest text-stone-500 font-medium">Синхронизация...</div>
+        <button onclick="openContactModal()" class="text-[10px] border border-stone-800 px-5 py-2 hover:bg-white hover:text-black transition-all uppercase tracking-widest">Связь</button>
     </div>
 </header>
 
-<div class="main-layout container flex flex-col lg:flex-row">
-    <aside class="sidebar w-full lg:w-72 p-6 border-r border-stone-900">
-        <h2 class="serif text-3xl text-white italic mb-8">Фильтры</h2>
+<div class="max-w-7xl mx-auto flex flex-col lg:flex-row min-h-[calc(100vh-80px)]">
+    <aside class="w-full lg:w-80 p-8 border-r border-stone-900 bg-[#080808]">
+        <h2 class="serif text-4xl text-white italic mb-10">Коллекция</h2>
         
-        <div class="filter-group mb-6">
-            <label class="text-[9px] uppercase tracking-widest block mb-3 text-stone-500">Форма огранки</label>
-            <select id="f-shape" onchange="applyFilters()" class="w-full p-3 text-xs bg-[#1a1a1a] border-stone-800 text-white outline-none focus:border-stone-500"></select>
-        </div>
-
-        <div class="filter-group mb-6">
-            <label class="text-[9px] uppercase tracking-widest block mb-3 text-stone-500">Вес камня (ct)</label>
-            <div class="flex gap-2">
-                <input type="number" id="f-min-w" step="0.1" placeholder="От" oninput="applyFilters()" class="w-full p-2 text-xs bg-[#1a1a1a] border-stone-800 text-white outline-none">
-                <input type="number" id="f-max-w" step="0.1" placeholder="До" oninput="applyFilters()" class="w-full p-2 text-xs bg-[#1a1a1a] border-stone-800 text-white outline-none">
+        <div class="space-y-8">
+            <div>
+                <label class="text-[9px] uppercase tracking-[0.3em] text-stone-500 mb-4 block">Форма камня</label>
+                <select id="f-shape" onchange="applyFilters()" class="w-full p-4 text-xs uppercase tracking-widest rounded-none outline-none focus:border-stone-400">
+                    </select>
             </div>
-        </div>
 
-        <div class="filter-group mb-6">
-            <label class="text-[9px] uppercase tracking-widest block mb-3 text-stone-500">Бюджет до (₽)</label>
-            <input type="number" id="f-max-p" placeholder="Любая сумма" oninput="applyFilters()" class="w-full p-2 text-xs bg-[#1a1a1a] border-stone-800 text-white outline-none">
+            <div>
+                <label class="text-[9px] uppercase tracking-[0.3em] text-stone-500 mb-4 block">Вес (Carat)</label>
+                <div class="flex items-center gap-3">
+                    <input type="number" id="f-min-w" step="0.1" placeholder="От" oninput="applyFilters()" class="w-full p-3 text-xs rounded-none outline-none">
+                    <span class="text-stone-700">—</span>
+                    <input type="number" id="f-max-w" step="0.1" placeholder="До" oninput="applyFilters()" class="w-full p-3 text-xs rounded-none outline-none">
+                </div>
+            </div>
+
+            <div>
+                <label class="text-[9px] uppercase tracking-[0.3em] text-stone-500 mb-4 block">Бюджет (₽)</label>
+                <input type="number" id="f-max-p" placeholder="Максимальная цена" oninput="applyFilters()" class="w-full p-3 text-xs rounded-none outline-none">
+            </div>
         </div>
     </aside>
 
-    <main class="content flex-1 p-6">
-        <div id="catalog" class="catalog-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8"></div>
-        <button id="load-more" onclick="renderNextPage()" class="hidden mx-auto mt-16 px-16 py-4 border border-stone-800 text-[10px] uppercase tracking-[0.3em] hover:border-stone-400 text-stone-400 hover:text-white transition-all">
-            Показать еще
-        </button>
+    <main class="flex-1 p-8 bg-[#0a0a0a]">
+        <div id="catalog" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            </div>
+        
+        <div id="pagination" class="mt-20 mb-10 flex justify-center">
+            <button id="load-more" onclick="renderNextPage()" class="hidden btn-main px-16 py-5 text-[10px] uppercase">
+                Показать больше моделей
+            </button>
+        </div>
     </main>
 </div>
 
-<div id="contact-modal" class="modal fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md" onclick="closeModal()">
-    <div class="modal-content bg-[#111] p-10 border border-stone-800 max-w-sm w-full text-center" onclick="event.stopPropagation()">
-        <h3 id="modal-msg" class="serif italic text-stone-200 mb-8 uppercase text-[11px] tracking-widest">Связаться с экспертом</h3>
-        <div id="qr-container" class="hidden">
-            <img id="qr-img" src="" class="mx-auto mb-6 border-[12px] border-white w-[200px] h-[200px]">
-            <p class="text-[9px] text-stone-600 uppercase tracking-widest">Наведите камеру для перехода в TG</p>
+<div id="contact-modal" class="fixed inset-0 bg-black/98 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-xl" onclick="closeModal()">
+    <div class="max-w-md w-full bg-[#0f0f0f] border border-stone-800 p-12 text-center" onclick="event.stopPropagation()">
+        <h3 id="modal-msg" class="serif text-3xl italic text-white mb-2">Запрос изделия</h3>
+        <p class="text-[10px] uppercase tracking-widest text-stone-500 mb-10">Свяжитесь с экспертом для бронирования</p>
+        
+        <div id="qr-container" class="hidden animate-pulse">
+            <img id="qr-img" src="" class="mx-auto mb-8 border-[16px] border-white w-56 h-56 rounded-sm shadow-2xl">
+            <p class="text-[9px] text-stone-600 uppercase tracking-widest">Наведите камеру на QR-код</p>
         </div>
+
         <div id="mobile-ui" class="hidden space-y-4">
-            <a id="link-tg" href="#" class="block p-4 border border-stone-800 text-[10px] uppercase text-white tracking-[0.2em] hover:bg-stone-900">Telegram</a>
-            <a id="link-wa" href="#" class="block p-4 border border-stone-800 text-[10px] uppercase text-white tracking-[0.2em] hover:bg-stone-900">WhatsApp</a>
+            <a id="link-tg" href="#" class="block py-5 border border-stone-700 text-[11px] uppercase tracking-[0.3em] text-white hover:bg-stone-800 transition-all">WhatsApp / Telegram</a>
         </div>
-        <button onclick="closeModal()" class="mt-10 text-[9px] uppercase text-stone-700 tracking-[0.3em] hover:text-stone-400">Закрыть</button>
+        
+        <button onclick="closeModal()" class="mt-12 text-[9px] uppercase text-stone-600 tracking-widest hover:text-stone-300 transition-colors">Вернуться в каталог</button>
     </div>
 </div>
 
@@ -80,33 +91,27 @@ let filtered = [];
 let currentIndex = 0;
 let exchangeRate = 0;
 
-// Маппинг картинок для форм (используем бесплатные иконки-заглушки или SVG)
-const shapeIcons = {
-    'RD': 'https://img.icons8.com/ios-filled/50/diamond--v1.png', // Круг
-    'OV': 'https://img.icons8.com/ios-filled/50/oval.png',
-    'PR': 'https://img.icons8.com/ios-filled/50/square.png',
-    'EM': 'https://img.icons8.com/ios-filled/50/rectangle.png',
-    'PS': 'https://img.icons8.com/ios-filled/50/drop.png',
-    'HT': 'https://img.icons8.com/ios-filled/50/hearts.png'
+// Иконки для селектора (эмодзи или спецсимволы)
+const shapeVisuals = {
+    'RD': '💎', 'OV': '🥚', 'PR': '⬛', 'EM': '▮', 'PS': '💧', 'RAD': '◼️', 'CU': '▢', 'MQ': '👁', 'AS': '💠', 'HT': '🤍'
 };
 
 const parseNum = (s) => parseFloat(String(s || '').replace(',', '.')) || 0;
 
 async function fetchRate() {
     try {
-        const response = await fetch('https://open.er-api.com/v6/latest/USD');
-        const data = await response.json();
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
         exchangeRate = data.rates.RUB + (DIAMOND_CONFIG.r || 0);
-    } catch (e) {
-        exchangeRate = 100 + (DIAMOND_CONFIG.r || 0);
-    }
+    } catch (e) { exchangeRate = 105; }
 }
 
 async function init() {
     const shapeSelect = document.getElementById('f-shape');
-    shapeSelect.innerHTML = '<option value="">Все формы</option>';
+    shapeSelect.innerHTML = '<option value="">Все огранки</option>';
     Object.entries(DIAMOND_CONFIG.s).forEach(([code, name]) => {
-        shapeSelect.innerHTML += `<option value="${code}">${name}</option>`;
+        const icon = shapeVisuals[code] || '';
+        shapeSelect.innerHTML += `<option value="${code}">${icon} ${name}</option>`;
     });
 
     await fetchRate();
@@ -119,27 +124,18 @@ async function init() {
         db = lines.slice(1).map(line => {
             const v = line.split(';');
             if (v.length < 12) return null;
-            const priceUSD = parseNum(v[12]);
             return {
-                re: v[0], 
-                lab: v[1], 
-                shape: v[2],
-                ct: parseNum(v[3]), 
-                col: v[4], 
-                cla: v[5],
-                cut: v[6], 
-                s1: v[9], s2: v[10], s3: v[11], // Размеры
-                price: Math.ceil(priceUSD * exchangeRate)
+                re: v[0], lab: v[1], shape: v[2],
+                ct: parseNum(v[3]), col: v[4], cla: v[5], cut: v[6],
+                s1: v[9], s2: v[10], s3: v[11],
+                price: Math.ceil(parseNum(v[12]) * exchangeRate)
             };
         }).filter(i => i && i.re);
 
         filtered = [...db];
-        document.getElementById('stats').innerText = `Курс: ${exchangeRate.toFixed(2)} ₽ | Найдено: ${db.length}`;
+        document.getElementById('stats').innerText = `Курс: ${exchangeRate.toFixed(2)} ₽ | ${db.length} камней`;
         renderNextPage(true);
-    } catch (e) { 
-        document.getElementById('stats').innerText = "Ошибка загрузки данных";
-        console.error(e);
-    }
+    } catch (e) { console.error(e); }
 }
 
 function renderNextPage(reset = false) {
@@ -148,53 +144,50 @@ function renderNextPage(reset = false) {
 
     const chunk = filtered.slice(currentIndex, currentIndex + DIAMOND_CONFIG.n);
     
-    if (chunk.length === 0 && reset) {
-        container.innerHTML = '<div class="col-span-full text-center py-20 text-stone-600 uppercase text-[10px] tracking-widest">Ничего не найдено</div>';
-    }
-
     chunk.forEach(i => {
         const shapeName = DIAMOND_CONFIG.s[i.shape] || i.shape;
-        const icon = shapeIcons[i.shape] || 'https://img.icons8.com/ios-filled/50/diamond--v1.png';
+        // Путь к фото: /img/RD.png и т.д.
+        const imgPath = `img/${i.shape.toUpperCase()}.png`;
         
         container.innerHTML += `
-            <div class="diamond-card border border-stone-900 p-8 transition-all hover:border-stone-600 bg-[#0a0a0a]">
-                <div class="flex justify-between items-start mb-6">
-                    <div class="flex items-center">
-                        <span class="text-white text-[10px] font-semibold tracking-wider">${i.lab}</span>
-                        <span class="verified-icon" title="Сертифицирован">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                        </span>
+            <div class="diamond-card flex flex-col p-2">
+                <div class="relative overflow-hidden bg-[#111] aspect-square flex items-center justify-center">
+                    <img src="${imgPath}" onerror="this.src='https://placehold.co/400x400/111/333?text=${i.shape}'" 
+                         class="w-full h-full object-contain p-4 opacity-90">
+                    <div class="absolute top-4 left-4 flex items-center gap-1 bg-black/60 backdrop-blur px-2 py-1 rounded-sm border border-white/5">
+                        <span class="text-[9px] text-white font-bold tracking-widest lowercase uppercase">${i.lab}</span>
+                        <svg class="w-2.5 h-2.5 text-blue-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293l-4 4a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L9 10.586l3.293-3.293a1 1 0 011.414 1.414z"/></svg>
                     </div>
-                    <span class="text-white font-light text-sm">${i.price.toLocaleString()} ₽</span>
-                </div>
-                
-                <div class="text-center py-4 border-b border-stone-900 mb-4">
-                    <img src="${icon}" class="diamond-shape-img" alt="shape">
-                    <div class="text-3xl text-white font-light mt-2">${i.ct} <span class="text-[10px] text-stone-500 uppercase">carat</span></div>
-                    <div class="serif text-xl italic text-stone-400 mt-1">${shapeName}</div>
                 </div>
 
-                <div class="specs-table">
-                    <div class="spec-item"><span class="spec-label">Цвет / Чистота</span><span class="text-stone-300 font-medium">${i.col} / ${i.cla}</span></div>
-                    <div class="spec-item"><span class="spec-label">Огранка</span><span class="text-stone-300 font-medium">${i.cut}</span></div>
-                    <div class="spec-item"><span class="spec-label">Размер (мм)</span><span class="text-stone-300 font-medium">${i.s1} x ${i.s2} x ${i.s3}</span></div>
-                </div>
+                <div class="p-6 flex-1 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-baseline mb-4">
+                            <h3 class="text-2xl font-light text-white">${i.ct} <span class="text-[10px] text-stone-500 uppercase tracking-tighter">carat</span></h3>
+                            <span class="text-lg font-medium text-stone-200 tracking-tight">${i.price.toLocaleString()} ₽</span>
+                        </div>
+                        
+                        <div class="serif italic text-xl text-stone-400 mb-6">${shapeName}</div>
 
-                <button onclick="openContactModal('${i.re}')" class="w-full mt-8 py-3 border border-stone-800 text-[9px] uppercase tracking-[0.3em] hover:bg-white hover:text-black transition-all">
-                    Запросить детали
-                </button>
+                        <div class="grid grid-cols-2 gap-y-3 text-[10px] uppercase tracking-widest border-t border-white/5 pt-5">
+                            <div><span class="text-stone-600 block mb-1 uppercase text-[8px]">Характеристики</span><span class="text-stone-300">${i.col} / ${i.cla}</span></div>
+                            <div><span class="text-stone-600 block mb-1 uppercase text-[8px]">Огранка</span><span class="text-stone-300">${i.cut}</span></div>
+                            <div class="col-span-2"><span class="text-stone-600 block mb-1 uppercase text-[8px]">Размеры (мм)</span><span class="text-stone-300 font-mono">${i.s1} × ${i.s2} × ${i.s3}</span></div>
+                        </div>
+                    </div>
+
+                    <button onclick="openContactModal('${i.re}')" class="mt-8 w-full py-4 border border-stone-800 text-[10px] uppercase tracking-[0.2em] hover:bg-stone-100 hover:text-black transition-all">
+                        Запросить наличие
+                    </button>
+                </div>
             </div>`;
     });
     
     currentIndex += chunk.length;
     const btnLoad = document.getElementById('load-more');
-    const isHidden = currentIndex >= filtered.length;
-    btnLoad.style.display = isHidden ? 'none' : 'block';
-    btnLoad.classList.toggle('hidden', isHidden);
+    btnLoad.style.display = currentIndex >= filtered.length ? 'none' : 'block';
+    btnLoad.classList.toggle('hidden', currentIndex >= filtered.length);
 }
-
-// ... остальной код (applyFilters, openContactModal, closeModal) без изменений ...
-// (Оставляю их в твоем файле как были)
 
 function applyFilters() {
     const s = document.getElementById('f-shape').value;
@@ -210,19 +203,18 @@ function applyFilters() {
 
 function openContactModal(id = "") {
     const modal = document.getElementById('contact-modal');
-    const isMob = /Android|iPhone/i.test(navigator.userAgent);
+    const isMob = /Android|iPhone|iPad/i.test(navigator.userAgent);
     const tgUrl = `https://t.me/${atob(DIAMOND_CONFIG.c.t)}`;
     
     modal.classList.remove('hidden');
-    if (id) document.getElementById('modal-msg').innerText = `Камень ${id}`;
+    if (id) document.getElementById('modal-msg').innerText = `Камень #${id}`;
 
     if (isMob) {
         document.getElementById('mobile-ui').classList.remove('hidden');
         document.getElementById('link-tg').href = tgUrl;
-        document.getElementById('link-wa').href = `https://wa.me/${atob(DIAMOND_CONFIG.c.w)}`;
     } else {
         document.getElementById('qr-container').classList.remove('hidden');
-        document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(tgUrl)}`;
+        document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(tgUrl)}`;
     }
 }
 
