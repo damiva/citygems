@@ -1,0 +1,33 @@
+/* Базовые сбросы и шрифты */
+body { background-color: #0d0d0d; color: #a8a29e; margin: 0; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+.min-h-screen { min-height: 100vh; }
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.max-w-7xl { max-width: 80rem; margin-left: auto; margin-right: auto; }
+.w-full { width: 100%; }
+.grid { display: grid; }
+
+/* Шапка и Сетка */
+header { padding: 1.5rem; border-bottom: 1px solid #1c1917; position: sticky; top: 0; background-color: rgba(13, 13, 13, 0.9); backdrop-filter: blur(12px); z-index: 40; }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+@media (min-width: 640px) { .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { .xl\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.gap-6 { gap: 1.5rem; }
+
+/* Фильтры и Карточки */
+input, select { background-color: #1a1a1a; border: 1px solid #2e2e2e; color: white; padding: 0.5rem; border-radius: 0; width: 100%; font-size: 0.75rem; }
+.diamond-card { border: 1px solid #1c1917; padding: 1.5rem; transition: all 0.3s; }
+.diamond-card:hover { border-color: #57534e; background-color: #141414; }
+
+/* Типографика */
+.text-white { color: #fff; }
+.text-2xl { font-size: 1.5rem; }
+.uppercase { text-transform: uppercase; }
+.tracking-widest { letter-spacing: 0.1em; }
+.serif { font-family: 'Cormorant Garamond', serif; font-style: italic; }
+
+/* Утилиты */
+.hidden { display: none; }
+.p-6 { padding: 1.5rem; }
+.mb-4 { margin-bottom: 1rem; }
+.text-center { text-align: center; }

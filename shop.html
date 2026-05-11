@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityGems — Каталог</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+</head>
+<body>
+
+<header class="header">
+    <div class="container flex-between">
+        <h1 class="logo">City<span class="serif">Gems</span></h1>
+        <div id="stats" class="stats">Загрузка базы...</div>
+        <button onclick="openContactModal()" class="btn-sm">Связь</button>
+    </div>
+</header>
+
+<div class="main-layout container">
+    <aside class="sidebar">
+        <h2 class="serif section-title">Фильтры</h2>
+        <div class="filter-group">
+            <label>Огранка</label>
+            <select id="f-shape" onchange="applyFilters()">
+                <option value="">Все формы</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Вес (ct)</label>
+            <div class="flex-gap">
+                <input type="number" id="f-min-w" step="0.1" placeholder="От" oninput="applyFilters()">
+                <input type="number" id="f-max-w" step="0.1" placeholder="До" oninput="applyFilters()">
+            </div>
+        </div>
+        <div class="filter-group">
+            <label>Цена до ($)</label>
+            <input type="number" id="f-max-p" placeholder="Любая" oninput="applyFilters()">
+        </div>
+    </aside>
+
+    <main class="content">
+        <div id="catalog" class="catalog-grid"></div>
+        <button id="load-more" onclick="renderNextPage()" class="btn-load">Показать еще</button>
+    </main>
+</div>
+
+<div id="contact-modal" class="modal hidden" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h3 id="modal-msg" class="serif">Связаться с нами</h3>
+        
+        <div id="qr-container" class="hidden">
+            <img id="qr-img" src="" class="qr-code">
+            <p class="hint">Наведите камеру телефона</p>
+        </div>
+
+        <div id="mobile-ui" class="hidden">
+            <a id="link-tg" href="#" class="btn-contact">Telegram</a>
+            <a id="link-wa" href="#" class="btn-contact">WhatsApp</a>
+        </div>
+        
+        <button onclick="closeModal()" class="btn-close">Закрыть</button>
+    </div>
+</div>
+
+<script>
+let db = []; let filtered = []; let currentIndex = 0;
+const parseNum = (s) => parseFloat(String(s).replace(',', '.')) || 0;
+
+async function init() {
+    const shapeSelect = document.getElementById('f-shape');
+    Object.entries(DIAMOND_CONFIG.translate).forEach(([code, name]) => {
+        shapeSelect.innerHTML += `<option value="${code}">${name}</option>`;
+    });
+
+    try {
+        const response = await fetch('diamonds_lab.csv');
+        const text = await response.text();
+        const lines = text.split('\n');
+        
+        db = lines.slice(1).map(line => {
+            const v = line.split(';');
+            if (v.length < 12) return null;
+            return {
+                re: v[0], lab: v[1], shape: v[2],
+                ct: parseNum(v[3]), col: v[4], cla: v[5],
+                cut: v[6], usd: parseNum(v[12])
+            };
+        }).filter(i => i && i.re);
+
+        filtered = [...db];
+        document.getElementById('stats').innerText = `${db.length} камней`;
+        renderNextPage(true);
+    } catch (e) { console.error(e); }
+}
+
+function renderNextPage(reset = false) {
+    const container = document.getElementById('catalog');
+    if (reset) { container.innerHTML = ''; currentIndex = 0; }
+
+    const chunk = filtered.slice(currentIndex, currentIndex + DIAMOND_CONFIG.itemsPerPage);
+    chunk.forEach(i => {
+        const shapeName = DIAMOND_CONFIG.translate[i.shape] || i.shape;
+        container.innerHTML += `
+            <div class="diamond-card">
+                <div class="card-head">
+                    <span class="report">${i.lab} ${i.re}</span>
+                    <span class="price">$${Math.ceil(i.usd)}</span>
+                </div>
+                <div class="card-body">
+                    <span class="ct">${i.ct}</span> <span class="unit">ct</span>
+                    <div class="shape">${shapeName}</div>
+                </div>
+                <div class="card-footer">
+                    <span class="specs">${i.col} / ${i.cla} • ${i.cut}</span>
+                    <button onclick="openContactModal('${i.re}')" class="btn-card">Запросить</button>
+                </div>
+            </div>`;
+    });
+    currentIndex += chunk.length;
+    document.getElementById('load-more').style.display = currentIndex >= filtered.length ? 'none' : 'block';
+}
+
+function applyFilters() {
+    const s = document.getElementById('f-shape').value;
+    const minW = parseNum(document.getElementById('f-min-w').value);
+    const maxW = parseNum(document.getElementById('f-max-w').value) || 999;
+    const maxP = parseNum(document.getElementById('f-max-p').value) || 999999;
+
+    filtered = db.filter(i => 
+        (!s || i.shape === s) && (i.ct >= minW && i.ct <= maxW) && (i.usd <= maxP)
+    );
+    renderNextPage(true);
+}
+
+function openContactModal(id = "") {
+    const modal = document.getElementById('contact-modal');
+    const isMob = /Android|iPhone/i.test(navigator.userAgent);
+    const tgUrl = `https://t.me/${DIAMOND_CONFIG.contacts.tg}`;
+    
+    modal.classList.remove('hidden');
+    if (id) document.getElementById('modal-msg').innerText = `Камень ${id}`;
+
+    if (isMob) {
+        document.getElementById('mobile-ui').classList.remove('hidden');
+        document.getElementById('link-tg').href = tgUrl;
+        document.getElementById('link-wa').href = `https://wa.me/${DIAMOND_CONFIG.contacts.wa}`;
+    } else {
+        document.getElementById('qr-container').classList.remove('hidden');
+        document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(tgUrl)}`;
+    }
+}
+
+function closeModal() {
+    document.getElementById('contact-modal').classList.add('hidden');
+    document.getElementById('mobile-ui').classList.add('hidden');
+    document.getElementById('qr-container').classList.add('hidden');
+}
+init();
+</script>
+</body>
+</html>
