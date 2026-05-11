@@ -3,506 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CityGems — Эксклюзивный каталог</title>
+    <title>CityGems — Premium Catalog</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Montserrat:wght@200;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Montserrat:wght@200;400;500;600&display=swap" rel="stylesheet">
     <script src="config.js"></script>
     <style>
         :root {
-            --bg: #080808; --card: #0c0c0c; --border: #1a1a1a; --text: #d1d5db; --text-main: #ffffff; --accent: #D4AF37;
+            --bg: #080808; --sidebar: #0c0c0c; --card: #0e0e0e; --border: #1f1f1f;
+            --text-main: #ffffff; --text-dim: #9ca3af; --accent: #D4AF37;
         }
-        body.light {
-            --bg: #F9F8F6; --card: #ffffff; --border: #e5e7eb; --text: #4b5563; --text-main: #111827; --accent: #b49431;
+        body.light-theme {
+            --bg: #f3f4f6; --sidebar: #ffffff; --card: #ffffff; --border: #e5e7eb;
+            --text-main: #111827; --text-dim: #6b7280; --accent: #9d7f1e;
         }
-        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color: var(--text); transition: background 0.3s ease; }
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color: var(--text-dim); transition: all 0.3s ease; }
         .serif { font-family: 'Cormorant Garamond', serif; }
-        .diamond-card { background: var(--card); border: 1px solid var(--border); transition: all 0.3s ease; }
-        .diamond-card:hover { border-color: var(--accent); }
-        select, input { background: var(--card) !important; border: 1px solid var(--border) !important; color: var(--text-main) !important; border-radius: 0 !important; outline: none; }
         
-        /* Слайдеры */
-        .range-slider { position: relative; width: 100%; height: 30px; margin-bottom: 5px; }
-        .range-slider input[type="range"] {
-            position: absolute; width: 100%; pointer-events: none; appearance: none; -webkit-appearance: none; 
-            z-index: 2; height: 10px; opacity: 0; background: none; top: 10px;
-        }
-        .range-slider input[type="range"]::-webkit-slider-thumb {
-            pointer-events: all; width: 24px; height: 24px; -webkit-appearance: none; cursor: pointer;
-        }
-        .slider-track { position: absolute; width: 100%; height: 1px; background: var(--border); top: 20px; z-index: 1; }
-        .slider-thumb-custom {
-            position: absolute; width: 10px; height: 10px; background: var(--accent); top: 20px; 
-            transform: translate(-50%, -50%); z-index: 3; pointer-events: none; border-radius: 50%;
+        /* Сетка и карточки */
+        .diamond-card { background: var(--card); border: 1px solid var(--border); transition: transform 0.2s, border-color 0.2s; }
+        .diamond-card:hover { border-color: var(--accent); }
+        
+        /* Кастомные инпуты */
+        select, input { 
+            background: var(--card) !important; border: 1px solid var(--border) !important; 
+            color: var(--text-main) !important; outline: none; border-radius: 2px !important;
         }
 
-        .active-view { color: var(--accent) !important; }
+        /* Двойной Range Slider */
+        .range-container { position: relative; width: 100%; height: 40px; }
+        .range-container input[type="range"] {
+            position: absolute; width: 100%; pointer-events: none; -webkit-appearance: none; 
+            background: none; top: 50%; transform: translateY(-50%); z-index: 2;
+        }
+        .range-container input[type="range"]::-webkit-slider-thumb {
+            pointer-events: all; width: 18px; height: 18px; -webkit-appearance: none; 
+            background: var(--accent); cursor: pointer; border-radius: 50%; border: 2px solid var(--bg);
+        }
+        .slider-track {
+            position: absolute; width: 100%; height: 2px; background: var(--border); 
+            top: 50%; transform: translateY(-50%); z-index: 1;
+        }
+
         .view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
         .view-list { display: flex; flex-direction: column; gap: 1rem; }
-        
-        /* Улучшенные стили для карточек */
-        .spec-badge { display: inline-block; padding: 0.25rem 0.75rem; font-size: 7px; background: var(--border); border-radius: 3px; color: var(--text-main); margin-right: 0.5rem; margin-bottom: 0.25rem; text-transform: uppercase; font-weight: 600; }
+        .active-btn { color: var(--accent) !important; }
     </style>
 </head>
 <body class="min-h-screen">
 
-<header class="border-b border-stone-900/10 sticky top-0 bg-opacity-95 backdrop-blur-md z-50 shadow-sm" style="background-color: var(--bg); border-color: var(--border);">
+<header class="sticky top-0 z-50 border-b shadow-sm backdrop-blur-md" style="background: var(--bg); border-color: var(--border);">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <div class="flex-1">
-            <h1 class="text-xl tracking-[0.3em] font-light uppercase text-main" style="color: var(--text-main)">City<span class="serif italic opacity-50 lowercase">Gems</span></h1>
+        <div class="flex-1 text-xl tracking-[0.4em] font-light uppercase" style="color: var(--text-main)">
+            City<span class="serif italic lowercase opacity-60">Gems</span>
         </div>
-        
-        <div class="hidden md:block flex gap-4">
-            <button onclick="openLikesModal()" class="text-[9px] border border-stone-800 px-8 py-2 hover:bg-stone-800 hover:text-white transition-all uppercase tracking-widest relative" style="color: var(--text-main); border-color: var(--border);">
-                ♥ Избранное <span id="likes-counter" class="absolute -top-2 -right-2 bg-red-600 text-white text-[7px] rounded-full w-5 h-5 flex items-center justify-center">0</span>
-            </button>
-            <button onclick="openContactModal()" class="text-[9px] border border-stone-800 px-8 py-2 hover:bg-stone-800 hover:text-white transition-all uppercase tracking-widest" style="color: var(--text-main); border-color: var(--border);">
-                Связаться с нами
-            </button>
-        </div>
-        
-        <div class="flex-1 flex justify-end items-center gap-6">
-            <button onclick="toggleTheme()" class="text-[9px] uppercase tracking-widest opacity-60 hover:opacity-100">
-                <span id="theme-icon">Тёмная</span>
-            </button>
 
-            <select id="sort-order" onchange="applyFiltersAndSort()" class="text-[9px] uppercase bg-transparent border-none outline-none tracking-widest cursor-pointer">
-                <option value="new">По умолчанию</option>
-                <option value="p-asc">Цена: Минимум</option>
-                <option value="p-desc">Цена: Максимум</option>
-                <option value="w-asc">Вес: Минимум</option>
-                <option value="w-desc">Вес: Максимум</option>
+        <div class="flex items-center gap-6">
+            <button onclick="toggleTheme()" class="text-[10px] uppercase tracking-widest hover:text-white flex items-center gap-2">
+                <span id="theme-label">Тёмная тема</span>
+            </button>
+            
+            <select id="sort-order" onchange="applyFilters()" class="text-[10px] uppercase p-1 bg-transparent border-none cursor-pointer">
+                <option value="none">Сортировка</option>
+                <option value="p-asc">Цена: По возрастанию</option>
+                <option value="p-desc">Цена: По убыванию</option>
+                <option value="w-asc">Вес: По возрастанию</option>
+                <option value="w-desc">Вес: По убыванию</option>
             </select>
 
-            <div class="flex gap-4 border-l border-stone-800 pl-6" style="border-color: var(--border);">
-                <button id="btn-list" onclick="changeView('list')" class="text-stone-500 hover:text-stone-300">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
-                </button>
-                <button id="btn-grid" onclick="changeView('grid')" class="text-stone-500 hover:text-stone-300">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/></svg>
-                </button>
+            <div class="flex gap-4 border-l pl-6" style="border-color: var(--border);">
+                <button id="v-list" onclick="setView('list')" class="active-btn"><svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg></button>
+                <button id="v-grid" onclick="setView('grid')"><svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM9 2.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3z"/></svg></button>
             </div>
         </div>
     </div>
 </header>
 
 <div class="max-w-7xl mx-auto flex flex-col lg:flex-row">
-    <aside class="w-full lg:w-72 p-8 border-r bg-opacity-50" style="border-color: var(--border);">
-        <div class="sticky-sidebar">
-            <h2 class="serif text-3xl text-main italic mb-8" style="color: var(--text-main)">Фильтры</h2>
+    <aside class="w-full lg:w-80 p-8 border-r" style="border-color: var(--border); background: var(--sidebar);">
+        <div class="sticky top-24">
+            <h2 class="serif text-4xl italic mb-10" style="color: var(--text-main)">Фильтры</h2>
             
-            <div class="space-y-10">
+            <div class="space-y-12">
                 <div>
-                    <label class="text-[8px] uppercase tracking-[0.3em] opacity-50 mb-3 block">Огранка</label>
-                    <select id="f-shape" onchange="applyFiltersAndSort()" class="w-full p-3 text-[10px] uppercase"></select>
+                    <label class="text-[9px] uppercase tracking-[0.3em] mb-4 block">Форма огранки</label>
+                    <select id="f-shape" onchange="applyFilters()" class="w-full p-3 text-xs uppercase"></select>
                 </div>
 
                 <div>
-                    <label class="text-[8px] uppercase tracking-[0.3em] opacity-50 mb-2 block">Вес (ct)</label>
-                    <div class="range-slider">
+                    <label class="text-[9px] uppercase tracking-[0.3em] mb-2 block">Вес (Carat)</label>
+                    <div class="range-container" id="container-w">
                         <div class="slider-track"></div>
-                        <input type="range" id="r-min-w" step="0.01" oninput="sync('w', 'min')">
-                        <input type="range" id="r-max-w" step="0.01" oninput="sync('w', 'max')">
-                        <div id="thumb-min-w" class="slider-thumb-custom"></div>
-                        <div id="thumb-max-w" class="slider-thumb-custom"></div>
+                        <input type="range" id="r-min-w" step="0.01" oninput="syncRange('w', 'min')">
+                        <input type="range" id="r-max-w" step="0.01" oninput="syncRange('w', 'max')">
                     </div>
-                    <div class="flex gap-2">
-                        <input type="number" id="f-min-w" step="0.01" oninput="syncInputs('w')" class="w-1/2 p-2 text-[10px] text-center" placeholder="От">
-                        <input type="number" id="f-max-w" step="0.01" oninput="syncInputs('w')" class="w-1/2 p-2 text-[10px] text-center" placeholder="До">
+                    <div class="flex gap-2 mt-2">
+                        <input type="number" id="i-min-w" step="0.01" oninput="syncInput('w')" class="w-1/2 p-2 text-[10px] text-center">
+                        <input type="number" id="i-max-w" step="0.01" oninput="syncInput('w')" class="w-1/2 p-2 text-[10px] text-center">
                     </div>
                 </div>
 
                 <div>
-                    <label class="text-[8px] uppercase tracking-[0.3em] opacity-50 mb-2 block">Цена (₽)</label>
-                    <div class="range-slider">
+                    <label class="text-[9px] uppercase tracking-[0.3em] mb-2 block">Цена (₽)</label>
+                    <div class="range-container" id="container-p">
                         <div class="slider-track"></div>
-                        <input type="range" id="r-min-p" step="1000" oninput="sync('p', 'min')">
-                        <input type="range" id="r-max-p" step="1000" oninput="sync('p', 'max')">
-                        <div id="thumb-min-p" class="slider-thumb-custom"></div>
-                        <div id="thumb-max-p" class="slider-thumb-custom"></div>
+                        <input type="range" id="r-min-p" step="500" oninput="syncRange('p', 'min')">
+                        <input type="range" id="r-max-p" step="500" oninput="syncRange('p', 'max')">
                     </div>
-                    <div class="flex gap-2">
-                        <input type="number" id="f-min-p" oninput="syncInputs('p')" class="w-1/2 p-2 text-[10px] text-center" placeholder="От">
-                        <input type="number" id="f-max-p" oninput="syncInputs('p')" class="w-1/2 p-2 text-[10px] text-center" placeholder="До">
+                    <div class="flex flex-col gap-2 mt-2">
+                        <input type="number" id="i-min-p" oninput="syncInput('p')" class="w-full p-2 text-[10px]" placeholder="От">
+                        <input type="number" id="i-max-p" oninput="syncInput('p')" class="w-full p-2 text-[10px]" placeholder="До">
                     </div>
                 </div>
             </div>
 
-            <div id="stats-counter" class="mt-10 pt-6 border-t text-[9px] uppercase tracking-[0.2em] opacity-50 text-right italic" style="border-color: var(--border);">Загрузка...</div>
+            <div id="counter" class="mt-12 pt-6 border-t text-[10px] uppercase tracking-widest text-right italic" style="border-color: var(--border);">
+                Загрузка...
+            </div>
         </div>
     </aside>
 
-    <main class="flex-1 p-6">
+    <main class="flex-1 p-6 lg:p-10">
         <div id="catalog" class="view-list"></div>
-        <div class="mt-12 flex justify-center pb-20">
-            <button id="load-more" onclick="renderNextPage()" class="hidden border px-16 py-4 text-[9px] uppercase tracking-[0.3em] opacity-60 hover:opacity-100 hover:border-white transition-all" style="border-color: var(--border); color: var(--text-main);">Показать еще</button>
+        <div id="more-box" class="mt-16 flex justify-center hidden pb-20">
+            <button onclick="renderNextPage()" class="border px-16 py-4 text-[10px] uppercase tracking-[0.4em] hover:bg-stone-800 hover:text-white transition-all" style="border-color: var(--border); color: var(--text-main);">
+                Загрузить еще
+            </button>
         </div>
     </main>
 </div>
 
-<!-- Likes Modal -->
-<div id="likes-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-    <div class="bg-stone-900 border border-stone-700 p-8 max-w-md w-full" style="background-color: var(--card); border-color: var(--border);">
-        <h2 class="serif text-2xl italic mb-4" style="color: var(--text-main);">Мои избранные</h2>
-        <div id="likes-list" class="max-h-60 overflow-y-auto mb-6"></div>
-        <div class="flex gap-3">
-            <button onclick="submitLikesRequest()" class="flex-1 py-2 bg-white text-black text-[9px] uppercase font-medium tracking-widest hover:bg-gray-200">Запросить</button>
-            <button onclick="closeLikesModal()" class="flex-1 py-2 border border-stone-600 text-[9px] uppercase tracking-widest" style="border-color: var(--border); color: var(--text-main);">Закрыть</button>
-        </div>
-    </div>
-</div>
-
-<!-- Contact Modal -->
-<div id="contact-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-    <div class="bg-stone-900 border border-stone-700 p-8 max-w-md w-full" style="background-color: var(--card); border-color: var(--border);">
-        <h2 class="serif text-2xl italic mb-4" style="color: var(--text-main);">Запросить камень</h2>
-        <form id="contact-form" onsubmit="submitContact(event)">
-            <input type="hidden" id="modal-diamond-id">
-            <div class="space-y-3 mb-6">
-                <input type="text" placeholder="Ваше имя" class="w-full p-2 text-sm" id="contact-name" required>
-                <input type="email" placeholder="E-mail" class="w-full p-2 text-sm" id="contact-email" required>
-                <input type="tel" placeholder="Телефон" class="w-full p-2 text-sm" id="contact-phone" required>
-                <textarea placeholder="Сообщение" class="w-full p-2 text-sm h-20" id="contact-message" required></textarea>
-            </div>
-            <div class="flex gap-4">
-                <button type="submit" class="flex-1 py-2 bg-white text-black text-[9px] uppercase font-medium tracking-widest hover:bg-gray-200">Отправить</button>
-                <button type="button" onclick="closeContactModal()" class="flex-1 py-2 border border-stone-600 text-[9px] uppercase tracking-widest" style="border-color: var(--border); color: var(--text-main);">Отмена</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <script>
-let db = [], filtered = [], currentIndex = 0, exchangeRate = 105, currentView = 'list';
-const parseNum = (s) => parseFloat(String(s || '').replace(',', '.')) || 0;
+let db = [], filtered = [], currentIndex = 0, rate = 105, view = 'list';
+const parse = (v) => parseFloat(String(v || '').replace(',', '.')) || 0;
 
-// Темы
 function toggleTheme() {
-    document.body.classList.toggle('light');
-    const isLight = document.body.classList.contains('light');
-    document.getElementById('theme-icon').innerText = isLight ? 'Светлая' : 'Тёмная';
+    document.body.classList.toggle('light-theme');
+    const isLight = document.body.classList.contains('light-theme');
+    document.getElementById('theme-label').innerText = isLight ? 'Светлая тема' : 'Тёмная тема';
 }
 
-// Управление наложением ползунков (мышка)
-function sync(type, side) {
-    const min = document.getElementById(`r-min-${type}`);
-    const max = document.getElementById(`r-max-${type}`);
-    const fMin = document.getElementById(`f-min-${type}`);
-    const fMax = document.getElementById(`f-max-${type}`);
-
-    // Логика: ползунки не должны пересекаться
-    if (side === 'min' && parseNum(min.value) >= parseNum(max.value)) min.value = max.value;
-    if (side === 'max' && parseNum(max.value) <= parseNum(min.value)) max.value = min.value;
-
-    fMin.value = min.value;
-    fMax.value = max.value;
+// Умная синхронизация двойных слайдеров
+function syncRange(type, side) {
+    const rMin = document.getElementById(`r-min-${type}`), rMax = document.getElementById(`r-max-${type}`);
+    const iMin = document.getElementById(`i-min-${type}`), iMax = document.getElementById(`i-max-${type}`);
     
-    // Поднимаем активный ползунок выше по z-index
-    min.style.zIndex = (side === 'min') ? "10" : "5";
-    max.style.zIndex = (side === 'max') ? "10" : "5";
+    // Предотвращение перекрещивания
+    if (side === 'min' && +rMin.value >= +rMax.value) rMin.value = rMax.value;
+    if (side === 'max' && +rMax.value <= +rMin.value) rMax.value = rMin.value;
 
-    updateThumbs(type);
-    applyFiltersAndSort();
+    // Управление Z-index, чтобы мышка всегда цепляла активный ползунок
+    rMin.style.zIndex = (side === 'min') ? "10" : "5";
+    rMax.style.zIndex = (side === 'max') ? "10" : "5";
+
+    iMin.value = rMin.value;
+    iMax.value = rMax.value;
+    applyFilters();
 }
 
-function updateThumbs(type) {
-    ['min', 'max'].forEach(side => {
-        const input = document.getElementById(`r-${side}-${type}`);
-        const thumb = document.getElementById(`thumb-${side}-${type}`);
-        const percent = ((input.value - input.min) / (input.max - input.min)) * 100;
-        thumb.style.left = percent + '%';
-    });
-}
-
-function syncInputs(type) {
-    const fMin = document.getElementById(`f-min-${type}`);
-    const fMax = document.getElementById(`f-max-${type}`);
-    document.getElementById(`r-min-${type}`).value = fMin.value;
-    document.getElementById(`r-max-${type}`).value = fMax.value;
-    updateThumbs(type);
-    applyFiltersAndSort();
+function syncInput(type) {
+    const rMin = document.getElementById(`r-min-${type}`), rMax = document.getElementById(`r-max-${type}`);
+    const iMin = document.getElementById(`i-min-${type}`), iMax = document.getElementById(`i-max-${type}`);
+    rMin.value = iMin.value;
+    rMax.value = iMax.value;
+    applyFilters();
 }
 
 async function init() {
-    changeView('list');
+    // Загрузка конфига и селектов
+    const shapeSel = document.getElementById('f-shape');
+    shapeSel.innerHTML = '<option value="">Все формы</option>';
+    Object.entries(DIAMOND_CONFIG.s).forEach(([k, v]) => shapeSel.innerHTML += `<option value="${k}">${v}</option>`);
+
+    // Курс валют
     try {
-        const shapeSelect = document.getElementById('f-shape');
-        shapeSelect.innerHTML = '<option value="">Все огранки</option>';
-        Object.entries(DIAMOND_CONFIG.s).forEach(([code, name]) => shapeSelect.innerHTML += `<option value="${code}">${name}</option>`);
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        rate = data.rates.RUB + (DIAMOND_CONFIG.r || 0);
+    } catch(e) {}
 
-        // Кэш валюты на 24 часа
-        const cachedRate = localStorage.getItem('exchangeRate');
-        const lastRateTime = localStorage.getItem('lastRateTime');
-        const now = Date.now();
-        if (cachedRate && lastRateTime && (now - lastRateTime < 86400000)) {
-            exchangeRate = parseFloat(cachedRate);
-        } else {
-            try {
-                const res = await fetch('https://open.er-api.com/v6/latest/USD');
-                const data = await res.json();
-                exchangeRate = data.rates.RUB + (DIAMOND_CONFIG.r || 0);
-                localStorage.setItem('exchangeRate', exchangeRate);
-                localStorage.setItem('lastRateTime', now);
-            } catch(e) {
-                console.warn('Не удалось загрузить валюту, используется кэшированное значение');
-            }
-        }
-
-        const response = await fetch('diamonds_lab.csv?v=' + Date.now());
-        if (!response.ok) throw new Error('CSV не найден');
-        const text = await response.text();
-        
-        db = text.split('\n').slice(1).map(line => {
-            const v = line.split(';');
-            if (v.length < 13) return null;
-            return {
-                re: v[0], lab: v[1], shape: v[2], ct: v[3].replace(',', '.'), 
-                col: v[4], cla: v[5], cut: v[6], pol: v[7], sym: v[8],
-                s1: v[9], s2: v[10], s3: v[11],
-                price: Math.ceil(parseNum(v[12]) * exchangeRate)
-            };
-        }).filter(i => i);
-
-        if (db.length === 0) throw new Error('Каталог пуст');
-
-        const weights = db.map(i => parseNum(i.ct));
-        const prices = db.map(i => i.price);
-        
-        const setR = (id, min, max) => {
-            const rMin = document.getElementById(`r-min-${id}`), rMax = document.getElementById(`r-max-${id}`);
-            const fMin = document.getElementById(`f-min-${id}`), fMax = document.getElementById(`f-max-${id}`);
-            rMin.min = rMax.min = min; rMin.max = rMax.max = max;
-            rMin.value = min; rMax.value = max;
-            fMin.value = min; fMax.value = max;
-            updateThumbs(id);
+    // Чтение CSV
+    const resp = await fetch('diamonds_lab.csv?v=' + Date.now());
+    const text = await resp.text();
+    db = text.split('\n').slice(1).map(line => {
+        const v = line.split(';');
+        if (v.length < 12) return null;
+        return {
+            id: v[0], lab: v[1], sh: v[2], ct: parse(v[3]), col: v[4], cla: v[5],
+            cut: v[6], sym: v[7], pol: v[8], s1: v[9], s2: v[10], s3: v[11],
+            price: Math.ceil(parse(v[12]) * rate)
         };
+    }).filter(x => x);
 
-        setR('w', Math.min(...weights), Math.max(...weights));
-        setR('p', Math.min(...prices), Math.max(...prices));
+    // Авто-настройка границ фильтров
+    const ws = db.map(x => x.ct), ps = db.map(x => x.price);
+    const setupR = (type, min, max) => {
+        const rMin = document.getElementById(`r-min-${type}`), rMax = document.getElementById(`r-max-${type}`);
+        const iMin = document.getElementById(`i-min-${type}`), iMax = document.getElementById(`i-max-${type}`);
+        rMin.min = rMax.min = iMin.min = iMax.min = min;
+        rMin.max = rMax.max = iMin.max = iMax.max = max;
+        rMin.value = iMin.value = min;
+        rMax.value = iMax.value = max;
+    };
+    setupR('w', Math.min(...ws), Math.max(...ws));
+    setupR('p', Math.min(...ps), Math.max(...ps));
 
-        applyFiltersAndSort();
-        updateLikesCounter();
-    } catch(error) {
-        console.error('Ошибка инициализации:', error);
-        document.getElementById('catalog').innerHTML = `<div class="text-center py-20" style="color: var(--text-main);"><p>⚠️ Ошибка загрузки</p><p class="text-xs opacity-60 mt-2">Проверьте наличие config.js и diamonds_lab.csv</p></div>`;
-    }
+    applyFilters();
 }
 
-function applyFiltersAndSort() {
-    const s = document.getElementById('f-shape').value;
-    const minW = parseNum(document.getElementById('f-min-w').value), maxW = parseNum(document.getElementById('f-max-w').value);
-    const minP = parseNum(document.getElementById('f-min-p').value), maxP = parseNum(document.getElementById('f-max-p').value);
+function applyFilters() {
+    const shape = document.getElementById('f-shape').value;
+    const minW = parse(document.getElementById('i-min-w').value), maxW = parse(document.getElementById('i-max-w').value);
+    const minP = parse(document.getElementById('i-min-p').value), maxP = parse(document.getElementById('i-max-p').value);
     const sort = document.getElementById('sort-order').value;
 
-    filtered = db.filter(i => 
-        (!s || i.shape === s) && 
-        (parseNum(i.ct) >= minW && parseNum(i.ct) <= maxW) && 
-        (i.price >= minP && i.price <= maxP)
+    filtered = db.filter(x => 
+        (!shape || x.sh === shape) && 
+        (x.ct >= minW && x.ct <= maxW) && 
+        (x.price >= minP && x.price <= maxP)
     );
 
     if (sort === 'p-asc') filtered.sort((a,b) => a.price - b.price);
-    else if (sort === 'p-desc') filtered.sort((a,b) => b.price - a.price);
-    else if (sort === 'w-asc') filtered.sort((a,b) => parseNum(a.ct) - parseNum(b.ct));
-    else if (sort === 'w-desc') filtered.sort((a,b) => parseNum(b.ct) - parseNum(a.ct));
+    if (sort === 'p-desc') filtered.sort((a,b) => b.price - a.price);
+    if (sort === 'w-asc') filtered.sort((a,b) => a.ct - b.ct);
+    if (sort === 'w-desc') filtered.sort((a,b) => b.ct - a.ct);
 
-    const total = db.length.toLocaleString('ru-RU');
-    const found = filtered.length.toLocaleString('ru-RU');
-    document.getElementById('stats-counter').innerHTML = filtered.length === db.length ? `ВСЕГО: ${total}` : `НАЙДЕНО: <span style="color:var(--text-main)">${found}</span> <span style="opacity:0.4">ИЗ ${total}</span>`;
-    
+    document.getElementById('counter').innerHTML = `Найдено: <span style="color:var(--text-main)">${filtered.length.toLocaleString()}</span>`;
     renderNextPage(true);
 }
 
-function changeView(v) {
-    currentView = v;
-    document.getElementById('catalog').className = v === 'grid' ? 'view-grid' : 'view-list';
-    document.getElementById('btn-list').classList.toggle('active-view', v === 'list');
-    document.getElementById('btn-grid').classList.toggle('active-view', v === 'grid');
+function setView(v) {
+    view = v;
+    document.getElementById('v-list').classList.toggle('active-btn', v === 'list');
+    document.getElementById('v-grid').classList.toggle('active-btn', v === 'grid');
+    document.getElementById('catalog').className = (v === 'grid') ? 'view-grid' : 'view-list';
     renderNextPage(true);
 }
 
 function renderNextPage(reset = false) {
-    const container = document.getElementById('catalog');
-    if (reset) { container.innerHTML = ''; currentIndex = 0; }
+    const cont = document.getElementById('catalog');
+    if (reset) { cont.innerHTML = ''; currentIndex = 0; }
     
-    const chunk = filtered.slice(currentIndex, currentIndex + DIAMOND_CONFIG.n);
-    const fragment = document.createDocumentFragment();
-    
-    chunk.forEach(i => {
-        const img = `${DIAMOND_CONFIG.i.p}${i.shape}${DIAMOND_CONFIG.i.e}`;
-        const name = DIAMOND_CONFIG.s[i.shape] || i.shape;
-        const price = i.price.toLocaleString('ru-RU');
-        const badge = `<div class="absolute top-2 left-2 bg-black/80 backdrop-blur px-2 py-0.5 text-[7px] text-white font-bold uppercase z-10 border border-white/10 flex items-center gap-1">✓ ${i.lab}</div>`;
-
-        const div = document.createElement('div');
-        div.className = 'diamond-card p-5';
+    const page = filtered.slice(currentIndex, currentIndex + (DIAMOND_CONFIG.n || 20));
+    page.forEach(d => {
+        const video = `${DIAMOND_CONFIG.i.p}${d.sh}${DIAMOND_CONFIG.i.e}`;
+        const priceStr = d.price.toLocaleString('ru-RU');
         
-        if (currentView === 'list') {
-            div.className += ' flex flex-row items-center gap-6';
-            div.innerHTML = `
-                <div class="w-28 h-28 bg-stone-500/5 relative flex-shrink-0 rounded">
-                    ${badge}
-                    <video src="${img}" autoplay loop muted playsinline class="w-full h-full object-contain p-2" onerror="this.style.display='none'; this.parentElement.innerHTML += '<div class=\\'flex items-center justify-center h-full text-3xl\\'>💎</div>'"></video>
+        if (view === 'list') {
+            cont.innerHTML += `
+            <div class="diamond-card p-4 flex flex-col md:flex-row items-center gap-6">
+                <div class="w-24 h-24 bg-black/20 relative flex-shrink-0">
+                    <div class="absolute top-0 left-0 bg-stone-800 text-[7px] text-white px-1 z-10">${d.lab}</div>
+                    <video src="${video}" autoplay loop muted playsinline class="w-full h-full object-contain" onerror="this.style.display='none'"></video>
                 </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-start mb-3 gap-4">
-                        <div>
-                            <span class="serif italic text-lg" style="color:var(--accent)">${name}</span>
-                            <span class="text-2xl font-light ml-3" style="color:var(--text-main)">${i.ct} ct</span>
-                        </div>
-                        <div class="text-right flex-shrink-0">
-                            <div class="text-xs opacity-60 uppercase mb-1">Цена</div>
-                            <div class="text-xl font-semibold" style="color:var(--accent)">${price} ₽</div>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-[10px] uppercase tracking-wider mb-3">
-                        <div><span class="opacity-60">Цвет:</span> <b style="color:var(--text-main)">${i.col}</b></div>
-                        <div><span class="opacity-60">Чистота:</span> <b style="color:var(--text-main)">${i.cla}</b></div>
-                        <div><span class="opacity-60">Огранка:</span> <b style="color:var(--text-main)">${i.cut}</b></div>
-                        <div><span class="opacity-60">Полировка:</span> <b style="color:var(--text-main)">${i.pol}</b></div>
-                        <div><span class="opacity-60">Симметрия:</span> <b style="color:var(--text-main)">${i.sym}</b></div>
-                        <div><span class="opacity-60">Размер:</span> <b style="color:var(--text-main)">${i.s1}×${i.s2}×${i.s3}</b></div>
-                    </div>
-                </div>
-                <button onclick="addToLikes('${i.re}', '${name}', ${i.ct}, ${i.price})" class="px-6 py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all flex-shrink-0 rounded" style="border-color:var(--border); color:var(--text-main)">♥ Нравиться</button>
-            `;
-        } else {
-            div.className += ' flex flex-col rounded overflow-hidden';
-            div.innerHTML = `
-                <div class="aspect-square bg-stone-500/5 relative overflow-hidden flex items-center justify-center">
-                    ${badge}
-                    <video src="${img}" autoplay loop muted playsinline class="w-full h-full object-contain p-4" onerror="this.style.display='none'; this.parentElement.innerHTML += '<div class=\\'text-6xl\\'>💎</div>'"></video>
-                </div>
-                <div class="p-4 flex-1 flex flex-col justify-between">
+                <div class="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4 items-center">
                     <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <div class="serif italic text-sm mb-1" style="color:var(--accent)">${name}</div>
-                                <div class="text-xl font-light" style="color:var(--text-main)">${i.ct} ct</div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-xs opacity-60 uppercase mb-1">Цена</div>
-                                <div class="font-semibold" style="color:var(--accent)">${price} ₽</div>
-                            </div>
-                        </div>
-                        <div class="border-t mt-3 pt-3" style="border-color:var(--border)">
-                            <div class="grid grid-cols-2 gap-2 text-[8px] uppercase tracking-wider opacity-70">
-                                <div><span class="opacity-60">Цвет:</span><br><b style="color:var(--text-main)">${i.col}</b></div>
-                                <div><span class="opacity-60">Чистота:</span><br><b style="color:var(--text-main)">${i.cla}</b></div>
-                                <div><span class="opacity-60">Огранка:</span><br><b style="color:var(--text-main)">${i.cut}</b></div>
-                                <div><span class="opacity-60">Полировка:</span><br><b style="color:var(--text-main)">${i.pol}</b></div>
-                                <div class="col-span-2"><span class="opacity-60">Симметрия:</span> <b style="color:var(--text-main)">${i.sym}</b></div>
-                                <div class="col-span-2"><span class="opacity-60">Размеры:</span> <b style="color:var(--text-main)">${i.s1}×${i.s2}×${i.s3} мм</b></div>
-                            </div>
-                        </div>
+                        <div class="serif italic text-lg leading-none">${DIAMOND_CONFIG.s[d.sh] || d.sh}</div>
+                        <div class="text-xl font-light text-white" style="color:var(--text-main)">${d.ct} CT</div>
                     </div>
-                    <button onclick="addToLikes('${i.re}', '${name}', ${i.ct}, ${i.price})" class="mt-4 w-full py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all rounded" style="border-color:var(--border); color:var(--text-main)">♥ Нравиться</button>
+                    <div class="text-[10px] uppercase tracking-tighter opacity-70">
+                        <div>Цвет: <span class="text-white" style="color:var(--text-main)">${d.col}</span></div>
+                        <div>Чистота: <span class="text-white" style="color:var(--text-main)">${d.cla}</span></div>
+                    </div>
+                    <div class="text-[10px] uppercase tracking-tighter opacity-70">
+                        <div>Огранка: ${d.cut}</div>
+                        <div>Размер: ${d.s1}x${d.s2}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-medium text-white mb-1" style="color:var(--text-main)">${priceStr} ₽</div>
+                        <button onclick="contact('${d.id}')" class="text-[8px] border border-stone-700 px-4 py-2 uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="color:var(--text-main)">Запрос</button>
+                    </div>
                 </div>
-            `;
+            </div>`;
+        } else {
+            cont.innerHTML += `
+            <div class="diamond-card p-5 flex flex-col">
+                <div class="aspect-square bg-black/20 mb-4 relative overflow-hidden">
+                    <div class="absolute top-2 left-2 bg-stone-800 text-[8px] text-white px-2 py-0.5 z-10 border border-white/10">${d.lab}</div>
+                    <video src="${video}" autoplay loop muted playsinline class="w-full h-full object-contain p-4"></video>
+                </div>
+                <div class="flex justify-between items-baseline mb-3">
+                    <span class="text-2xl font-light" style="color:var(--text-main)">${d.ct} ct</span>
+                    <span class="text-lg font-medium" style="color:var(--text-main)">${priceStr} ₽</span>
+                </div>
+                <div class="text-[9px] uppercase tracking-widest opacity-60 pb-4 mb-4 border-b" style="border-color: var(--border)">
+                    ${DIAMOND_CONFIG.s[d.sh] || d.sh} • ${d.col} • ${d.cla} • ${d.cut}
+                </div>
+                <div class="flex justify-between text-[8px] opacity-40 uppercase mb-4">
+                    <span>Sym: ${d.sym}</span><span>Pol: ${d.pol}</span><span>${d.s1}x${d.s2}mm</span>
+                </div>
+                <button onclick="contact('${d.id}')" class="w-full py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="color:var(--text-main)">Запросить</button>
+            </div>`;
         }
-        fragment.appendChild(div);
     });
-    container.appendChild(fragment);
-    currentIndex += chunk.length;
-    document.getElementById('load-more').style.display = (currentIndex >= filtered.length) ? 'none' : 'block';
+
+    currentIndex += page.length;
+    document.getElementById('more-box').classList.toggle('hidden', currentIndex >= filtered.length);
 }
 
-function openContactModal(id) {
-    document.getElementById('modal-diamond-id').value = id || '';
-    document.getElementById('contact-modal').classList.remove('hidden');
-}
-
-function closeContactModal() {
-    document.getElementById('contact-modal').classList.add('hidden');
-    document.getElementById('contact-form').reset();
-}
-
-function submitContact(e) {
-    e.preventDefault();
-    const diamondId = document.getElementById('modal-diamond-id').value;
-    const name = document.getElementById('contact-name').value;
-    const email = document.getElementById('contact-email').value;
-    const phone = document.getElementById('contact-phone').value;
-    const message = document.getElementById('contact-message').value;
-    
-    // TODO: Отправить на сервер (email, API и т.д.)
-    console.log('Запрос:', { diamondId, name, email, phone, message });
-    alert('✓ Спасибо! Мы свяжемся с вами в ближайшее время.');
-    closeContactModal();
-}
-
-// Система лайков/избранного
-function addToLikes(id, name, ct, price) {
-    let likes = JSON.parse(localStorage.getItem('diamondLikes') || '[]');
-    const existing = likes.find(d => d.id === id);
-    
-    if (existing) {
-        likes = likes.filter(d => d.id !== id);
-        alert('❌ Удалено из избранного');
-    } else {
-        likes.push({ id, name, ct, price });
-        alert('❤️ Добавлено в избранное');
-    }
-    
-    localStorage.setItem('diamondLikes', JSON.stringify(likes));
-    updateLikesCounter();
-}
-
-function updateLikesCounter() {
-    const likes = JSON.parse(localStorage.getItem('diamondLikes') || '[]');
-    const counter = document.getElementById('likes-counter');
-    if (counter) counter.innerText = likes.length;
-}
-
-function openLikesModal() {
-    const likes = JSON.parse(localStorage.getItem('diamondLikes') || '[]');
-    const modal = document.getElementById('likes-modal');
-    const list = document.getElementById('likes-list');
-    
-    if (likes.length === 0) {
-        list.innerHTML = '<div class="p-4 text-center opacity-60">Нет избранного</div>';
-    } else {
-        list.innerHTML = likes.map((d, i) => `
-            <div class="border-b pb-3 mb-3 flex justify-between items-start" style="border-color: var(--border);">
-                <div class="flex-1">
-                    <div class="text-sm italic mb-1" style="color: var(--accent);">${d.name}</div>
-                    <div class="text-xs opacity-60">
-                        <span>${d.ct} ct</span><br>
-                        <span style="color: var(--accent);">${d.price.toLocaleString('ru-RU')} ₽</span>
-                    </div>
-                </div>
-                <button onclick="addToLikes('${d.id}', '${d.name}', ${d.ct}, ${d.price}); openLikesModal();" class="text-red-500 hover:text-red-600 text-sm ml-2">✕</button>
-            </div>
-        `).join('');
-    }
-    
-    modal.classList.remove('hidden');
-}
-
-function closeLikesModal() {
-    document.getElementById('likes-modal').classList.add('hidden');
-}
-
-function submitLikesRequest() {
-    const likes = JSON.parse(localStorage.getItem('diamondLikes') || '[]');
-    if (likes.length === 0) {
-        alert('Нет избранного');
-        return;
-    }
-    
-    const name = prompt('Ваше имя:');
-    if (!name) return;
-    
-    const phone = prompt('Ваш телефон:');
-    if (!phone) return;
-    
-    const email = prompt('Ваш email:');
-    if (!email) return;
-    
-    // TODO: Отправить на сервер с полным списком лайков
-    console.log('Запрос с избранными:', { name, phone, email, diamonds: likes });
-    alert('✓ Спасибо! Менеджер свяжется с вами в ближайшее время.');
-    localStorage.removeItem('diamondLikes');
-    updateLikesCounter();
-    closeLikesModal();
+function contact(id) { 
+    const tg = `https://t.me/${atob(DIAMOND_CONFIG.c.t)}`;
+    window.open(tg + "?text=" + encodeURIComponent("Здравствуйте! Интересует бриллиант #" + id), "_blank");
 }
 
 init();
