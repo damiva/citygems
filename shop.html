@@ -51,7 +51,10 @@
             <h1 class="text-xl tracking-[0.3em] font-light uppercase text-main" style="color: var(--text-main)">City<span class="serif italic opacity-50 lowercase">Gems</span></h1>
         </div>
         
-        <div class="hidden md:block">
+        <div class="hidden md:block flex gap-4">
+            <button onclick="openLikesModal()" class="text-[9px] border border-stone-800 px-8 py-2 hover:bg-stone-800 hover:text-white transition-all uppercase tracking-widest relative" style="color: var(--text-main); border-color: var(--border);">
+                ♥ Избранное <span id="likes-counter" class="absolute -top-2 -right-2 bg-red-600 text-white text-[7px] rounded-full w-5 h-5 flex items-center justify-center">0</span>
+            </button>
             <button onclick="openContactModal()" class="text-[9px] border border-stone-800 px-8 py-2 hover:bg-stone-800 hover:text-white transition-all uppercase tracking-widest" style="color: var(--text-main); border-color: var(--border);">
                 Связаться с нами
             </button>
@@ -117,9 +120,9 @@
                         <div id="thumb-min-p" class="slider-thumb-custom"></div>
                         <div id="thumb-max-p" class="slider-thumb-custom"></div>
                     </div>
-                    <div class="space-y-2">
-                        <input type="number" id="f-min-p" oninput="syncInputs('p')" class="w-full p-2 text-[10px]" placeholder="От">
-                        <input type="number" id="f-max-p" oninput="syncInputs('p')" class="w-full p-2 text-[10px]" placeholder="До">
+                    <div class="flex gap-2">
+                        <input type="number" id="f-min-p" oninput="syncInputs('p')" class="w-1/2 p-2 text-[10px] text-center" placeholder="От">
+                        <input type="number" id="f-max-p" oninput="syncInputs('p')" class="w-1/2 p-2 text-[10px] text-center" placeholder="До">
                     </div>
                 </div>
             </div>
@@ -134,6 +137,18 @@
             <button id="load-more" onclick="renderNextPage()" class="hidden border px-16 py-4 text-[9px] uppercase tracking-[0.3em] opacity-60 hover:opacity-100 hover:border-white transition-all" style="border-color: var(--border); color: var(--text-main);">Показать еще</button>
         </div>
     </main>
+</div>
+
+<!-- Likes Modal -->
+<div id="likes-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+    <div class="bg-stone-900 border border-stone-700 p-8 max-w-md w-full" style="background-color: var(--card); border-color: var(--border);">
+        <h2 class="serif text-2xl italic mb-4" style="color: var(--text-main);">Мои избранные</h2>
+        <div id="likes-list" class="max-h-60 overflow-y-auto mb-6"></div>
+        <div class="flex gap-3">
+            <button onclick="submitLikesRequest()" class="flex-1 py-2 bg-white text-black text-[9px] uppercase font-medium tracking-widest hover:bg-gray-200">Запросить</button>
+            <button onclick="closeLikesModal()" class="flex-1 py-2 border border-stone-600 text-[9px] uppercase tracking-widest" style="border-color: var(--border); color: var(--text-main);">Закрыть</button>
+        </div>
+    </div>
 </div>
 
 <!-- Contact Modal -->
@@ -265,6 +280,7 @@ async function init() {
         setR('p', Math.min(...prices), Math.max(...prices));
 
         applyFiltersAndSort();
+        updateLikesCounter();
     } catch(error) {
         console.error('Ошибка инициализации:', error);
         document.getElementById('catalog').innerHTML = `<div class="text-center py-20" style="color: var(--text-main);"><p>⚠️ Ошибка загрузки</p><p class="text-xs opacity-60 mt-2">Проверьте наличие config.js и diamonds_lab.csv</p></div>`;
@@ -314,7 +330,7 @@ function renderNextPage(reset = false) {
         const img = `${DIAMOND_CONFIG.i.p}${i.shape}${DIAMOND_CONFIG.i.e}`;
         const name = DIAMOND_CONFIG.s[i.shape] || i.shape;
         const price = i.price.toLocaleString('ru-RU');
-        const badge = `<div class="absolute top-2 left-2 bg-black/80 backdrop-blur px-2 py-0.5 text-[7px] text-white font-bold uppercase z-10 border border-white/10">${i.lab}</div>`;
+        const badge = `<div class="absolute top-2 left-2 bg-black/80 backdrop-blur px-2 py-0.5 text-[7px] text-white font-bold uppercase z-10 border border-white/10 flex items-center gap-1">✓ ${i.lab}</div>`;
 
         const div = document.createElement('div');
         div.className = 'diamond-card p-5';
@@ -324,12 +340,11 @@ function renderNextPage(reset = false) {
             div.innerHTML = `
                 <div class="w-28 h-28 bg-stone-500/5 relative flex-shrink-0 rounded">
                     ${badge}
-                    <video src="${img}" autoplay loop muted playsinline class="w-full h-full object-contain p-2" onerror="this.outerHTML='<div class=\\"flex items-center justify-center h-full text-3xl\\">💎</div>'"></video>
+                    <video src="${img}" autoplay loop muted playsinline class="w-full h-full object-contain p-2" onerror="this.style.display='none'; this.parentElement.innerHTML += '<div class=\\'flex items-center justify-center h-full text-3xl\\'>💎</div>'"></video>
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex justify-between items-start mb-3 gap-4">
                         <div>
-                            <div class="text-sm opacity-60 uppercase tracking-widest mb-1" style="color:var(--text)">ID: <b style="color:var(--text-main)">${i.re}</b></div>
                             <span class="serif italic text-lg" style="color:var(--accent)">${name}</span>
                             <span class="text-2xl font-light ml-3" style="color:var(--text-main)">${i.ct} ct</span>
                         </div>
@@ -347,20 +362,19 @@ function renderNextPage(reset = false) {
                         <div><span class="opacity-60">Размер:</span> <b style="color:var(--text-main)">${i.s1}×${i.s2}×${i.s3}</b></div>
                     </div>
                 </div>
-                <button onclick="openContactModal('${i.re}')" class="px-6 py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all flex-shrink-0 rounded" style="border-color:var(--border); color:var(--text-main)">Запрос</button>
+                <button onclick="addToLikes('${i.re}', '${name}', ${i.ct}, ${i.price})" class="px-6 py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all flex-shrink-0 rounded" style="border-color:var(--border); color:var(--text-main)">♥ Нравиться</button>
             `;
         } else {
             div.className += ' flex flex-col rounded overflow-hidden';
             div.innerHTML = `
                 <div class="aspect-square bg-stone-500/5 relative overflow-hidden flex items-center justify-center">
                     ${badge}
-                    <video src="${img}" autoplay loop muted playsinline class="w-full h-full object-contain p-4" onerror="this.outerHTML='<div class=\\"text-6xl\\">💎</div>'"></video>
+                    <video src="${img}" autoplay loop muted playsinline class="w-full h-full object-contain p-4" onerror="this.style.display='none'; this.parentElement.innerHTML += '<div class=\\'text-6xl\\'>💎</div>'"></video>
                 </div>
                 <div class="p-4 flex-1 flex flex-col justify-between">
                     <div>
                         <div class="flex justify-between items-start mb-2">
                             <div>
-                                <div class="text-[9px] opacity-50 uppercase tracking-widest mb-1">ID ${i.re}</div>
                                 <div class="serif italic text-sm mb-1" style="color:var(--accent)">${name}</div>
                                 <div class="text-xl font-light" style="color:var(--text-main)">${i.ct} ct</div>
                             </div>
@@ -380,7 +394,7 @@ function renderNextPage(reset = false) {
                             </div>
                         </div>
                     </div>
-                    <button onclick="openContactModal('${i.re}')" class="mt-4 w-full py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all rounded" style="border-color:var(--border); color:var(--text-main)">Запросить</button>
+                    <button onclick="addToLikes('${i.re}', '${name}', ${i.ct}, ${i.price})" class="mt-4 w-full py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all rounded" style="border-color:var(--border); color:var(--text-main)">♥ Нравиться</button>
                 </div>
             `;
         }
@@ -413,6 +427,82 @@ function submitContact(e) {
     console.log('Запрос:', { diamondId, name, email, phone, message });
     alert('✓ Спасибо! Мы свяжемся с вами в ближайшее время.');
     closeContactModal();
+}
+
+// Система лайков/избранного
+function addToLikes(id, name, ct, price) {
+    let likes = JSON.parse(localStorage.getItem('diamondLikes') || '[]');
+    const existing = likes.find(d => d.id === id);
+    
+    if (existing) {
+        likes = likes.filter(d => d.id !== id);
+        alert('❌ Удалено из избранного');
+    } else {
+        likes.push({ id, name, ct, price });
+        alert('❤️ Добавлено в избранное');
+    }
+    
+    localStorage.setItem('diamondLikes', JSON.stringify(likes));
+    updateLikesCounter();
+}
+
+function updateLikesCounter() {
+    const likes = JSON.parse(localStorage.getItem('diamondLikes') || '[]');
+    const counter = document.getElementById('likes-counter');
+    if (counter) counter.innerText = likes.length;
+}
+
+function openLikesModal() {
+    const likes = JSON.parse(localStorage.getItem('diamondLikes') || '[]');
+    const modal = document.getElementById('likes-modal');
+    const list = document.getElementById('likes-list');
+    
+    if (likes.length === 0) {
+        list.innerHTML = '<div class="p-4 text-center opacity-60">Нет избранного</div>';
+    } else {
+        list.innerHTML = likes.map((d, i) => `
+            <div class="border-b pb-3 mb-3 flex justify-between items-start" style="border-color: var(--border);">
+                <div class="flex-1">
+                    <div class="text-sm italic mb-1" style="color: var(--accent);">${d.name}</div>
+                    <div class="text-xs opacity-60">
+                        <span>${d.ct} ct</span><br>
+                        <span style="color: var(--accent);">${d.price.toLocaleString('ru-RU')} ₽</span>
+                    </div>
+                </div>
+                <button onclick="addToLikes('${d.id}', '${d.name}', ${d.ct}, ${d.price}); openLikesModal();" class="text-red-500 hover:text-red-600 text-sm ml-2">✕</button>
+            </div>
+        `).join('');
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+function closeLikesModal() {
+    document.getElementById('likes-modal').classList.add('hidden');
+}
+
+function submitLikesRequest() {
+    const likes = JSON.parse(localStorage.getItem('diamondLikes') || '[]');
+    if (likes.length === 0) {
+        alert('Нет избранного');
+        return;
+    }
+    
+    const name = prompt('Ваше имя:');
+    if (!name) return;
+    
+    const phone = prompt('Ваш телефон:');
+    if (!phone) return;
+    
+    const email = prompt('Ваш email:');
+    if (!email) return;
+    
+    // TODO: Отправить на сервер с полным списком лайков
+    console.log('Запрос с избранными:', { name, phone, email, diamonds: likes });
+    alert('✓ Спасибо! Менеджер свяжется с вами в ближайшее время.');
+    localStorage.removeItem('diamondLikes');
+    updateLikesCounter();
+    closeLikesModal();
 }
 
 init();
