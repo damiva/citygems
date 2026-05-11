@@ -23,7 +23,22 @@ body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color
 
 /* Header */
 .header-main { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border); background: var(--bg); backdrop-filter: blur(10px); }
-.logo { font-size: 1.25rem; letter-spacing: 0.4em; text-transform: uppercase; color: var(--text-main); }
+.logo { 
+    font-size: 1.1rem; 
+    letter-spacing: 0.5em; 
+    text-transform: uppercase; 
+    color: var(--text-main); 
+    font-weight: 400;
+}
+.logo span { 
+    font-family: 'Cormorant Garamond', serif;
+    text-transform: lowercase; 
+    font-style: italic;
+    letter-spacing: 0.1em;
+    margin-left: -0.2em; /* Немного сближаем для эстетики */
+    font-weight: 300;
+    opacity: 0.8;
+}
 .header-controls { display: flex; align-items: center; gap: 2rem; }
 .theme-toggle { font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; }
 .sort-select { font-size: 10px; text-transform: uppercase; background: transparent; border: none; cursor: pointer; color: var(--text-main); }
@@ -31,7 +46,16 @@ body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color
 /* Sidebar & Inputs */
 .sidebar { width: 100%; border-right: 1px solid var(--border); padding: 2rem; background: var(--sidebar); }
 @media (min-width: 1024px) { .sidebar { width: 20rem; } }
-.filters-title { font-size: 2.25rem; font-style: italic; margin-bottom: 2.5rem; color: var(--text-main); }
+.filters-title { 
+    font-size: 1.5rem; /* Было 2.25rem — сильно уменьшили */
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem; 
+    color: var(--text-main);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    display: inline-block;
+}
 .filter-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.3em; opacity: 0.6; }
 .current-val { font-size: 9px; color: var(--accent); font-weight: 600; }
 
