@@ -143,3 +143,43 @@ body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color
 .qty-ctrl { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); padding: 2px 8px; }
 .qty-btn { font-size: 16px; opacity: 0.5; transition: 0.2s; }
 .qty-btn:hover { opacity: 1; color: var(--accent); }
+/* Навигация (SPA) */
+.nav-menu { display: flex; align-items: center; gap: 2rem; }
+.nav-link { 
+    font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; 
+    opacity: 0.5; transition: 0.3s; position: relative; 
+    background: none; border: none; cursor: pointer; color: var(--text-main); font-weight: 500;
+}
+.nav-link:hover, .nav-link.active { opacity: 1; }
+.nav-link.active::after { 
+    content: ''; position: absolute; bottom: -8px; left: 0; width: 100%; height: 1px; background: var(--accent); 
+}
+
+/* Секции и анимация перехода */
+.content-section { min-height: 80vh; animation: fadeIn 0.4s ease forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.hidden { display: none !important; }
+
+/* Динамический контент (Статьи из HTML) */
+.prose-content h1 {
+    font-family: 'Cormorant Garamond', serif; font-size: 3.5rem; font-style: italic;
+    color: var(--text-main); margin-bottom: 2.5rem; text-align: center; line-height: 1.1;
+}
+.prose-content h2 {
+    font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-style: italic;
+    color: var(--accent); margin-top: 4rem; margin-bottom: 1.5rem; text-align: center;
+}
+.prose-content p {
+    font-size: 1.15rem; line-height: 1.8; margin-bottom: 1.5rem; font-weight: 300; color: var(--text-main); opacity: 0.9; text-align: justify;
+}
+.prose-content strong { color: var(--accent); font-weight: 500; }
+.prose-content ul { margin-bottom: 2rem; list-style: none; padding-left: 0; }
+.prose-content li { margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; font-weight: 300; color: var(--text-main); opacity: 0.9; }
+.prose-content li::before { content: "—"; position: absolute; left: 0; color: var(--accent); }
+.prose-content a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: 0.3s; }
+.prose-content a:hover { border-bottom-color: var(--accent); }
+
+/* Плашка-контейнер для текста (опционально, делает текст как в блоках) */
+.prose-box {
+    padding: 2.5rem; border: 1px solid var(--border); background: var(--sidebar); margin-bottom: 2rem;
+}

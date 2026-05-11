@@ -1,4 +1,35 @@
 let db = [], filtered = [], currentIndex = 0, rate = 105, view = 'list', isRendering = false;
+// 1. Функция загрузки внешних HTML файлов
+async function loadPageContent(pageId, fileName) {
+    const container = document.getElementById(pageId);
+    if (!container) return;
+    try {
+        const response = await fetch(fileName);
+        if (response.ok) {
+            container.innerHTML = await response.text();
+        }
+    } catch (err) {
+        console.error("Ошибка загрузки:", err);
+    }
+}
+
+// 2. Функция навигации по сайту
+function navigate(pageId) {
+    // Прячем все секции
+    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+    
+    // Показываем нужную
+    const target = document.getElementById(pageId);
+    if (target) target.classList.remove('hidden');
+    
+    // Обновляем активную кнопку в меню (игнорируя Избранное, так как это модалка)
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+    const activeBtn = document.querySelector(`button[onclick="navigate('${pageId}')"]`);
+    if (activeBtn) activeBtn.classList.add('active');
+
+    // Плавный скролл наверх
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 const parse = (v) => parseFloat(String(v || '').replace(',', '.')) || 0;
 
@@ -51,6 +82,11 @@ async function init() {
         document.body.classList.remove('light-theme');
         updateThemeButton(false);
     }    // Подгрузка форм из конфига
+    
+    await loadPageContent('home-content', 'about.html');
+    await loadPageContent('contacts-content', 'contacts.html');
+    navigate('page-home');
+    
     const shapeSel = document.getElementById('f-shape');
     shapeSel.innerHTML = '<option value="">Все формы</option>';
     Object.entries(DIAMOND_CONFIG.s).forEach(([k, v]) => shapeSel.innerHTML += `<option value="${k}">${v}</option>`);
