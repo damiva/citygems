@@ -1,119 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityGems — Каталог</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="config.js"></script>
+</head>
+<body>
+
+<header class="header">
+    <div class="container flex-between">
+        <h1 class="logo text-white uppercase font-light">City<span class="serif italic text-stone-500">Gems</span></h1>
+        <div id="stats" class="stats text-[10px] uppercase tracking-widest text-stone-600">Загрузка курса...</div>
+        <button onclick="openContactModal()" class="btn-sm border border-stone-800 px-4 py-2 hover:bg-stone-200 hover:text-black">Связь</button>
+    </div>
+</header>
+
+<div class="main-layout container flex flex-col lg:flex-row">
+    <aside class="sidebar w-full lg:w-72 p-6 border-r border-stone-900">
+        <h2 class="serif text-2xl text-white italic mb-6">Фильтры</h2>
+        
+        <div class="filter-group mb-4">
+            <label class="text-[9px] uppercase tracking-widest block mb-2 text-stone-500">Огранка</label>
+            <select id="f-shape" onchange="applyFilters()" class="w-full p-2 text-xs bg-[#1a1a1a] border-stone-800 text-white"></select>
+        </div>
+
+        <div class="filter-group mb-4">
+            <label class="text-[9px] uppercase tracking-widest block mb-2 text-stone-500">Вес (ct)</label>
+            <div class="flex gap-2">
+                <input type="number" id="f-min-w" step="0.1" placeholder="От" oninput="applyFilters()" class="w-full p-2 text-xs bg-[#1a1a1a] border-stone-800">
+                <input type="number" id="f-max-w" step="0.1" placeholder="До" oninput="applyFilters()" class="w-full p-2 text-xs bg-[#1a1a1a] border-stone-800">
+            </div>
+        </div>
+
+        <div class="filter-group mb-4">
+            <label class="text-[9px] uppercase tracking-widest block mb-2 text-stone-500">Цена до (₽)</label>
+            <input type="number" id="f-max-p" placeholder="Любая" oninput="applyFilters()" class="w-full p-2 text-xs bg-[#1a1a1a] border-stone-800">
+        </div>
+    </aside>
+
+    <main class="content flex-1 p-6">
+        <div id="catalog" class="catalog-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+        <button id="load-more" onclick="renderNextPage()" class="hidden mx-auto mt-12 px-12 py-4 border border-stone-800 text-[10px] uppercase tracking-widest hover:border-stone-400">
+            Показать еще
+        </button>
+    </main>
+</div>
+
+<div id="contact-modal" class="modal fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md" onclick="closeModal()">
+    <div class="modal-content bg-[#111] p-8 border border-stone-800 max-w-sm w-full text-center" onclick="event.stopPropagation()">
+        <h3 id="modal-msg" class="serif italic text-stone-200 mb-8 uppercase text-[10px]">Связаться</h3>
+        <div id="qr-container" class="hidden">
+            <img id="qr-img" src="" class="mx-auto mb-4 border-8 border-white w-[180px] h-[180px]">
+        </div>
+        <div id="mobile-ui" class="hidden space-y-4">
+            <a id="link-tg" href="#" class="block p-4 border border-stone-800 text-[10px] uppercase text-white">TELEGRAM</a>
+            <a id="link-wa" href="#" class="block p-4 border border-stone-800 text-[10px] uppercase text-white">WHATSAPP</a>
+        </div>
+        <button onclick="closeModal()" class="mt-8 text-[9px] uppercase text-stone-700 tracking-widest">Закрыть</button>
+    </div>
+</div>
+
 <script>
 let db = []; 
 let filtered = []; 
 let currentIndex = 0;
-let exchangeRate = 0; // Итоговый курс (ЦБ + надбавка)
+let exchangeRate = 0;
 
-const parseNum = (s) => parseFloat(String(s).replace(',', '.')) || 0;
+const parseNum = (s) => parseFloat(String(s || '').replace(',', '.')) || 0;
 
-// Функция получения курса ЦБ
-async function fetchExchangeRate() {
+async function fetchRate() {
     try {
-        // Используем открытое API для получения курса USD
         const response = await fetch('https://open.er-api.com/v6/latest/USD');
         const data = await response.json();
-        const rateRUB = data.rates.RUB;
-        
-        // Складываем курс и твою надбавку из config.js
-        exchangeRate = rateRUB + (DIAMOND_CONFIG.rateAdd || 0);
-        console.log(`Курс ЦБ: ${rateRUB}, С надбавкой: ${exchangeRate}`);
+        // Используем r из твоего конфига
+        exchangeRate = data.rates.RUB + (DIAMOND_CONFIG.r || 0);
     } catch (e) {
-        console.error("Не удалось получить курс, ставим резервный 100", e);
-        exchangeRate = 100 + (DIAMOND_CONFIG.rateAdd || 0);
+        exchangeRate = 100 + (DIAMOND_CONFIG.r || 0);
     }
 }
 
 async function init() {
-    // Сначала получаем курс
-    await fetchExchangeRate();
-
+    // Настройка селектора огранок из конфига (s)
     const shapeSelect = document.getElementById('f-shape');
+    shapeSelect.innerHTML = '<option value="">Все формы</option>';
     Object.entries(DIAMOND_CONFIG.s).forEach(([code, name]) => {
         shapeSelect.innerHTML += `<option value="${code}">${name}</option>`;
     });
 
+    await fetchRate();
+
     try {
-        const response = await fetch('diamonds_lab.csv');
+        const response = await fetch('diamonds_lab.csv?v=' + Date.now());
         const text = await response.text();
         const lines = text.split('\n');
         
         db = lines.slice(1).map(line => {
             const v = line.split(';');
             if (v.length < 12) return null;
-            
             const priceUSD = parseNum(v[12]);
-            // Считаем цену в рублях
-            const priceRUB = Math.ceil(priceUSD * exchangeRate);
-
             return {
-                re: v[0],
-                lab: v[1],
-                shape: v[2],
-                ct: parseNum(v[3]),
-                col: v[4],
-                cla: v[5],
-                cut: v[6],
-                price: priceRUB // Храним уже в рублях
+                re: v[0], lab: v[1], shape: v[2],
+                ct: parseNum(v[3]), col: v[4], cla: v[5],
+                cut: v[6], price: Math.ceil(priceUSD * exchangeRate)
             };
         }).filter(i => i && i.re);
 
         filtered = [...db];
-        updateStats();
+        document.getElementById('stats').innerText = `Курс: ${exchangeRate.toFixed(2)} | ${db.length} шт.`;
         renderNextPage(true);
     } catch (e) { 
+        document.getElementById('stats').innerText = "Ошибка загрузки данных";
         console.error(e);
     }
-}
-
-function updateStats() {
-    const statsText = `Курс: ${exchangeRate.toFixed(2)} ₽ | Всего: ${db.length}`;
-    document.getElementById('stats').innerText = statsText;
 }
 
 function renderNextPage(reset = false) {
     const container = document.getElementById('catalog');
     if (reset) { container.innerHTML = ''; currentIndex = 0; }
 
-    const chunk = filtered.slice(currentIndex, currentIndex + DIAMOND_CONFIG.pageItems);
+    // Используем n из твоего конфига
+    const chunk = filtered.slice(currentIndex, currentIndex + DIAMOND_CONFIG.n);
+    
+    if (chunk.length === 0 && reset) {
+        container.innerHTML = '<div class="col-span-full text-center py-20 text-stone-600 uppercase text-[10px]">Ничего не найдено</div>';
+    }
+
     chunk.forEach(i => {
         const shapeName = DIAMOND_CONFIG.s[i.shape] || i.shape;
         container.innerHTML += `
-            <div class="diamond-card">
-                <div class="card-head flex-between">
-                    <span class="report">${i.lab} ${i.re}</span>
-                    <span class="price-tag text-white font-bold">${i.price.toLocaleString()} ₽</span>
+            <div class="diamond-card border border-stone-900 p-6 transition-all hover:border-stone-500">
+                <div class="flex justify-between text-[9px] mb-4 text-stone-600 uppercase">
+                    <span>${i.lab} ${i.re}</span>
+                    <span class="text-white">${i.price.toLocaleString()} ₽</span>
                 </div>
-                <div class="card-body py-6 text-center">
-                    <div class="ct-val text-3xl text-white font-light">${i.ct} <span class="text-xs text-stone-500 uppercase">ct</span></div>
-                    <div class="shape-val serif text-xl italic text-stone-400 mt-1">${shapeName}</div>
+                <div class="text-center py-6">
+                    <div class="text-3xl text-white font-light">${i.ct} <span class="text-xs text-stone-500 uppercase">ct</span></div>
+                    <div class="serif text-lg italic text-stone-400 mt-1">${shapeName}</div>
                 </div>
-                <div class="card-footer">
-                    <p class="specs-text text-center text-[10px] uppercase tracking-widest text-stone-500 mb-4">
-                        ${i.col} / ${i.cla} • ${i.cut}
-                    </p>
-                    <button onclick="openContactModal('${i.re}')" class="btn-card-action">Запросить цену</button>
+                <div class="text-[10px] text-center text-stone-500 uppercase tracking-[0.2em] mb-6">
+                    ${i.col} / ${i.cla} • ${i.cut}
                 </div>
+                <button onclick="openContactModal('${i.re}')" class="w-full py-2 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Запросить</button>
             </div>`;
     });
     
     currentIndex += chunk.length;
     const btnLoad = document.getElementById('load-more');
-    btnLoad.style.display = currentIndex >= filtered.length ? 'none' : 'block';
+    const isHidden = currentIndex >= filtered.length;
+    btnLoad.style.display = isHidden ? 'none' : 'block';
+    btnLoad.classList.toggle('hidden', isHidden);
 }
 
-// Фильтры теперь тоже работают по рублевой цене
 function applyFilters() {
     const s = document.getElementById('f-shape').value;
     const minW = parseNum(document.getElementById('f-min-w').value);
     const maxW = parseNum(document.getElementById('f-max-w').value) || 999;
-    const maxP = parseNum(document.getElementById('f-max-p').value) || 999999999;
+    const maxP = parseNum(document.getElementById('f-max-p').value) || 99999999;
 
     filtered = db.filter(i => 
-        (!s || i.shape === s) && 
-        (i.ct >= minW && i.ct <= maxW) && 
-        (i.price <= maxP)
+        (!s || i.shape === s) && (i.ct >= minW && i.ct <= maxW) && (i.price <= maxP)
     );
-    
     renderNextPage(true);
 }
+
+function openContactModal(id = "") {
+    const modal = document.getElementById('contact-modal');
+    const isMob = /Android|iPhone/i.test(navigator.userAgent);
+    const tgUrl = `https://t.me/${atob(DIAMOND_CONFIG.c.t)}`;
+    
+    modal.classList.remove('hidden');
+    if (id) document.getElementById('modal-msg').innerText = `Камень ${id}`;
+
+    if (isMob) {
+        document.getElementById('mobile-ui').classList.remove('hidden');
+        document.getElementById('link-tg').href = tgUrl;
+        document.getElementById('link-wa').href = `https://wa.me/${atob(DIAMOND_CONFIG.c.w)}`;
+    } else {
+        document.getElementById('qr-container').classList.remove('hidden');
+        document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(tgUrl)}`;
+    }
+}
+
+function closeModal() {
+    document.getElementById('contact-modal').classList.add('hidden');
+    document.getElementById('mobile-ui').classList.add('hidden');
+    document.getElementById('qr-container').classList.add('hidden');
+}
+
+init();
 </script>
+</body>
+</html>
