@@ -105,17 +105,40 @@ body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color
 /* Кнопка избранного в хедере */
 .wishlist-btn-main { font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; position: relative; display: flex; align-items: center; gap: 8px; }
 .wish-badge { background: var(--accent); color: white; font-size: 9px; padding: 1px 6px; border-radius: 10px; font-weight: bold; }
-
-/* Иконка сердечка на карточке */
-.wish-toggle { position: absolute; top: 10px; right: 10px; z-index: 20; background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 50%; transition: all 0.2s; }
-.wish-toggle.active { background: var(--accent); border-color: var(--accent); color: white; }
+.wish-toggle { 
+    position: absolute; 
+    top: 12px; 
+    right: 12px; 
+    z-index: 20; 
+    background: var(--card); 
+    border: 1px solid var(--border); 
+    padding: 8px; 
+    border-radius: 50%; 
+    transition: all 0.2s ease;
+    cursor: pointer;
+    opacity: 0; /* Скрыто по умолчанию */
+    transform: translateY(-5px); /* Легкий эффект появления */
+}
+.wish-toggle.active { 
+    opacity: 1 !important; 
+    transform: translateY(0);
+    background: var(--accent); 
+    border-color: var(--accent); 
+    color: white; 
+}
 .wish-toggle svg { width: 14px; height: 14px; }
-
+.diamond-card:hover .wish-toggle {
+    opacity: 0.6; 
+    transform: translateY(0);
+}
+.wish-toggle:hover {
+    opacity: 1 !important;
+    transform: scale(1.1);
+}
 /* Модальное окно */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
 .modal-content { background: var(--sidebar); width: 90%; max-width: 600px; padding: 2.5rem; border: 1px solid var(--border); }
 .hidden { display: none !important; }
-
 /* Управление количеством */
 .qty-ctrl { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); padding: 2px 8px; }
 .qty-btn { font-size: 16px; opacity: 0.5; transition: 0.2s; }

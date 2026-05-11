@@ -208,8 +208,15 @@ function renderNextPage(reset = false) {
         const labBadge = `<div class="absolute top-0 left-0 bg-stone-800 text-[8px] text-white px-2 py-0.5 z-10 font-bold uppercase flex items-center"><span class="verified-icon"></span>${d.lab}</div>`;
         const inWish = wishlist.some(i => i.id === d.id);
         const wishBtn = `
-            <button onclick="toggleWish('${d.id}')" class="wish-toggle ${inWish ? 'active' : ''}">
-                <svg viewBox="0 0 24 24" fill="${inWish ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+            <button onclick="event.stopPropagation(); toggleWish('${d.id}')" 
+                    class="wish-toggle ${inWish ? 'active' : ''}" 
+                    title="${inWish ? 'Удалить из избранного' : 'Добавить в избранное'}">
+                <svg viewBox="0 0 24 24" 
+                    fill="${inWish ? 'currentColor' : 'none'}" 
+                    stroke="currentColor" 
+                    stroke-width="2" 
+                    stroke-linecap="round" 
+                    stroke-linejoin="round">
                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                 </svg>
             </button>
