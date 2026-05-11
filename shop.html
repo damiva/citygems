@@ -13,56 +13,58 @@
             --text-main: #ffffff; --text-dim: #9ca3af; --accent: #D4AF37;
         }
         body.light-theme {
-            --bg: #f3f4f6; --sidebar: #ffffff; --card: #ffffff; --border: #e5e7eb;
-            --text-main: #111827; --text-dim: #6b7280; --accent: #9d7f1e;
+            --bg: #F9F8F6; --sidebar: #ffffff; --card: #ffffff; --border: #e2e8f0;
+            --text-main: #1a202c; --text-dim: #4a5568; --accent: #b49431;
         }
-        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color: var(--text-dim); transition: all 0.3s ease; }
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color: var(--text-dim); transition: background 0.3s, color 0.3s; }
         .serif { font-family: 'Cormorant Garamond', serif; }
         
-        /* Сетка и карточки */
-        .diamond-card { background: var(--card); border: 1px solid var(--border); transition: transform 0.2s, border-color 0.2s; }
-        .diamond-card:hover { border-color: var(--accent); }
+        .diamond-card { background: var(--card); border: 1px solid var(--border); transition: all 0.25s ease; }
+        .diamond-card:hover { border-color: var(--accent); transform: translateY(-2px); }
         
-        /* Кастомные инпуты */
         select, input { 
             background: var(--card) !important; border: 1px solid var(--border) !important; 
-            color: var(--text-main) !important; outline: none; border-radius: 2px !important;
+            color: var(--text-main) !important; outline: none;
         }
 
-        /* Двойной Range Slider */
-        .range-container { position: relative; width: 100%; height: 40px; }
+        /* Double Range Slider Core */
+        .range-container { position: relative; width: 100%; height: 32px; display: flex; align-items: center; }
         .range-container input[type="range"] {
             position: absolute; width: 100%; pointer-events: none; appearance: none; -webkit-appearance: none; 
-            background: none; top: 50%; transform: translateY(-50%); z-index: 2;
+            background: none; z-index: 2; margin: 0;
         }
         .range-container input[type="range"]::-webkit-slider-thumb {
-            pointer-events: all; width: 18px; height: 18px; -webkit-appearance: none; 
+            pointer-events: all; width: 16px; height: 16px; -webkit-appearance: none; 
             background: var(--accent); cursor: pointer; border-radius: 50%; border: 2px solid var(--bg);
         }
         .slider-track {
-            position: absolute; width: 100%; height: 2px; background: var(--border); 
-            top: 50%; transform: translateY(-50%); z-index: 1;
+            position: absolute; width: 100%; height: 1px; background: var(--border); z-index: 1;
         }
 
         .view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-        .view-list { display: flex; flex-direction: column; gap: 1rem; }
+        .view-list { display: flex; flex-direction: column; gap: 1.25rem; }
         .active-btn { color: var(--accent) !important; }
+        
+        /* Скроллбар */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); }
     </style>
 </head>
 <body class="min-h-screen">
 
-<header class="sticky top-0 z-50 border-b shadow-sm backdrop-blur-md" style="background: var(--bg); border-color: var(--border);">
+<header class="sticky top-0 z-50 border-b backdrop-blur-lg" style="background: var(--bg); border-color: var(--border);">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <div class="flex-1 text-xl tracking-[0.4em] font-light uppercase" style="color: var(--text-main)">
-            City<span class="serif italic lowercase opacity-60">Gems</span>
+        <div class="flex-1">
+            <span class="text-xl tracking-[0.4em] font-light uppercase" style="color: var(--text-main)">City<span class="serif italic lowercase opacity-60">Gems</span></span>
         </div>
 
-        <div class="flex items-center gap-6">
-            <button onclick="toggleTheme()" class="text-[10px] uppercase tracking-widest hover:text-white flex items-center gap-2">
+        <div class="flex items-center gap-8">
+            <button onclick="toggleTheme()" class="text-[10px] uppercase tracking-[0.2em] hover:text-white transition-opacity">
                 <span id="theme-label">Тёмная тема</span>
             </button>
             
-            <select id="sort-order" onchange="applyFilters()" class="text-[10px] uppercase p-1 bg-transparent border-none cursor-pointer">
+            <select id="sort-order" onchange="applyFilters()" class="text-[10px] uppercase p-1 bg-transparent border-none cursor-pointer tracking-widest">
                 <option value="none">Сортировка</option>
                 <option value="p-asc">Цена: По возрастанию</option>
                 <option value="p-desc">Цена: По убыванию</option>
@@ -71,8 +73,8 @@
             </select>
 
             <div class="flex gap-4 border-l pl-6" style="border-color: var(--border);">
-                <button id="v-list" onclick="setView('list')" class="active-btn"><svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg></button>
-                <button id="v-grid" onclick="setView('grid')"><svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM9 2.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3z"/></svg></button>
+                <button id="v-list" onclick="setView('list')" class="active-btn transition-colors"><svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg></button>
+                <button id="v-grid" onclick="setView('grid')" class="transition-colors"><svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM9 2.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3z"/></svg></button>
             </div>
         </div>
     </div>
@@ -83,40 +85,40 @@
         <div class="sticky top-24">
             <h2 class="serif text-4xl italic mb-10" style="color: var(--text-main)">Фильтры</h2>
             
-            <div class="space-y-12">
+            <div class="space-y-10">
                 <div>
-                    <label class="text-[9px] uppercase tracking-[0.3em] mb-4 block">Форма огранки</label>
-                    <select id="f-shape" onchange="applyFilters()" class="w-full p-3 text-xs uppercase"></select>
+                    <label class="text-[9px] uppercase tracking-[0.3em] mb-4 block opacity-60">Форма огранки</label>
+                    <select id="f-shape" onchange="applyFilters()" class="w-full p-3 text-xs uppercase tracking-widest"></select>
                 </div>
 
                 <div>
-                    <label class="text-[9px] uppercase tracking-[0.3em] mb-2 block">Вес (Carat)</label>
-                    <div class="range-container" id="container-w">
+                    <label class="text-[9px] uppercase tracking-[0.3em] mb-2 block opacity-60">Вес (Carat)</label>
+                    <div class="range-container">
                         <div class="slider-track"></div>
                         <input type="range" id="r-min-w" step="0.01" oninput="syncRange('w', 'min')">
                         <input type="range" id="r-max-w" step="0.01" oninput="syncRange('w', 'max')">
                     </div>
                     <div class="flex gap-2 mt-2">
-                        <input type="number" id="i-min-w" step="0.01" oninput="syncInput('w')" class="w-1/2 p-2 text-[10px] text-center">
-                        <input type="number" id="i-max-w" step="0.01" oninput="syncInput('w')" class="w-1/2 p-2 text-[10px] text-center">
+                        <input type="number" id="i-min-w" step="0.01" oninput="syncInput('w')" class="w-1/2 p-2 text-[10px] text-center font-medium">
+                        <input type="number" id="i-max-w" step="0.01" oninput="syncInput('w')" class="w-1/2 p-2 text-[10px] text-center font-medium">
                     </div>
                 </div>
 
                 <div>
-                    <label class="text-[9px] uppercase tracking-[0.3em] mb-2 block">Цена (₽)</label>
-                    <div class="range-container" id="container-p">
+                    <label class="text-[9px] uppercase tracking-[0.3em] mb-2 block opacity-60">Цена (₽)</label>
+                    <div class="range-container">
                         <div class="slider-track"></div>
-                        <input type="range" id="r-min-p" step="500" oninput="syncRange('p', 'min')">
-                        <input type="range" id="r-max-p" step="500" oninput="syncRange('p', 'max')">
+                        <input type="range" id="r-min-p" step="1000" oninput="syncRange('p', 'min')">
+                        <input type="range" id="r-max-p" step="1000" oninput="syncRange('p', 'max')">
                     </div>
                     <div class="flex flex-col gap-2 mt-2">
-                        <input type="number" id="i-min-p" oninput="syncInput('p')" class="w-full p-2 text-[10px]" placeholder="От">
-                        <input type="number" id="i-max-p" oninput="syncInput('p')" class="w-full p-2 text-[10px]" placeholder="До">
+                        <input type="number" id="i-min-p" oninput="syncInput('p')" class="w-full p-2 text-[10px] px-4" placeholder="От">
+                        <input type="number" id="i-max-p" oninput="syncInput('p')" class="w-full p-2 text-[10px] px-4" placeholder="До">
                     </div>
                 </div>
             </div>
 
-            <div id="counter" class="mt-12 pt-6 border-t text-[10px] uppercase tracking-widest text-right italic" style="border-color: var(--border);">
+            <div id="counter" class="mt-12 pt-6 border-t text-[10px] uppercase tracking-[0.2em] text-right italic" style="border-color: var(--border);">
                 Загрузка...
             </div>
         </div>
@@ -125,8 +127,8 @@
     <main class="flex-1 p-6 lg:p-10">
         <div id="catalog" class="view-list"></div>
         <div id="more-box" class="mt-16 flex justify-center hidden pb-20">
-            <button onclick="renderNextPage()" class="border px-16 py-4 text-[10px] uppercase tracking-[0.4em] hover:bg-stone-800 hover:text-white transition-all" style="border-color: var(--border); color: var(--text-main);">
-                Загрузить еще
+            <button onclick="renderNextPage()" class="border px-16 py-4 text-[10px] uppercase tracking-[0.4em] transition-all hover:bg-stone-800 hover:text-white" style="border-color: var(--border); color: var(--text-main);">
+                Показать еще
             </button>
         </div>
     </main>
@@ -135,48 +137,38 @@
 <script>
 let db = [], filtered = [], currentIndex = 0, rate = 105, view = 'list', isRendering = false;
 
-// Debounce функция для оптимизации фильтров
-function debounce(func, wait) {
+// Оптимизация вызовов фильтра
+const debounce = (fn, ms) => {
     let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
+    return (...args) => {
         clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        timeout = setTimeout(() => fn.apply(this, args), ms);
     };
-}
+};
 
 const parse = (v) => parseFloat(String(v || '').replace(',', '.')) || 0;
 
-// Управление темами
 function toggleTheme() {
     document.body.classList.toggle('light-theme');
-    const isLight = document.body.classList.contains('light-theme');
-    document.getElementById('theme-label').innerText = isLight ? 'Светлая тема' : 'Тёмная тема';
+    document.getElementById('theme-label').innerText = document.body.classList.contains('light-theme') ? 'Светлая тема' : 'Тёмная тема';
 }
 
-// Умная синхронизация двойных слайдеров
-// Синхронизация ползунков и полей ввода
 function syncRange(type, side) {
     const rMin = document.getElementById(`r-min-${type}`), rMax = document.getElementById(`r-max-${type}`);
     const iMin = document.getElementById(`i-min-${type}`), iMax = document.getElementById(`i-max-${type}`);
     
-    // Предотвращение перекрещивания
-    if (side === 'min' && +rMin.value >= +rMax.value) rMin.value = rMax.value;
-    if (side === 'max' && +rMax.value <= +rMin.value) rMax.value = rMin.value;
+    if (side === 'min' && +rMin.value >= +rMax.value) rMin.value = rMax.value - (+rMin.step);
+    if (side === 'max' && +rMax.value <= +rMin.value) rMax.value = +rMin.value + (+rMax.step);
 
-    // Управление Z-index, чтобы мышка всегда цепляла активный ползунок
-    rMin.style.zIndex = (side === 'min') ? "10" : "5";
-    rMax.style.zIndex = (side === 'max') ? "10" : "5";
+    // Умный Z-index для перекрытия
+    rMin.style.zIndex = (side === 'min') ? "20" : "10";
+    rMax.style.zIndex = (side === 'max') ? "20" : "10";
 
     iMin.value = rMin.value;
     iMax.value = rMax.value;
     debouncedApplyFilters();
 }
 
-// Синхронизация полей ввода с ползунками
 function syncInput(type) {
     const rMin = document.getElementById(`r-min-${type}`), rMax = document.getElementById(`r-max-${type}`);
     const iMin = document.getElementById(`i-min-${type}`), iMax = document.getElementById(`i-max-${type}`);
@@ -185,24 +177,17 @@ function syncInput(type) {
     debouncedApplyFilters();
 }
 
-// Инициализация приложения
 async function init() {
-    // Показать загрузку
-    document.getElementById('catalog').innerHTML = '<div class="text-center py-20 text-xl opacity-60">Загрузка каталога...</div>';
-    
-    try {
     const shapeSel = document.getElementById('f-shape');
     shapeSel.innerHTML = '<option value="">Все формы</option>';
     Object.entries(DIAMOND_CONFIG.s).forEach(([k, v]) => shapeSel.innerHTML += `<option value="${k}">${v}</option>`);
 
-    // Курс валют
     try {
         const res = await fetch('https://open.er-api.com/v6/latest/USD');
         const data = await res.json();
         rate = data.rates.RUB + (DIAMOND_CONFIG.r || 0);
     } catch(e) {}
 
-    // Чтение CSV
     const resp = await fetch('diamonds_lab.csv?v=' + Date.now());
     const text = await resp.text();
     db = text.split('\n').slice(1).map(line => {
@@ -215,7 +200,6 @@ async function init() {
         };
     }).filter(x => x);
 
-    // Авто-настройка границ фильтров
     const ws = db.map(x => x.ct), ps = db.map(x => x.price);
     const setupR = (type, min, max) => {
         const rMin = document.getElementById(`r-min-${type}`), rMax = document.getElementById(`r-max-${type}`);
@@ -229,13 +213,8 @@ async function init() {
     setupR('p', Math.min(...ps), Math.max(...ps));
 
     applyFilters();
-    } catch (error) {
-        console.error('Ошибка загрузки:', error);
-        document.getElementById('catalog').innerHTML = '<div class="text-center py-20 text-red-400">Ошибка загрузки каталога. Проверьте config.js и diamonds_lab.csv</div>';
-    }
 }
 
-// Применение фильтров и сортировки
 function applyFilters() {
     const shape = document.getElementById('f-shape').value;
     const minW = parse(document.getElementById('i-min-w').value), maxW = parse(document.getElementById('i-max-w').value);
@@ -249,16 +228,15 @@ function applyFilters() {
     );
 
     if (sort === 'p-asc') filtered.sort((a,b) => a.price - b.price);
-    if (sort === 'p-desc') filtered.sort((a,b) => b.price - a.price);
-    if (sort === 'w-asc') filtered.sort((a,b) => a.ct - b.ct);
-    if (sort === 'w-desc') filtered.sort((a,b) => b.ct - a.ct);
+    else if (sort === 'p-desc') filtered.sort((a,b) => b.price - a.price);
+    else if (sort === 'w-asc') filtered.sort((a,b) => a.ct - b.ct);
+    else if (sort === 'w-desc') filtered.sort((a,b) => b.ct - a.ct);
 
     document.getElementById('counter').innerHTML = `Найдено: <span style="color:var(--text-main)">${filtered.length.toLocaleString()}</span>`;
     renderNextPage(true);
 }
 
-// Debounced версия для оптимизации
-const debouncedApplyFilters = debounce(applyFilters, 300);
+const debouncedApplyFilters = debounce(applyFilters, 250);
 
 function setView(v) {
     view = v;
@@ -268,72 +246,69 @@ function setView(v) {
     renderNextPage(true);
 }
 
-// Рендеринг следующей страницы товаров
 function renderNextPage(reset = false) {
-    if (isRendering) return; // Предотвращаем множественные рендеры
+    if (isRendering) return;
     isRendering = true;
-    
     const cont = document.getElementById('catalog');
     if (reset) { cont.innerHTML = ''; currentIndex = 0; }
     
     const page = filtered.slice(currentIndex, currentIndex + (DIAMOND_CONFIG.n || 20));
-    const frag = document.createDocumentFragment();
+    let html = '';
     
     page.forEach(d => {
         const video = `${DIAMOND_CONFIG.i.p}${d.sh}${DIAMOND_CONFIG.i.e}`;
         const priceStr = d.price.toLocaleString('ru-RU');
-        const card = document.createElement('div');
-        card.className = 'diamond-card p-4 flex flex-col md:flex-row items-center gap-6';
         
         if (view === 'list') {
-            card.innerHTML = `
-                <div class="w-24 h-24 bg-black/20 relative flex-shrink-0">
-                    <div class="absolute top-0 left-0 bg-stone-800 text-[7px] text-white px-1 z-10">${d.lab}</div>
-                    <video src="${video}" autoplay loop muted playsinline class="w-full h-full object-contain" onerror="this.style.display='none'"></video>
+            html += `
+            <div class="diamond-card p-5 flex flex-col md:flex-row items-center gap-8">
+                <div class="w-28 h-28 bg-black/10 relative flex-shrink-0">
+                    <div class="absolute top-0 left-0 bg-stone-800 text-[8px] text-white px-2 py-0.5 z-10 font-bold uppercase">${d.lab}</div>
+                    <video src="${video}" autoplay loop muted playsinline class="w-full h-full object-contain p-2"></video>
                 </div>
-                <div class="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+                <div class="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-6 items-center">
                     <div>
-                        <div class="serif italic text-lg leading-none">${DIAMOND_CONFIG.s[d.sh] || d.sh}</div>
-                        <div class="text-xl font-light text-white" style="color:var(--text-main)">${d.ct} CT</div>
+                        <div class="serif italic text-xl leading-tight mb-1" style="color:var(--text-main)">${DIAMOND_CONFIG.s[d.sh] || d.sh}</div>
+                        <div class="text-2xl font-light tracking-tighter" style="color:var(--text-main)">${d.ct} CT</div>
                     </div>
-                    <div class="text-[10px] uppercase tracking-tighter opacity-70">
-                        <div>Цвет: <span class="text-white" style="color:var(--text-main)">${d.col}</span></div>
-                        <div>Чистота: <span class="text-white" style="color:var(--text-main)">${d.cla}</span></div>
+                    <div class="text-[10px] uppercase tracking-widest opacity-70 leading-relaxed">
+                        <div>Цвет: <span style="color:var(--text-main)">${d.col}</span></div>
+                        <div>Чистота: <span style="color:var(--text-main)">${d.cla}</span></div>
                     </div>
-                    <div class="text-[10px] uppercase tracking-tighter opacity-70">
-                        <div>Огранка: ${d.cut}</div>
-                        <div>Размер: ${d.s1}x${d.s2}</div>
+                    <div class="text-[10px] uppercase tracking-widest opacity-70 leading-relaxed">
+                        <div>Огранка: <span style="color:var(--text-main)">${d.cut}</span></div>
+                        <div>Sym/Pol: <span style="color:var(--text-main)">${d.sym}/${d.pol}</span></div>
                     </div>
                     <div class="text-right">
-                        <div class="text-lg font-medium text-white mb-1" style="color:var(--text-main)">${priceStr} ₽</div>
-                        <button onclick="contact('${d.id}')" class="text-[8px] border border-stone-700 px-4 py-2 uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="color:var(--text-main)">Запрос</button>
+                        <div class="text-xl font-semibold mb-3" style="color:var(--text-main)">${priceStr} ₽</div>
+                        <button onclick="contact('${d.id}')" class="text-[9px] border border-stone-800 px-6 py-2 uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all" style="color:var(--text-main)">Запросить</button>
                     </div>
                 </div>
-            `;
+            </div>`;
         } else {
-            card.className = 'diamond-card p-5 flex flex-col';
-            card.innerHTML = `
-                <div class="aspect-square bg-black/20 mb-4 relative overflow-hidden">
-                    <div class="absolute top-2 left-2 bg-stone-800 text-[8px] text-white px-2 py-0.5 z-10 border border-white/10">${d.lab}</div>
+            html += `
+            <div class="diamond-card p-6 flex flex-col">
+                <div class="aspect-square bg-black/10 mb-5 relative overflow-hidden">
+                    <div class="absolute top-3 left-3 bg-stone-800 text-[8px] text-white px-2 py-1 z-10 font-bold uppercase">${d.lab}</div>
                     <video src="${video}" autoplay loop muted playsinline class="w-full h-full object-contain p-4"></video>
                 </div>
-                <div class="flex justify-between items-baseline mb-3">
+                <div class="flex justify-between items-baseline mb-4">
                     <span class="text-2xl font-light" style="color:var(--text-main)">${d.ct} ct</span>
-                    <span class="text-lg font-medium" style="color:var(--text-main)">${priceStr} ₽</span>
+                    <span class="text-lg font-semibold" style="color:var(--text-main)">${priceStr} ₽</span>
                 </div>
-                <div class="text-[9px] uppercase tracking-widest opacity-60 pb-4 mb-4 border-b" style="border-color: var(--border)">
-                    ${DIAMOND_CONFIG.s[d.sh] || d.sh} • ${d.col} • ${d.cla} • ${d.cut}
+                <div class="text-[10px] uppercase tracking-[0.2em] opacity-60 pb-4 mb-4 border-b" style="border-color: var(--border)">
+                    ${DIAMOND_CONFIG.s[d.sh] || d.sh} • ${d.col} • ${d.cla}
                 </div>
-                <div class="flex justify-between text-[8px] opacity-40 uppercase mb-4">
-                    <span>Sym: ${d.sym}</span><span>Pol: ${d.pol}</span><span>${d.s1}x${d.s2}mm</span>
+                <div class="grid grid-cols-2 gap-y-2 text-[9px] uppercase tracking-widest opacity-50 mb-6">
+                    <span>Cut: ${d.cut}</span><span>Sym: ${d.sym}</span>
+                    <span>Pol: ${d.pol}</span><span>${d.s1}x${d.s2}mm</span>
                 </div>
-                <button onclick="contact('${d.id}')" class="w-full py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="color:var(--text-main)">Запросить</button>
-            `;
+                <button onclick="contact('${d.id}')" class="w-full py-4 border border-stone-800 text-[9px] uppercase tracking-[0.3em] hover:bg-white hover:text-black transition-all" style="color:var(--text-main)">Запросить</button>
+            </div>`;
         }
-        frag.appendChild(card);
     });
     
-    cont.appendChild(frag);
+    cont.insertAdjacentHTML('beforeend', html);
     currentIndex += page.length;
     document.getElementById('more-box').classList.toggle('hidden', currentIndex >= filtered.length);
     isRendering = false;
