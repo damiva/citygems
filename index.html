@@ -4,64 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CityGems — Каталог</title>
-    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Montserrat:wght@200;400;500&display=swap" rel="stylesheet">
     <script src="config.js"></script>
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background-color: #080808; color: #d1d5db; }
+        .serif { font-family: 'Cormorant Garamond', serif; }
+        .diamond-card { background: #0c0c0c; border: 1px solid #1a1a1a; transition: all 0.3s ease; }
+        .diamond-card:hover { border-color: #333; background: #111; }
+        select, input { background: #111 !important; border: 1px solid #222 !important; color: #fff !important; border-radius: 0 !important; }
+        .gold-icon { color: #D4AF37; }
+        .sticky-sidebar { position: sticky; top: 100px; height: fit-content; }
+        .view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+        .view-list { display: flex; flex-direction: column; gap: 1rem; }
+        .active-view { color: #D4AF37 !important; }
+    </style>
 </head>
-<body>
+<body class="min-h-screen">
 
-<header class="header">
-    <div class="container flex-between">
-        <h1 class="logo text-white uppercase font-light">City<span class="serif italic text-stone-500">Gems</span></h1>
-        <div id="stats" class="stats text-[10px] uppercase tracking-widest text-stone-600">Загрузка базы...</div>
-        <button onclick="openContactModal()" class="btn-sm border border-stone-800 px-4 py-2 hover:bg-stone-200 hover:text-black transition-all">Связь</button>
+<header class="border-b border-stone-900 sticky top-0 bg-black/95 backdrop-blur-md z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center">
+        <div class="flex-1">
+            <h1 class="text-xl tracking-[0.3em] font-light uppercase text-white">City<span class="serif italic text-stone-500 lowercase">Gems</span></h1>
+        </div>
+        
+        <div class="flex-1 text-center">
+            <button onclick="openContactModal()" class="text-[9px] border border-stone-800 px-6 py-2 hover:bg-white hover:text-black transition-all uppercase tracking-widest text-white">
+                Связаться с нами
+            </button>
+        </div>
+        
+        <div class="flex-1 flex justify-end gap-5">
+            <button id="btn-list" onclick="changeView('list')" class="text-stone-600 hover:text-white transition-colors flex items-center gap-2 text-[9px] uppercase tracking-widest">
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
+            </button>
+            <button id="btn-grid" onclick="changeView('grid')" class="text-stone-600 hover:text-white transition-colors flex items-center gap-2 text-[9px] uppercase tracking-widest">
+                <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/></svg>
+            </button>
+        </div>
     </div>
 </header>
 
-<div class="main-layout container flex flex-col lg:flex-row">
-    <aside class="sidebar w-full lg:w-72 p-6 border-r border-stone-900 space-y-6">
-        <h2 class="serif text-2xl text-white italic mb-6">Фильтры</h2>
-        <div class="filter-group mb-6">
-            <label class="text-[9px] uppercase tracking-[0.3em] mb-3 block">Огранка</label>
-            <select id="f-shape" onchange="applyFilters()" class="w-full p-3 text-xs uppercase">
-                <option value="">Все формы</option>
-            </select>
-        </div>
-        <div class="filter-group mb-6">
-            <label class="text-[9px] uppercase tracking-[0.3em] mb-3 block">Вес (ct)</label>
-            <div class="flex gap-2">
-                <input type="number" id="f-min-w" step="0.1" placeholder="От" oninput="applyFilters()" class="w-full p-2 text-xs">
-                <input type="number" id="f-max-w" step="0.1" placeholder="До" oninput="applyFilters()" class="w-full p-2 text-xs">
+<div class="max-w-7xl mx-auto flex flex-col lg:flex-row">
+    <aside class="w-full lg:w-72 p-8 border-r border-stone-900 bg-[#080808]">
+        <div class="sticky-sidebar">
+            <h2 class="serif text-3xl text-white italic mb-6">Фильтры</h2>
+            <div class="space-y-6">
+                <div>
+                    <label class="text-[8px] uppercase tracking-[0.3em] text-stone-500 mb-3 block">Огранка</label>
+                    <select id="f-shape" onchange="applyFilters()" class="w-full p-3 text-[10px] uppercase outline-none"></select>
+                </div>
+                <div>
+                    <label class="text-[8px] uppercase tracking-[0.3em] text-stone-500 mb-3 block">Вес (ct)</label>
+                    <div class="flex gap-2">
+                        <input type="number" id="f-min-w" step="0.1" placeholder="От" oninput="applyFilters()" class="w-full p-2 text-xs">
+                        <input type="number" id="f-max-w" step="0.1" placeholder="До" oninput="applyFilters()" class="w-full p-2 text-xs">
+                    </div>
+                </div>
+                <div>
+                    <label class="text-[8px] uppercase tracking-[0.3em] text-stone-500 mb-3 block">Цена до (₽)</label>
+                    <input type="number" id="f-max-p" placeholder="Любая" oninput="applyFilters()" class="w-full p-3 text-xs outline-none">
+                </div>
             </div>
-        </div>
-        <div class="filter-group mb-6">
-            <label class="text-[9px] uppercase tracking-[0.3em] mb-3 block">Цена до ($)</label>
-            <input type="number" id="f-max-p" placeholder="Любая" oninput="applyFilters()" class="w-full p-2 text-xs">
+
+            <div id="stats-counter" class="mt-10 pt-6 border-t border-stone-900 text-[9px] uppercase tracking-[0.2em] text-stone-400 text-right italic">
+                Загрузка...
+            </div>
         </div>
     </aside>
 
-    <main class="content flex-1 p-6">
-        <div id="catalog" class="catalog-grid grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6"></div>
-        <button id="load-more" onclick="renderNextPage()" class="btn-load hidden mx-auto mt-12 px-12 py-4 border border-stone-800 text-[10px] uppercase tracking-widest hover:text-white hover:border-stone-200 transition-all">
-            Показать еще
-        </button>
+    <main class="flex-1 p-6 bg-[#0a0a0a]">
+        <div id="catalog" class="view-list"></div>
+        <div class="mt-12 mb-10 flex justify-center">
+            <button id="load-more" onclick="renderNextPage()" class="hidden border border-stone-800 px-12 py-4 text-[9px] uppercase tracking-[0.3em] text-stone-400 hover:text-white transition-all">
+                Показать еще
+            </button>
+        </div>
     </main>
 </div>
 
-<div id="contact-modal" class="modal fixed inset-0 bg-black/95 z-50 hidden flex items-center justify-center backdrop-blur-md" onclick="closeModal()">
-    <div class="modal-content bg-[#111] p-8 border border-stone-800 max-w-sm w-full text-center" onclick="event.stopPropagation()">
-        <h3 id="modal-msg" class="serif italic text-stone-200 mb-8 uppercase text-[10px] tracking-widest text-center">Связаться с нами</h3>
-        
-        <div id="qr-container" class="hidden">
-            <img id="qr-img" src="" class="qr-code mx-auto mb-4 border-8 border-white w-[180px] h-[180px]">
-            <p class="hint text-[9px] text-stone-600 uppercase">Наведите камеру телефона</p>
-        </div>
-
-        <div id="mobile-ui" class="hidden space-y-4">
-            <a id="link-tg" href="#" class="btn-contact block p-4 border border-stone-800 text-[10px] uppercase tracking-widest">Telegram</a>
-            <a id="link-wa" href="#" class="btn-contact block p-4 border border-stone-800 text-[10px] uppercase tracking-widest">WhatsApp</a>
-        </div>
-        
-        <button onclick="closeModal()" class="btn-close mt-8 text-[9px] uppercase text-stone-700 tracking-widest">Закрыть</button>
+<div id="contact-modal" class="fixed inset-0 bg-black/98 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-xl" onclick="closeModal()">
+    <div class="max-w-md w-full bg-[#0f0f0f] border border-stone-800 p-10 text-center" onclick="event.stopPropagation()">
+        <h3 id="modal-msg" class="serif text-2xl italic text-white mb-6 tracking-wide">Запросить информацию</h3>
+        <div id="qr-container" class="hidden"><img id="qr-img" src="" class="mx-auto mb-6 border-8 border-white w-48 h-48 shadow-2xl"></div>
+        <div id="mobile-ui" class="hidden space-y-4"><a id="link-tg" href="#" class="block py-4 border border-stone-700 text-[10px] uppercase tracking-widest text-white hover:bg-stone-800">Перейти в диалог</a></div>
+        <button onclick="closeModal()" class="mt-8 text-[8px] uppercase text-stone-600 tracking-widest">Назад</button>
     </div>
 </div>
 
@@ -69,82 +96,137 @@
 let db = []; 
 let filtered = []; 
 let currentIndex = 0;
+let exchangeRate = 0;
+let currentView = 'list';
 
-// Утилита для парсинга чисел (замена запятой на точку)
-const parseNum = (s) => parseFloat(String(s).replace(',', '.')) || 0;
+const shapeVisuals = { 'RD': '💎', 'OV': '🥚', 'PR': '⬛', 'EM': '▮', 'PS': '💧', 'RA': '◼️', 'CU': '▢', 'MQ': '👁', 'AS': '💠', 'HT': '🤍' };
+const parseNum = (s) => parseFloat(String(s || '').replace(',', '.')) || 0;
+
+function changeView(type) {
+    currentView = type;
+    document.getElementById('catalog').className = type === 'grid' ? 'view-grid' : 'view-list';
+    document.getElementById('btn-grid').classList.toggle('active-view', type === 'grid');
+    document.getElementById('btn-list').classList.toggle('active-view', type === 'list');
+    renderNextPage(true);
+}
+
+async function fetchRate() {
+    try {
+        const res = await fetch('https://open.er-api.com/v6/latest/USD');
+        const data = await res.json();
+        exchangeRate = data.rates.RUB + (DIAMOND_CONFIG.r || 0);
+    } catch (e) { exchangeRate = 105; }
+}
 
 async function init() {
-    // 1. Заполняем фильтр огранок из DIAMOND_CONFIG.s
+    changeView('list');
     const shapeSelect = document.getElementById('f-shape');
+    shapeSelect.innerHTML = '<option value="">Все огранки</option>';
     Object.entries(DIAMOND_CONFIG.s).forEach(([code, name]) => {
-        shapeSelect.innerHTML += `<option value="${code}">${name}</option>`;
+        shapeSelect.innerHTML += `<option value="${code}">${shapeVisuals[code] || ''} ${name}</option>`;
     });
 
+    await fetchRate();
+
     try {
-        // 2. Загружаем CSV
-        const response = await fetch('diamonds_lab.csv');
+        const response = await fetch('diamonds_lab.csv?v=' + Date.now());
         const text = await response.text();
         const lines = text.split('\n');
         
-        // 3. Парсим CSV вручную (ориентируемся на структуру из файла)
         db = lines.slice(1).map(line => {
             const v = line.split(';');
             if (v.length < 12) return null;
             return {
-                re: v[0],    // Номер сертификата
-                lab: v[1],   // Лаборатория
-                shape: v[2], // Огранка (код)
-                ct: parseNum(v[3]), // Каратность
-                col: v[4],   // Цвет
-                cla: v[5],   // Чистота
-                cut: v[6],   // Огранка (качество)
-                usd: parseNum(v[12]) // Цена
+                re: v[0], lab: v[1], shape: v[2],
+                ct: v[3].replace(',', '.'), 
+                col: v[4], cla: v[5], cut: v[6],
+                s1: v[9], s2: v[10], s3: v[11],
+                price: Math.ceil(parseNum(v[12]) * exchangeRate)
             };
         }).filter(i => i && i.re);
 
         filtered = [...db];
-        document.getElementById('stats').innerText = `${db.length} камней в наличии`;
+        updateStats();
         renderNextPage(true);
-    } catch (e) { 
-        console.error("Ошибка инициализации:", e); 
-        document.getElementById('stats').innerText = "Ошибка загрузки данных";
-    }
+    } catch (e) { console.error(e); }
+}
+
+function updateStats() {
+    const total = db.length;
+    const found = filtered.length;
+    const statsEl = document.getElementById('stats-counter');
+    statsEl.innerHTML = found === total ? `ВСЕГО: ${total}` : `НАЙДЕНО: <span class="text-white">${found}</span> <span class="text-stone-700">ИЗ ${total}</span>`;
 }
 
 function renderNextPage(reset = false) {
     const container = document.getElementById('catalog');
-    if (reset) { 
-        container.innerHTML = ''; 
-        currentIndex = 0; 
-    }
+    if (reset) { container.innerHTML = ''; currentIndex = 0; }
 
-    const chunk = filtered.slice(currentIndex, currentIndex + DIAMOND_CONFIG.ipp);
+    const chunk = filtered.slice(currentIndex, currentIndex + DIAMOND_CONFIG.n);
+    
     chunk.forEach(i => {
-        // Берем перевод из конфига (DIAMOND_CONFIG.s)
         const shapeName = DIAMOND_CONFIG.s[i.shape] || i.shape;
-        container.innerHTML += `
-            <div class="diamond-card border border-stone-900 p-6 transition-all hover:border-stone-500 hover:bg-[#141414]">
-                <div class="card-head flex justify-between text-[9px] mb-4 uppercase tracking-widest text-stone-600">
-                    <span class="report">${i.lab} ${i.re}</span>
-                    <span class="price text-white">$${Math.ceil(i.usd).toLocaleString()}</span>
-                </div>
-                <div class="card-body py-4 text-center">
-                    <span class="ct text-white text-2xl font-light">${i.ct}</span> <span class="unit text-[10px] text-stone-500 uppercase">ct</span>
-                    <div class="shape text-stone-400 serif italic text-lg mt-1">${shapeName}</div>
-                </div>
-                <div class="card-footer mt-4">
-                    <p class="specs text-[10px] text-center text-stone-500 uppercase tracking-widest mb-6">
-                        ${i.col} / ${i.cla} • ${i.cut}
-                    </p>
-                    <button onclick="openContactModal('${i.re}')" class="btn-card w-full py-2 border border-stone-800 text-[9px] uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all">Запросить</button>
-                </div>
+        const imgPath = `${DIAMOND_CONFIG.i.p}${i.shape}${DIAMOND_CONFIG.i.e}`;
+        
+        const badge = `
+            <div class="absolute top-2 left-2 bg-black border border-stone-800 px-1.5 py-0.5 flex items-center gap-1 z-10">
+                <span class="text-[8px] text-white font-bold uppercase">${i.lab.toUpperCase()}</span>
+                <svg class="w-2 h-2 gold-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293l-4 4a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L9 10.586l3.293-3.293a1 1 0 011.414 1.414z"/></svg>
             </div>`;
+
+        if (currentView === 'list') {
+            container.innerHTML += `
+                <div class="diamond-card p-4 flex flex-row items-center gap-6">
+                    <div class="w-20 h-20 bg-[#111] flex-shrink-0 relative">
+                        ${badge}
+                        <img src="${imgPath}" onerror="this.style.opacity='0'" class="w-full h-full object-contain p-2">
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center mb-1">
+                            <div class="flex items-center gap-3">
+                                <span class="serif italic text-lg text-stone-400">${shapeName}</span>
+                                <span class="text-xl text-white font-light tracking-tight">${i.ct} ct</span>
+                            </div>
+                            <span class="text-lg font-medium text-white tracking-tighter">${i.price.toLocaleString()} ₽</span>
+                        </div>
+                        <div class="text-[10px] uppercase tracking-[0.1em] text-stone-500">
+                            Цвет: <span class="text-stone-300 mr-2">${i.col}</span>
+                            Чистота: <span class="text-stone-300 mr-2">${i.cla}</span>
+                            Огранка: <span class="text-stone-300 mr-2">${i.cut}</span>
+                            Размер: <span class="text-stone-300 font-mono">${i.s1}×${i.s2}×${i.s3} мм</span>
+                        </div>
+                    </div>
+                    <button onclick="openContactModal('${i.re}')" class="px-6 py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Запрос</button>
+                </div>`;
+        } else {
+            container.innerHTML += `
+                <div class="diamond-card p-4 flex flex-col">
+                    <div class="aspect-square bg-[#111] mb-4 relative overflow-hidden">
+                        ${badge}
+                        <img src="${imgPath}" onerror="this.style.opacity='0'" class="w-full h-full object-contain p-4">
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-baseline mb-2">
+                                <div class="flex flex-col">
+                                    <span class="serif italic text-sm text-stone-400">${shapeName}</span>
+                                    <span class="text-xl text-white font-light tracking-tight">${i.ct} ct</span>
+                                </div>
+                                <span class="text-lg text-white font-medium tracking-tighter">${i.price.toLocaleString()} ₽</span>
+                            </div>
+                            <div class="space-y-1 text-[9px] uppercase tracking-widest text-stone-500 pt-3 border-t border-white/5">
+                                <div class="flex justify-between"><span>Цвет/Чистота</span><span class="text-stone-300">${i.col}/${i.cla}</span></div>
+                                <div class="flex justify-between"><span>Размер</span><span class="text-stone-300">${i.s1}×${i.s2}×${i.s3}</span></div>
+                            </div>
+                        </div>
+                        <button onclick="openContactModal('${i.re}')" class="mt-6 w-full py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all">Запросить</button>
+                    </div>
+                </div>`;
+        }
     });
     
     currentIndex += chunk.length;
-    // Кнопка "Показать еще" управляется из конфига (ipp)
     const btnLoad = document.getElementById('load-more');
-    btnLoad.classList.toggle('hidden', currentIndex >= filtered.length);
     btnLoad.style.display = currentIndex >= filtered.length ? 'none' : 'block';
 }
 
@@ -152,48 +234,36 @@ function applyFilters() {
     const s = document.getElementById('f-shape').value;
     const minW = parseNum(document.getElementById('f-min-w').value);
     const maxW = parseNum(document.getElementById('f-max-w').value) || 999;
-    const maxP = parseNum(document.getElementById('f-max-p').value) || 9999999;
+    const maxP = parseNum(document.getElementById('f-max-p').value) || 99999999;
 
     filtered = db.filter(i => 
-        (!s || i.shape === s) && 
-        (i.ct >= minW && i.ct <= maxW) && 
-        (i.usd <= maxP)
+        (!s || i.shape === s) && (parseNum(i.ct) >= minW && parseNum(i.ct) <= maxW) && (i.price <= maxP)
     );
-    
-    document.getElementById('stats').innerText = `Найдено ${filtered.length}`;
+    updateStats();
     renderNextPage(true);
 }
 
 function openContactModal(id = "") {
     const modal = document.getElementById('contact-modal');
-    const isMob = /Android|iPhone/i.test(navigator.userAgent);
-    
-    // Декодируем ник и телефон из твоего конфига (c.t и c.w)
-    const tgNick = atob(DIAMOND_CONFIG.c.t);
-    const waPhone = atob(DIAMOND_CONFIG.c.w);
-    const tgUrl = `https://t.me/${tgNick}`;
-    
+    const isMob = /Android|iPhone|iPad/i.test(navigator.userAgent);
+    const tgUrl = `https://t.me/${atob(DIAMOND_CONFIG.c.t)}`;
     modal.classList.remove('hidden');
-    if (id) document.getElementById('modal-msg').innerText = `Запрос по камню ${id}`;
-
+    if (id) document.getElementById('modal-msg').innerText = `Камень #${id}`;
     if (isMob) {
         document.getElementById('mobile-ui').classList.remove('hidden');
         document.getElementById('link-tg').href = tgUrl;
-        document.getElementById('link-wa').href = `https://wa.me/${waPhone}`;
     } else {
         document.getElementById('qr-container').classList.remove('hidden');
-        document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(tgUrl)}`;
+        document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(tgUrl)}`;
     }
 }
 
 function closeModal() {
-    const modal = document.getElementById('contact-modal');
-    modal.classList.add('hidden');
+    document.getElementById('contact-modal').classList.add('hidden');
     document.getElementById('mobile-ui').classList.add('hidden');
     document.getElementById('qr-container').classList.add('hidden');
 }
 
-// Запуск приложения
 init();
 </script>
 </body>
