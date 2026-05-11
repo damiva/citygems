@@ -18,6 +18,24 @@
         .view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
         .view-list { display: flex; flex-direction: column; gap: 1rem; }
         .active-view { color: #D4AF37 !important; }
+
+        /* Стили для слайдеров */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 2px;
+            background: #222;
+            outline: none;
+            margin: 15px 0;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #D4AF37;
+            cursor: pointer;
+            border-radius: 50%;
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -27,18 +45,16 @@
         <div class="flex-1">
             <h1 class="text-xl tracking-[0.3em] font-light uppercase text-white">City<span class="serif italic text-stone-500 lowercase">Gems</span></h1>
         </div>
-        
         <div class="flex-1 text-center">
             <button onclick="openContactModal()" class="text-[9px] border border-stone-800 px-6 py-2 hover:bg-white hover:text-black transition-all uppercase tracking-widest text-white">
                 Связаться с нами
             </button>
         </div>
-        
         <div class="flex-1 flex justify-end gap-5">
-            <button id="btn-list" onclick="changeView('list')" class="text-stone-600 hover:text-white transition-colors flex items-center gap-2 text-[9px] uppercase tracking-widest">
+            <button id="btn-list" onclick="changeView('list')" class="text-stone-600 hover:text-white transition-colors">
                 <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
             </button>
-            <button id="btn-grid" onclick="changeView('grid')" class="text-stone-600 hover:text-white transition-colors flex items-center gap-2 text-[9px] uppercase tracking-widest">
+            <button id="btn-grid" onclick="changeView('grid')" class="text-stone-600 hover:text-white transition-colors">
                 <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/></svg>
             </button>
         </div>
@@ -49,25 +65,29 @@
     <aside class="w-full lg:w-72 p-8 border-r border-stone-900 bg-[#080808]">
         <div class="sticky-sidebar">
             <h2 class="serif text-3xl text-white italic mb-6">Фильтры</h2>
-            <div class="space-y-6">
+            <div class="space-y-8">
                 <div>
                     <label class="text-[8px] uppercase tracking-[0.3em] text-stone-500 mb-3 block">Огранка</label>
                     <select id="f-shape" onchange="applyFilters()" class="w-full p-3 text-[10px] uppercase outline-none"></select>
                 </div>
+
                 <div>
                     <label class="text-[8px] uppercase tracking-[0.3em] text-stone-500 mb-3 block">Вес (ct)</label>
+                    <input type="range" id="r-max-w" min="0.3" max="10" step="0.1" value="10" oninput="syncFilters('w')">
                     <div class="flex gap-2">
                         <input type="number" id="f-min-w" step="0.1" placeholder="От" oninput="applyFilters()" class="w-full p-2 text-xs">
                         <input type="number" id="f-max-w" step="0.1" placeholder="До" oninput="applyFilters()" class="w-full p-2 text-xs">
                     </div>
                 </div>
+
                 <div>
                     <label class="text-[8px] uppercase tracking-[0.3em] text-stone-500 mb-3 block">Цена до (₽)</label>
+                    <input type="range" id="r-max-p" min="10000" max="5000000" step="10000" value="5000000" oninput="syncFilters('p')">
                     <input type="number" id="f-max-p" placeholder="Любая" oninput="applyFilters()" class="w-full p-3 text-xs outline-none">
                 </div>
             </div>
 
-            <div id="stats-counter" class="mt-10 pt-6 border-t border-stone-900 text-[9px] uppercase tracking-[0.2em] text-stone-400 text-right italic">
+            <div id="stats-counter" class="mt-10 pt-6 border-t border-stone-900 text-[9px] uppercase tracking-[0.2em] text-stone-400 text-right italic font-medium">
                 Загрузка...
             </div>
         </div>
@@ -85,9 +105,9 @@
 
 <div id="contact-modal" class="fixed inset-0 bg-black/98 z-[100] hidden flex items-center justify-center p-6 backdrop-blur-xl" onclick="closeModal()">
     <div class="max-w-md w-full bg-[#0f0f0f] border border-stone-800 p-10 text-center" onclick="event.stopPropagation()">
-        <h3 id="modal-msg" class="serif text-2xl italic text-white mb-6 tracking-wide">Запросить информацию</h3>
+        <h3 id="modal-msg" class="serif text-2xl italic text-white mb-6">Запросить информацию</h3>
         <div id="qr-container" class="hidden"><img id="qr-img" src="" class="mx-auto mb-6 border-8 border-white w-48 h-48 shadow-2xl"></div>
-        <div id="mobile-ui" class="hidden space-y-4"><a id="link-tg" href="#" class="block py-4 border border-stone-700 text-[10px] uppercase tracking-widest text-white hover:bg-stone-800">Перейти в диалог</a></div>
+        <div id="mobile-ui" class="hidden space-y-4"><a id="link-tg" href="#" class="block py-4 border border-stone-700 text-[10px] uppercase text-white tracking-widest hover:bg-stone-800">Перейти в диалог</a></div>
         <button onclick="closeModal()" class="mt-8 text-[8px] uppercase text-stone-600 tracking-widest">Назад</button>
     </div>
 </div>
@@ -101,6 +121,16 @@ let currentView = 'list';
 
 const shapeVisuals = { 'RD': '💎', 'OV': '🥚', 'PR': '⬛', 'EM': '▮', 'PS': '💧', 'RA': '◼️', 'CU': '▢', 'MQ': '👁', 'AS': '💠', 'HT': '🤍' };
 const parseNum = (s) => parseFloat(String(s || '').replace(',', '.')) || 0;
+
+// Синхронизация слайдеров и текстовых полей
+function syncFilters(type) {
+    if (type === 'w') {
+        document.getElementById('f-max-w').value = document.getElementById('r-max-w').value;
+    } else if (type === 'p') {
+        document.getElementById('f-max-p').value = document.getElementById('r-max-p').value;
+    }
+    applyFilters();
+}
 
 function changeView(type) {
     currentView = type;
@@ -145,6 +175,14 @@ async function init() {
             };
         }).filter(i => i && i.re);
 
+        // Настройка макс. значений слайдеров под базу данных
+        const maxCt = Math.ceil(Math.max(...db.map(i => parseNum(i.ct))));
+        const maxPr = Math.ceil(Math.max(...db.map(i => i.price)));
+        document.getElementById('r-max-w').max = maxCt;
+        document.getElementById('r-max-w').value = maxCt;
+        document.getElementById('r-max-p').max = maxPr;
+        document.getElementById('r-max-p').value = maxPr;
+
         filtered = [...db];
         updateStats();
         renderNextPage(true);
@@ -152,10 +190,12 @@ async function init() {
 }
 
 function updateStats() {
-    const total = db.length;
-    const found = filtered.length;
+    const totalStr = db.length.toLocaleString('ru-RU');
+    const foundStr = filtered.length.toLocaleString('ru-RU');
     const statsEl = document.getElementById('stats-counter');
-    statsEl.innerHTML = found === total ? `ВСЕГО: ${total}` : `НАЙДЕНО: <span class="text-white">${found}</span> <span class="text-stone-700">ИЗ ${total}</span>`;
+    statsEl.innerHTML = filtered.length === db.length 
+        ? `ВСЕГО: ${totalStr}` 
+        : `НАЙДЕНО: <span class="text-white">${foundStr}</span> <span class="text-stone-700">ИЗ ${totalStr}</span>`;
 }
 
 function renderNextPage(reset = false) {
@@ -167,6 +207,7 @@ function renderNextPage(reset = false) {
     chunk.forEach(i => {
         const shapeName = DIAMOND_CONFIG.s[i.shape] || i.shape;
         const imgPath = `${DIAMOND_CONFIG.i.p}${i.shape}${DIAMOND_CONFIG.i.e}`;
+        const priceStr = i.price.toLocaleString('ru-RU');
         
         const badge = `
             <div class="absolute top-2 left-2 bg-black border border-stone-800 px-1.5 py-0.5 flex items-center gap-1 z-10">
@@ -187,7 +228,7 @@ function renderNextPage(reset = false) {
                                 <span class="serif italic text-lg text-stone-400">${shapeName}</span>
                                 <span class="text-xl text-white font-light tracking-tight">${i.ct} ct</span>
                             </div>
-                            <span class="text-lg font-medium text-white tracking-tighter">${i.price.toLocaleString()} ₽</span>
+                            <span class="text-lg font-medium text-white tracking-tighter">${priceStr} ₽</span>
                         </div>
                         <div class="text-[10px] uppercase tracking-[0.1em] text-stone-500">
                             Цвет: <span class="text-stone-300 mr-2">${i.col}</span>
@@ -212,7 +253,7 @@ function renderNextPage(reset = false) {
                                     <span class="serif italic text-sm text-stone-400">${shapeName}</span>
                                     <span class="text-xl text-white font-light tracking-tight">${i.ct} ct</span>
                                 </div>
-                                <span class="text-lg text-white font-medium tracking-tighter">${i.price.toLocaleString()} ₽</span>
+                                <span class="text-lg text-white font-medium tracking-tighter">${priceStr} ₽</span>
                             </div>
                             <div class="space-y-1 text-[9px] uppercase tracking-widest text-stone-500 pt-3 border-t border-white/5">
                                 <div class="flex justify-between"><span>Цвет/Чистота</span><span class="text-stone-300">${i.col}/${i.cla}</span></div>
@@ -234,7 +275,7 @@ function applyFilters() {
     const s = document.getElementById('f-shape').value;
     const minW = parseNum(document.getElementById('f-min-w').value);
     const maxW = parseNum(document.getElementById('f-max-w').value) || 999;
-    const maxP = parseNum(document.getElementById('f-max-p').value) || 99999999;
+    const maxP = parseNum(document.getElementById('f-max-p').value) || 999999999;
 
     filtered = db.filter(i => 
         (!s || i.shape === s) && (parseNum(i.ct) >= minW && parseNum(i.ct) <= maxW) && (i.price <= maxP)
@@ -260,8 +301,6 @@ function openContactModal(id = "") {
 
 function closeModal() {
     document.getElementById('contact-modal').classList.add('hidden');
-    document.getElementById('mobile-ui').classList.add('hidden');
-    document.getElementById('qr-container').classList.add('hidden');
 }
 
 init();
