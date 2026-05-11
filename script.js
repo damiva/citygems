@@ -3,8 +3,13 @@ let db = [], filtered = [], currentIndex = 0, rate = 105, view = 'list', isRende
 const parse = (v) => parseFloat(String(v || '').replace(',', '.')) || 0;
 
 function toggleTheme() {
-    document.body.classList.toggle('light-theme');
-    document.getElementById('theme-label').innerText = document.body.classList.contains('light-theme') ? 'Светлая тема' : 'Тёмная тема';
+    const isLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    updateThemeButton(isLight);
+}
+
+function updateThemeButton(isLight) {
+    document.getElementById('theme-label').innerText = isLight ? 'Тёмная тема' : 'Светлая тема';
 }
 
 function syncRange(type, side) {
@@ -38,7 +43,14 @@ function syncInput(type) {
 }
 
 async function init() {
-    // Подгрузка форм из конфига
+    const savedTheme = localStorage.getItem('theme');
+    if (!savedTheme || savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        updateThemeButton(true);
+    } else {
+        document.body.classList.remove('light-theme');
+        updateThemeButton(false);
+    }    // Подгрузка форм из конфига
     const shapeSel = document.getElementById('f-shape');
     shapeSel.innerHTML = '<option value="">Все формы</option>';
     Object.entries(DIAMOND_CONFIG.s).forEach(([k, v]) => shapeSel.innerHTML += `<option value="${k}">${v}</option>`);
@@ -97,7 +109,7 @@ function applyFilters() {
     else if (sort === 'w-asc') filtered.sort((a,b) => a.ct - b.ct);
     else if (sort === 'w-desc') filtered.sort((a,b) => b.ct - a.ct);
 
-    document.getElementById('counter').innerHTML = `Найдено: <span style="color:var(--text-main)">${filtered.length.toLocaleString()}</span>`;
+    document.getElementById('counter').innerHTML = `Найдено: <span style="color:var(--text-main)">${filtered.length.toLocaleString()}</span> из <span style="opacity:0.5">${db.length.toLocaleString()}</span>`;
     renderNextPage(true);
 }
 
@@ -121,12 +133,13 @@ function renderNextPage(reset = false) {
     page.forEach(d => {
         const video = `${DIAMOND_CONFIG.i.p}${d.sh}${DIAMOND_CONFIG.i.e}`;
         const priceStr = d.price.toLocaleString('ru-RU');
+        const labBadge = `<div class="absolute top-0 left-0 bg-stone-800 text-[8px] text-white px-2 py-0.5 z-10 font-bold uppercase flex items-center"><span class="verified-icon"></span>${d.lab}</div>`;
         
         if (view === 'list') {
             html += `
             <div class="diamond-card p-5 flex flex-col md:flex-row items-center gap-8">
                 <div class="w-24 h-24 bg-black/10 relative flex-shrink-0">
-                    <div class="absolute top-0 left-0 bg-stone-800 text-[8px] text-white px-2 py-0.5 z-10 font-bold uppercase">${d.lab}</div>
+                    ${labBadge}
                     <video src="${video}" autoplay loop muted playsinline class="w-full h-full object-contain"></video>
                 </div>
                 <div class="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-6 items-center">
@@ -139,8 +152,8 @@ function renderNextPage(reset = false) {
                         <div>Чистота: <span style="color:var(--text-main)">${d.cla}</span></div>
                     </div>
                     <div class="text-[10px] uppercase tracking-widest opacity-70">
-                        <div>Cut/Sym: ${d.cut}/${d.sym}</div>
-                        <div>Pol: ${d.pol}</div>
+                        <div>Огранка: <span style="color:var(--text-main)">${d.cut}</span></div>
+                        <div>Сим/Пол: <span style="color:var(--text-main)">${d.sym}/${d.pol}</span></div>
                     </div>
                     <div class="text-right">
                         <div class="text-xl font-bold mb-2" style="color:var(--text-main)">${priceStr} ₽</div>
@@ -149,10 +162,11 @@ function renderNextPage(reset = false) {
                 </div>
             </div>`;
         } else {
+            // Сетку обновляем аналогично (labBadge и русский перевод)
             html += `
             <div class="diamond-card p-6 flex flex-col">
                 <div class="aspect-square bg-black/10 mb-5 relative overflow-hidden">
-                    <div class="absolute top-3 left-3 bg-stone-800 text-[8px] text-white px-2 py-1 z-10 font-bold uppercase">${d.lab}</div>
+                    ${labBadge.replace('top-0 left-0', 'top-3 left-3')}
                     <video src="${video}" autoplay loop muted playsinline class="w-full h-full object-contain p-4"></video>
                 </div>
                 <div class="flex justify-between items-baseline mb-4">
@@ -160,11 +174,13 @@ function renderNextPage(reset = false) {
                     <span class="text-lg font-bold" style="color:var(--text-main)">${priceStr} ₽</span>
                 </div>
                 <div class="text-[10px] uppercase tracking-widest opacity-60 pb-3 mb-4 border-b" style="border-color: var(--border)">
-                    ${DIAMOND_CONFIG.s[d.sh] || d.sh} • ${d.col} • ${d.cla}
+                    ${DIAMOND_CONFIG.s[d.sh] || d.sh} • <span style="color:var(--text-main)">${d.col}</span> • <span style="color:var(--text-main)">${d.cla}</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-[9px] uppercase tracking-widest opacity-50 mb-6">
-                    <span>Cut: ${d.cut}</span><span>Sym: ${d.sym}</span>
-                    <span>Pol: ${d.pol}</span><span>${d.s1}x${d.s2}mm</span>
+                    <span>Огр: <span style="color:var(--text-main)">${d.cut}</span></span>
+                    <span>Сим: <span style="color:var(--text-main)">${d.sym}</span></span>
+                    <span>Пол: <span style="color:var(--text-main)">${d.pol}</span></span>
+                    <span>${d.s1}x${d.s2}мм</span>
                 </div>
                 <button onclick="contact('${d.id}')" class="w-full py-4 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="color:var(--text-main)">Запросить</button>
             </div>`;

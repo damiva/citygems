@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="config.js"></script>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen light-theme">
 
 <header class="header-main">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -19,15 +19,15 @@
 
         <div class="header-controls">
             <button onclick="toggleTheme()" class="theme-toggle">
-                <span id="theme-label">Тёмная тема</span>
+                <span id="theme-label">Светлая тема</span>
             </button>
-            
+
             <select id="sort-order" onchange="applyFilters()" class="sort-select">
                 <option value="none">Сортировка</option>
-                <option value="p-asc">Цена: По возрастанию</option>
-                <option value="p-desc">Цена: По убыванию</option>
-                <option value="w-asc">Вес: По возрастанию</option>
-                <option value="w-desc">Вес: По убыванию</option>
+                <option value="p-asc">Цена ↑</option>
+                <option value="p-desc">Цена ↓</option>
+                <option value="w-asc">Вес ↑</option>
+                <option value="w-desc">Вес ↓</option>
             </select>
 
             <div class="view-switch">
