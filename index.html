@@ -13,7 +13,9 @@
 
 <header class="header-main">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        <img src="/img/cgi.png" onclick="navigate('page-home')" class="cursor-pointer">
+        <div class="logo cursor-pointer" onclick="location.reload()">
+            <img id="logo-img" src="/img/sgb.png" alt="CityGems" style="height: 40px; width: auto;">
+        </div>
 
         <nav class="nav-menu hidden md:flex">
             <button onclick="navigate('page-home')" class="nav-link active">Главная</button>

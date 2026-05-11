@@ -41,6 +41,10 @@ function toggleTheme() {
 
 function updateThemeButton(isLight) {
     document.getElementById('theme-label').innerText = isLight ? 'Тёмная тема' : 'Светлая тема';
+    const logoImg = document.getElementById('logo-img');
+    if (logoImg) {
+        logoImg.src = isLight ? '/img/sgb.png' : '/img/sgw.png';
+    }
 }
 
 function syncRange(type, side) {
