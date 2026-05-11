@@ -16,7 +16,7 @@ const DIAMOND_CONFIG = {
         w: "Nzk4NTc3NzY2NTU=",
         m: "aXJpbmE="
     },
-    i: { p: "/img/", e: ".webm" },
+    i: { p: "/img/", e: ".webp" },
     n: 20, // Количество позиций на странице
     r: 2.5 // Надбавка на курсы валют
 };
