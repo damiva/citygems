@@ -7,12 +7,53 @@ async function loadPageContent(pageId, fileName) {
         const response = await fetch(fileName);
         if (response.ok) {
             container.innerHTML = await response.text();
+            // Обязательно вызываем расшифровку здесь!
+            if (typeof decodePrivateData === 'function') {
+                decodePrivateData();
+            }
         }
     } catch (err) {
-        console.error("Ошибка загрузки:", err);
+        console.error("Error loading content:", err);
     }
 }
+function decodePrivateData() {
+    // Ищем все элементы, у которых есть хотя бы один из наших атрибутов
+    const selector = '[data-text], [data-link], [data-qre], [data-qrt]';
+    document.querySelectorAll(selector).forEach(el => {
+        try {
+            // 1. Расшифровка текста
+            if (el.dataset.text) {
+                el.innerHTML = decodeURIComponent(escape(atob(el.dataset.text)));
+                // Удаляем атрибут после обработки, чтобы не расшифровывать повторно
+                delete el.dataset.text; 
+            }
 
+            // 2. Расшифровка ссылки (только для <a>)
+            if (el.tagName === 'A' && el.dataset.link) {
+                el.href = decodeURIComponent(escape(atob(el.dataset.link)));
+                delete el.dataset.link;
+            }
+
+            // 3. Обработка QR-кода
+            const qrSource = el.dataset.qre || el.dataset.qrt;
+            if (qrSource) {
+                let qrData = qrSource;
+                if (el.dataset.qre) {
+                    qrData = decodeURIComponent(escape(atob(qrData)));
+                }
+                
+                const qrUrl = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(qrData)}`;
+                el.innerHTML = `<img src="${qrUrl}" alt="QR" class="mx-auto rounded-lg">`;
+                
+                // Чистим за собой
+                delete el.dataset.qre;
+                delete el.dataset.qrt;
+            }
+        } catch (e) {
+            console.error("Ошибка обработки данных:", e);
+        }
+    });
+}
 // 2. Функция навигации по сайту
 function navigate(pageId) {
     // Прячем все секции
@@ -40,11 +81,10 @@ function toggleTheme() {
 }
 
 function updateThemeButton(isLight) {
-    document.getElementById('theme-label').innerText = isLight ? 'Тёмная тема' : 'Светлая тема';
+    const label = document.getElementById('theme-label');
     const logoImg = document.getElementById('logo-img');
-    if (logoImg) {
-        logoImg.src = isLight ? '/img/sgb.png' : '/img/sgw.png';
-    }
+    if (label) label.innerText = isLight ? 'Тёмная тема' : 'Светлая тема';
+    if (logoImg) logoImg.src = isLight ? '/img/сgb.png' : '/img/сgw.png';
 }
 
 function syncRange(type, side) {
