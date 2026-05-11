@@ -23,7 +23,7 @@
         /* Слайдеры */
         .range-slider { position: relative; width: 100%; height: 30px; margin-bottom: 5px; }
         .range-slider input[type="range"] {
-            position: absolute; width: 100%; pointer-events: none; -webkit-appearance: none; 
+            position: absolute; width: 100%; pointer-events: none; appearance: none; -webkit-appearance: none; 
             z-index: 2; height: 10px; opacity: 0; background: none; top: 10px;
         }
         .range-slider input[type="range"]::-webkit-slider-thumb {
@@ -38,6 +38,9 @@
         .active-view { color: var(--accent) !important; }
         .view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
         .view-list { display: flex; flex-direction: column; gap: 1rem; }
+        
+        /* Улучшенные стили для карточек */
+        .spec-badge { display: inline-block; padding: 0.25rem 0.75rem; font-size: 7px; background: var(--border); border-radius: 3px; color: var(--text-main); margin-right: 0.5rem; margin-bottom: 0.25rem; text-transform: uppercase; font-weight: 600; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -133,6 +136,26 @@
     </main>
 </div>
 
+<!-- Contact Modal -->
+<div id="contact-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+    <div class="bg-stone-900 border border-stone-700 p-8 max-w-md w-full" style="background-color: var(--card); border-color: var(--border);">
+        <h2 class="serif text-2xl italic mb-4" style="color: var(--text-main);">Запросить камень</h2>
+        <form id="contact-form" onsubmit="submitContact(event)">
+            <input type="hidden" id="modal-diamond-id">
+            <div class="space-y-3 mb-6">
+                <input type="text" placeholder="Ваше имя" class="w-full p-2 text-sm" id="contact-name" required>
+                <input type="email" placeholder="E-mail" class="w-full p-2 text-sm" id="contact-email" required>
+                <input type="tel" placeholder="Телефон" class="w-full p-2 text-sm" id="contact-phone" required>
+                <textarea placeholder="Сообщение" class="w-full p-2 text-sm h-20" id="contact-message" required></textarea>
+            </div>
+            <div class="flex gap-4">
+                <button type="submit" class="flex-1 py-2 bg-white text-black text-[9px] uppercase font-medium tracking-widest hover:bg-gray-200">Отправить</button>
+                <button type="button" onclick="closeContactModal()" class="flex-1 py-2 border border-stone-600 text-[9px] uppercase tracking-widest" style="border-color: var(--border); color: var(--text-main);">Отмена</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 let db = [], filtered = [], currentIndex = 0, exchangeRate = 105, currentView = 'list';
 const parseNum = (s) => parseFloat(String(s || '').replace(',', '.')) || 0;
@@ -186,46 +209,66 @@ function syncInputs(type) {
 
 async function init() {
     changeView('list');
-    const shapeSelect = document.getElementById('f-shape');
-    shapeSelect.innerHTML = '<option value="">Все огранки</option>';
-    Object.entries(DIAMOND_CONFIG.s).forEach(([code, name]) => shapeSelect.innerHTML += `<option value="${code}">${name}</option>`);
-
     try {
-        const res = await fetch('https://open.er-api.com/v6/latest/USD');
-        const data = await res.json();
-        exchangeRate = data.rates.RUB + (DIAMOND_CONFIG.r || 0);
-    } catch(e) {}
+        const shapeSelect = document.getElementById('f-shape');
+        shapeSelect.innerHTML = '<option value="">Все огранки</option>';
+        Object.entries(DIAMOND_CONFIG.s).forEach(([code, name]) => shapeSelect.innerHTML += `<option value="${code}">${name}</option>`);
 
-    const response = await fetch('diamonds_lab.csv?v=' + Date.now());
-    const text = await response.text();
-    db = text.split('\n').slice(1).map(line => {
-        const v = line.split(';');
-        if (v.length < 12) return null;
-        return {
-            re: v[0], lab: v[1], shape: v[2], ct: v[3].replace(',', '.'), 
-            col: v[4], cla: v[5], cut: v[6], sym: v[7], pol: v[8],
-            s1: v[9], s2: v[10], s3: v[11],
-            price: Math.ceil(parseNum(v[12]) * exchangeRate)
+        // Кэш валюты на 24 часа
+        const cachedRate = localStorage.getItem('exchangeRate');
+        const lastRateTime = localStorage.getItem('lastRateTime');
+        const now = Date.now();
+        if (cachedRate && lastRateTime && (now - lastRateTime < 86400000)) {
+            exchangeRate = parseFloat(cachedRate);
+        } else {
+            try {
+                const res = await fetch('https://open.er-api.com/v6/latest/USD');
+                const data = await res.json();
+                exchangeRate = data.rates.RUB + (DIAMOND_CONFIG.r || 0);
+                localStorage.setItem('exchangeRate', exchangeRate);
+                localStorage.setItem('lastRateTime', now);
+            } catch(e) {
+                console.warn('Не удалось загрузить валюту, используется кэшированное значение');
+            }
+        }
+
+        const response = await fetch('diamonds_lab.csv?v=' + Date.now());
+        if (!response.ok) throw new Error('CSV не найден');
+        const text = await response.text();
+        
+        db = text.split('\n').slice(1).map(line => {
+            const v = line.split(';');
+            if (v.length < 13) return null;
+            return {
+                re: v[0], lab: v[1], shape: v[2], ct: v[3].replace(',', '.'), 
+                col: v[4], cla: v[5], cut: v[6], pol: v[7], sym: v[8],
+                s1: v[9], s2: v[10], s3: v[11],
+                price: Math.ceil(parseNum(v[12]) * exchangeRate)
+            };
+        }).filter(i => i);
+
+        if (db.length === 0) throw new Error('Каталог пуст');
+
+        const weights = db.map(i => parseNum(i.ct));
+        const prices = db.map(i => i.price);
+        
+        const setR = (id, min, max) => {
+            const rMin = document.getElementById(`r-min-${id}`), rMax = document.getElementById(`r-max-${id}`);
+            const fMin = document.getElementById(`f-min-${id}`), fMax = document.getElementById(`f-max-${id}`);
+            rMin.min = rMax.min = min; rMin.max = rMax.max = max;
+            rMin.value = min; rMax.value = max;
+            fMin.value = min; fMax.value = max;
+            updateThumbs(id);
         };
-    }).filter(i => i);
 
-    // Вычисляем границы из данных
-    const weights = db.map(i => parseNum(i.ct));
-    const prices = db.map(i => i.price);
-    
-    const setR = (id, min, max) => {
-        const rMin = document.getElementById(`r-min-${id}`), rMax = document.getElementById(`r-max-${id}`);
-        const fMin = document.getElementById(`f-min-${id}`), fMax = document.getElementById(`f-max-${id}`);
-        rMin.min = rMax.min = min; rMin.max = rMax.max = max;
-        rMin.value = min; rMax.value = max;
-        fMin.value = min; fMax.value = max;
-        updateThumbs(id);
-    };
+        setR('w', Math.min(...weights), Math.max(...weights));
+        setR('p', Math.min(...prices), Math.max(...prices));
 
-    setR('w', Math.min(...weights), Math.max(...weights));
-    setR('p', Math.min(...prices), Math.max(...prices));
-
-    applyFiltersAndSort();
+        applyFiltersAndSort();
+    } catch(error) {
+        console.error('Ошибка инициализации:', error);
+        document.getElementById('catalog').innerHTML = `<div class="text-center py-20" style="color: var(--text-main);"><p>⚠️ Ошибка загрузки</p><p class="text-xs opacity-60 mt-2">Проверьте наличие config.js и diamonds_lab.csv</p></div>`;
+    }
 }
 
 function applyFiltersAndSort() {
@@ -265,70 +308,111 @@ function renderNextPage(reset = false) {
     if (reset) { container.innerHTML = ''; currentIndex = 0; }
     
     const chunk = filtered.slice(currentIndex, currentIndex + DIAMOND_CONFIG.n);
+    const fragment = document.createDocumentFragment();
+    
     chunk.forEach(i => {
         const img = `${DIAMOND_CONFIG.i.p}${i.shape}${DIAMOND_CONFIG.i.e}`;
         const name = DIAMOND_CONFIG.s[i.shape] || i.shape;
         const price = i.price.toLocaleString('ru-RU');
         const badge = `<div class="absolute top-2 left-2 bg-black/80 backdrop-blur px-2 py-0.5 text-[7px] text-white font-bold uppercase z-10 border border-white/10">${i.lab}</div>`;
 
+        const div = document.createElement('div');
+        div.className = 'diamond-card p-5';
+        
         if (currentView === 'list') {
-            container.innerHTML += `
-            <div class="diamond-card p-5 flex flex-row items-center gap-8">
-                <div class="w-24 h-24 bg-stone-500/5 relative flex-shrink-0">
+            div.className += ' flex flex-row items-center gap-6';
+            div.innerHTML = `
+                <div class="w-28 h-28 bg-stone-500/5 relative flex-shrink-0 rounded">
                     ${badge}
-                    <video src="${img}" autoplay loop muted playsinline class="w-full h-full object-contain p-2" onerror="this.outerHTML='<div class=p-8>💎</div>'"></video>
+                    <video src="${img}" autoplay loop muted playsinline class="w-full h-full object-contain p-2" onerror="this.outerHTML='<div class=\\"flex items-center justify-center h-full text-3xl\\">💎</div>'"></video>
                 </div>
-                <div class="flex-1">
-                    <div class="flex justify-between items-start mb-2">
+                <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-start mb-3 gap-4">
                         <div>
-                            <span class="serif italic text-xl mr-3" style="color:var(--text-main)">${name}</span>
-                            <span class="text-2xl font-light tracking-tight" style="color:var(--text-main)">${i.ct} ct</span>
+                            <div class="text-sm opacity-60 uppercase tracking-widest mb-1" style="color:var(--text)">ID: <b style="color:var(--text-main)">${i.re}</b></div>
+                            <span class="serif italic text-lg" style="color:var(--accent)">${name}</span>
+                            <span class="text-2xl font-light ml-3" style="color:var(--text-main)">${i.ct} ct</span>
                         </div>
-                        <div class="text-right">
-                            <div class="text-xl font-medium mb-2" style="color:var(--text-main)">${price} ₽</div>
+                        <div class="text-right flex-shrink-0">
+                            <div class="text-xs opacity-60 uppercase mb-1">Цена</div>
+                            <div class="text-xl font-semibold" style="color:var(--accent)">${price} ₽</div>
                         </div>
                     </div>
-                    <div class="text-[10px] uppercase tracking-wider opacity-60 flex flex-wrap gap-x-4 gap-y-1">
-                        <span>Цвет: <b style="color:var(--text-main)">${i.col}</b></span>
-                        <span>Чистота: <b style="color:var(--text-main)">${i.cla}</b></span>
-                        <span>Огранка: <b style="color:var(--text-main)">${i.cut}</b></span>
-                        <span>Размеры: <b style="color:var(--text-main)">${i.s1}×${i.s2}×${i.s3} мм</b></span>
+                    <div class="grid grid-cols-2 gap-2 text-[10px] uppercase tracking-wider mb-3">
+                        <div><span class="opacity-60">Цвет:</span> <b style="color:var(--text-main)">${i.col}</b></div>
+                        <div><span class="opacity-60">Чистота:</span> <b style="color:var(--text-main)">${i.cla}</b></div>
+                        <div><span class="opacity-60">Огранка:</span> <b style="color:var(--text-main)">${i.cut}</b></div>
+                        <div><span class="opacity-60">Полировка:</span> <b style="color:var(--text-main)">${i.pol}</b></div>
+                        <div><span class="opacity-60">Симметрия:</span> <b style="color:var(--text-main)">${i.sym}</b></div>
+                        <div><span class="opacity-60">Размер:</span> <b style="color:var(--text-main)">${i.s1}×${i.s2}×${i.s3}</b></div>
                     </div>
                 </div>
-                <button onclick="openContactModal('${i.re}')" class="px-8 py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="border-color:var(--border); color:var(--text-main)">Запрос</button>
-            </div>`;
+                <button onclick="openContactModal('${i.re}')" class="px-6 py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all flex-shrink-0 rounded" style="border-color:var(--border); color:var(--text-main)">Запрос</button>
+            `;
         } else {
-            container.innerHTML += `
-            <div class="diamond-card p-5 flex flex-col">
-                <div class="aspect-square bg-stone-500/5 mb-5 relative overflow-hidden">
+            div.className += ' flex flex-col rounded overflow-hidden';
+            div.innerHTML = `
+                <div class="aspect-square bg-stone-500/5 relative overflow-hidden flex items-center justify-center">
                     ${badge}
-                    <video src="${img}" autoplay loop muted playsinline class="w-full h-full object-contain p-4"></video>
+                    <video src="${img}" autoplay loop muted playsinline class="w-full h-full object-contain p-4" onerror="this.outerHTML='<div class=\\"text-6xl\\">💎</div>'"></video>
                 </div>
-                <div class="flex-1 flex flex-col justify-between">
+                <div class="p-4 flex-1 flex flex-col justify-between">
                     <div>
-                        <div class="flex justify-between items-baseline mb-1">
-                            <span class="serif italic text-stone-400 text-sm">${name}</span>
-                            <span class="text-lg font-medium" style="color:var(--text-main)">${price} ₽</span>
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <div class="text-[9px] opacity-50 uppercase tracking-widest mb-1">ID ${i.re}</div>
+                                <div class="serif italic text-sm mb-1" style="color:var(--accent)">${name}</div>
+                                <div class="text-xl font-light" style="color:var(--text-main)">${i.ct} ct</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xs opacity-60 uppercase mb-1">Цена</div>
+                                <div class="font-semibold" style="color:var(--accent)">${price} ₽</div>
+                            </div>
                         </div>
-                        <div class="text-2xl font-light mb-4" style="color:var(--text-main)">${i.ct} ct</div>
-                        <div class="space-y-1 text-[9px] uppercase tracking-widest opacity-50 pt-4 border-t" style="border-color:var(--border)">
-                            <div class="flex justify-between"><span>Цвет/Чистота</span><span style="color:var(--text-main)">${i.col}/${i.cla}</span></div>
-                            <div class="flex justify-between"><span>Качество</span><span style="color:var(--text-main)">${i.cut}</span></div>
-                            <div class="flex justify-between"><span>Размеры</span><span style="color:var(--text-main)">${i.s1}×${i.s2}</span></div>
+                        <div class="border-t mt-3 pt-3" style="border-color:var(--border)">
+                            <div class="grid grid-cols-2 gap-2 text-[8px] uppercase tracking-wider opacity-70">
+                                <div><span class="opacity-60">Цвет:</span><br><b style="color:var(--text-main)">${i.col}</b></div>
+                                <div><span class="opacity-60">Чистота:</span><br><b style="color:var(--text-main)">${i.cla}</b></div>
+                                <div><span class="opacity-60">Огранка:</span><br><b style="color:var(--text-main)">${i.cut}</b></div>
+                                <div><span class="opacity-60">Полировка:</span><br><b style="color:var(--text-main)">${i.pol}</b></div>
+                                <div class="col-span-2"><span class="opacity-60">Симметрия:</span> <b style="color:var(--text-main)">${i.sym}</b></div>
+                                <div class="col-span-2"><span class="opacity-60">Размеры:</span> <b style="color:var(--text-main)">${i.s1}×${i.s2}×${i.s3} мм</b></div>
+                            </div>
                         </div>
                     </div>
-                    <button onclick="openContactModal('${i.re}')" class="mt-6 w-full py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="border-color:var(--border); color:var(--text-main)">Запросить</button>
+                    <button onclick="openContactModal('${i.re}')" class="mt-4 w-full py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all rounded" style="border-color:var(--border); color:var(--text-main)">Запросить</button>
                 </div>
-            </div>`;
+            `;
         }
+        fragment.appendChild(div);
     });
+    container.appendChild(fragment);
     currentIndex += chunk.length;
     document.getElementById('load-more').style.display = (currentIndex >= filtered.length) ? 'none' : 'block';
 }
 
-function openContactModal(id) { 
-    // Здесь должна быть ваша функция модального окна (из предыдущих шагов)
-    alert("Запрос по камню: " + (id || "Общий вопрос"));
+function openContactModal(id) {
+    document.getElementById('modal-diamond-id').value = id || '';
+    document.getElementById('contact-modal').classList.remove('hidden');
+}
+
+function closeContactModal() {
+    document.getElementById('contact-modal').classList.add('hidden');
+    document.getElementById('contact-form').reset();
+}
+
+function submitContact(e) {
+    e.preventDefault();
+    const diamondId = document.getElementById('modal-diamond-id').value;
+    const name = document.getElementById('contact-name').value;
+    const email = document.getElementById('contact-email').value;
+    const phone = document.getElementById('contact-phone').value;
+    const message = document.getElementById('contact-message').value;
+    
+    // TODO: Отправить на сервер (email, API и т.д.)
+    console.log('Запрос:', { diamondId, name, email, phone, message });
+    alert('✓ Спасибо! Мы свяжемся с вами в ближайшее время.');
+    closeContactModal();
 }
 
 init();
