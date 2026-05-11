@@ -23,22 +23,7 @@ body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color
 
 /* Header */
 .header-main { position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(--border); background: var(--bg); backdrop-filter: blur(10px); }
-.logo { 
-    font-size: 1.1rem; 
-    letter-spacing: 0.5em; 
-    text-transform: uppercase; 
-    color: var(--text-main); 
-    font-weight: 400;
-}
-.logo span { 
-    font-family: 'Cormorant Garamond', serif;
-    text-transform: lowercase; 
-    font-style: italic;
-    letter-spacing: 0.1em;
-    margin-left: -0.2em; /* Немного сближаем для эстетики */
-    font-weight: 300;
-    opacity: 0.8;
-}
+
 .header-controls { display: flex; align-items: center; gap: 2rem; }
 .theme-toggle { font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; }
 .sort-select { font-size: 10px; text-transform: uppercase; background: transparent; border: none; cursor: pointer; color: var(--text-main); }
