@@ -121,6 +121,78 @@ function setView(v) {
     renderNextPage(true);
 }
 
+// Инициализация избранного из локальной памяти
+let wishlist = JSON.parse(localStorage.getItem('citygems_wishlist') || '[]');
+
+// Функция добавления/удаления
+function toggleWish(id) {
+    const idx = wishlist.findIndex(item => item.id === id);
+    if (idx > -1) {
+        wishlist.splice(idx, 1);
+    } else {
+        const diamond = db.find(d => d.id === id);
+        wishlist.push({ ...diamond, qty: 1 });
+    }
+    saveWish();
+    renderNextPage(true); // Перерисовываем, чтобы обновить сердечки
+}
+
+function saveWish() {
+    localStorage.setItem('citygems_wishlist', JSON.stringify(wishlist));
+    document.getElementById('wish-count').innerText = wishlist.length;
+}
+
+// Изменение количества
+function updateQty(id, delta) {
+    const item = wishlist.find(i => i.id === id);
+    if (item) {
+        item.qty = Math.max(1, item.qty + delta);
+        saveWish();
+        renderWishlistModal();
+    }
+}
+
+// Рендеринг модального окна
+function renderWishlistModal() {
+    const cont = document.getElementById('wishlist-items');
+    let html = '';
+    let total = 0;
+
+    if (wishlist.length === 0) {
+        html = '<div class="text-center opacity-40 py-10 italic">Ваш список пуст</div>';
+    } else {
+        wishlist.forEach(item => {
+            const sum = item.price * item.qty;
+            total += sum;
+            html += `
+            <div class="flex items-center gap-4 py-3 border-b border-white/5">
+                <div class="flex-1">
+                    <div class="text-[11px] uppercase tracking-widest" style="color:var(--text-main)">${item.sh} ${item.ct} CT</div>
+                    <div class="text-[10px] opacity-50">${item.price.toLocaleString()} ₽/шт</div>
+                </div>
+                <div class="qty-ctrl">
+                    <button class="qty-btn" onclick="updateQty('${item.id}', -1)">−</button>
+                    <span class="text-xs w-4 text-center">${item.qty}</span>
+                    <button class="qty-btn" onclick="updateQty('${item.id}', 1)">+</button>
+                </div>
+                <div class="text-xs font-bold w-24 text-right" style="color:var(--text-main)">${sum.toLocaleString()} ₽</div>
+                <button onclick="toggleWish('${item.id}'); renderWishlistModal();" class="text-[10px] opacity-30 hover:opacity-100 ml-2">✕</button>
+            </div>`;
+        });
+    }
+    cont.innerHTML = html;
+    document.getElementById('wish-total').innerText = `Итого: ${total.toLocaleString()} ₽`;
+}
+
+function openWishlist() {
+    renderWishlistModal();
+    document.getElementById('wishlist-modal').classList.remove('hidden');
+}
+
+function closeWishlist() {
+    document.getElementById('wishlist-modal').classList.add('hidden');
+}
+
 function renderNextPage(reset = false) {
     if (isRendering) return;
     isRendering = true;
@@ -134,7 +206,14 @@ function renderNextPage(reset = false) {
         const video = `${DIAMOND_CONFIG.i.p}${d.sh}${DIAMOND_CONFIG.i.e}`;
         const priceStr = d.price.toLocaleString('ru-RU');
         const labBadge = `<div class="absolute top-0 left-0 bg-stone-800 text-[8px] text-white px-2 py-0.5 z-10 font-bold uppercase flex items-center"><span class="verified-icon"></span>${d.lab}</div>`;
-        
+        const inWish = wishlist.some(i => i.id === d.id);
+        const wishBtn = `
+            <button onclick="toggleWish('${d.id}')" class="wish-toggle ${inWish ? 'active' : ''}">
+                <svg viewBox="0 0 24 24" fill="${inWish ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+            </button>
+        `;
         if (view === 'list') {
             html += `
             <div class="diamond-card p-5 flex flex-col md:flex-row items-center gap-8">
@@ -157,12 +236,11 @@ function renderNextPage(reset = false) {
                     </div>
                     <div class="text-right">
                         <div class="text-xl font-bold mb-2" style="color:var(--text-main)">${priceStr} ₽</div>
-                        <button onclick="contact('${d.id}')" class="text-[9px] border border-stone-800 px-5 py-2 uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="color:var(--text-main)">Запросить</button>
+                        ${wishBtn}
                     </div>
                 </div>
             </div>`;
         } else {
-            // Сетку обновляем аналогично (labBadge и русский перевод)
             html += `
             <div class="diamond-card p-6 flex flex-col">
                 <div class="aspect-square bg-black/10 mb-5 relative overflow-hidden">
@@ -182,7 +260,7 @@ function renderNextPage(reset = false) {
                     <span>Пол: <span style="color:var(--text-main)">${d.pol}</span></span>
                     <span>${d.s1}x${d.s2}мм</span>
                 </div>
-                <button onclick="contact('${d.id}')" class="w-full py-4 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="color:var(--text-main)">Запросить</button>
+                ${wishBtn}
             </div>`;
         }
     });
@@ -193,9 +271,15 @@ function renderNextPage(reset = false) {
     isRendering = false;
 }
 
-function contact(id) { 
+// Функция отправки менеджеру
+function sendWishlist() {
+    if (wishlist.length === 0) return;
+    let text = "Здравствуйте! Хочу уточнить наличие по списку:\n\n";
+    wishlist.forEach(i => {
+        text += `— ${i.sh} ${i.ct}ct (${i.col}/${i.cla}), ${i.qty} шт. (ID: ${i.id})\n`;
+    });
     const tg = `https://t.me/${atob(DIAMOND_CONFIG.c.t)}`;
-    window.open(tg + "?text=" + encodeURIComponent("Здравствуйте! Меня заинтересовал бриллиант #" + id), "_blank");
+    window.open(tg + "?text=" + encodeURIComponent(text), "_blank");
 }
 
 init();
