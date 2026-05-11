@@ -1,5 +1,5 @@
 const DIAMOND_CONFIG = {
-    translate: {
+    s: {
         'RD': 'Круг',
         'OV': 'Овал',
         'PR': 'Принцесса',
@@ -11,9 +11,11 @@ const DIAMOND_CONFIG = {
         'AS': 'Ашер',
         'HT': 'Сердце'
     },
-    contacts: {
-        tg: "ZmFuY3lkaWFtcw==", 
-        wa: "Nzk4NTc3NzY2NTU="
+    c: {
+        t: "ZmFuY3lkaWFtcw==", 
+        w: "Nzk4NTc3NzY2NTU=",
+        m: "aXJpbmE="
     },
-    itemsPerPage: 21
+    n: 21, // Количество позиций на странице
+    r: 2.5 // Надбавка на курсы валют
 };
