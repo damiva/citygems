@@ -32,7 +32,7 @@
         /* Двойной Range Slider */
         .range-container { position: relative; width: 100%; height: 40px; }
         .range-container input[type="range"] {
-            position: absolute; width: 100%; pointer-events: none; -webkit-appearance: none; 
+            position: absolute; width: 100%; pointer-events: none; appearance: none; -webkit-appearance: none; 
             background: none; top: 50%; transform: translateY(-50%); z-index: 2;
         }
         .range-container input[type="range"]::-webkit-slider-thumb {
@@ -133,9 +133,24 @@
 </div>
 
 <script>
-let db = [], filtered = [], currentIndex = 0, rate = 105, view = 'list';
+let db = [], filtered = [], currentIndex = 0, rate = 105, view = 'list', isRendering = false;
+
+// Debounce функция для оптимизации фильтров
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 const parse = (v) => parseFloat(String(v || '').replace(',', '.')) || 0;
 
+// Управление темами
 function toggleTheme() {
     document.body.classList.toggle('light-theme');
     const isLight = document.body.classList.contains('light-theme');
@@ -143,6 +158,7 @@ function toggleTheme() {
 }
 
 // Умная синхронизация двойных слайдеров
+// Синхронизация ползунков и полей ввода
 function syncRange(type, side) {
     const rMin = document.getElementById(`r-min-${type}`), rMax = document.getElementById(`r-max-${type}`);
     const iMin = document.getElementById(`i-min-${type}`), iMax = document.getElementById(`i-max-${type}`);
@@ -157,19 +173,24 @@ function syncRange(type, side) {
 
     iMin.value = rMin.value;
     iMax.value = rMax.value;
-    applyFilters();
+    debouncedApplyFilters();
 }
 
+// Синхронизация полей ввода с ползунками
 function syncInput(type) {
     const rMin = document.getElementById(`r-min-${type}`), rMax = document.getElementById(`r-max-${type}`);
     const iMin = document.getElementById(`i-min-${type}`), iMax = document.getElementById(`i-max-${type}`);
     rMin.value = iMin.value;
     rMax.value = iMax.value;
-    applyFilters();
+    debouncedApplyFilters();
 }
 
+// Инициализация приложения
 async function init() {
-    // Загрузка конфига и селектов
+    // Показать загрузку
+    document.getElementById('catalog').innerHTML = '<div class="text-center py-20 text-xl opacity-60">Загрузка каталога...</div>';
+    
+    try {
     const shapeSel = document.getElementById('f-shape');
     shapeSel.innerHTML = '<option value="">Все формы</option>';
     Object.entries(DIAMOND_CONFIG.s).forEach(([k, v]) => shapeSel.innerHTML += `<option value="${k}">${v}</option>`);
@@ -208,8 +229,13 @@ async function init() {
     setupR('p', Math.min(...ps), Math.max(...ps));
 
     applyFilters();
+    } catch (error) {
+        console.error('Ошибка загрузки:', error);
+        document.getElementById('catalog').innerHTML = '<div class="text-center py-20 text-red-400">Ошибка загрузки каталога. Проверьте config.js и diamonds_lab.csv</div>';
+    }
 }
 
+// Применение фильтров и сортировки
 function applyFilters() {
     const shape = document.getElementById('f-shape').value;
     const minW = parse(document.getElementById('i-min-w').value), maxW = parse(document.getElementById('i-max-w').value);
@@ -231,6 +257,9 @@ function applyFilters() {
     renderNextPage(true);
 }
 
+// Debounced версия для оптимизации
+const debouncedApplyFilters = debounce(applyFilters, 300);
+
 function setView(v) {
     view = v;
     document.getElementById('v-list').classList.toggle('active-btn', v === 'list');
@@ -239,18 +268,25 @@ function setView(v) {
     renderNextPage(true);
 }
 
+// Рендеринг следующей страницы товаров
 function renderNextPage(reset = false) {
+    if (isRendering) return; // Предотвращаем множественные рендеры
+    isRendering = true;
+    
     const cont = document.getElementById('catalog');
     if (reset) { cont.innerHTML = ''; currentIndex = 0; }
     
     const page = filtered.slice(currentIndex, currentIndex + (DIAMOND_CONFIG.n || 20));
+    const frag = document.createDocumentFragment();
+    
     page.forEach(d => {
         const video = `${DIAMOND_CONFIG.i.p}${d.sh}${DIAMOND_CONFIG.i.e}`;
         const priceStr = d.price.toLocaleString('ru-RU');
+        const card = document.createElement('div');
+        card.className = 'diamond-card p-4 flex flex-col md:flex-row items-center gap-6';
         
         if (view === 'list') {
-            cont.innerHTML += `
-            <div class="diamond-card p-4 flex flex-col md:flex-row items-center gap-6">
+            card.innerHTML = `
                 <div class="w-24 h-24 bg-black/20 relative flex-shrink-0">
                     <div class="absolute top-0 left-0 bg-stone-800 text-[7px] text-white px-1 z-10">${d.lab}</div>
                     <video src="${video}" autoplay loop muted playsinline class="w-full h-full object-contain" onerror="this.style.display='none'"></video>
@@ -273,10 +309,10 @@ function renderNextPage(reset = false) {
                         <button onclick="contact('${d.id}')" class="text-[8px] border border-stone-700 px-4 py-2 uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="color:var(--text-main)">Запрос</button>
                     </div>
                 </div>
-            </div>`;
+            `;
         } else {
-            cont.innerHTML += `
-            <div class="diamond-card p-5 flex flex-col">
+            card.className = 'diamond-card p-5 flex flex-col';
+            card.innerHTML = `
                 <div class="aspect-square bg-black/20 mb-4 relative overflow-hidden">
                     <div class="absolute top-2 left-2 bg-stone-800 text-[8px] text-white px-2 py-0.5 z-10 border border-white/10">${d.lab}</div>
                     <video src="${video}" autoplay loop muted playsinline class="w-full h-full object-contain p-4"></video>
@@ -292,12 +328,15 @@ function renderNextPage(reset = false) {
                     <span>Sym: ${d.sym}</span><span>Pol: ${d.pol}</span><span>${d.s1}x${d.s2}mm</span>
                 </div>
                 <button onclick="contact('${d.id}')" class="w-full py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="color:var(--text-main)">Запросить</button>
-            </div>`;
+            `;
         }
+        frag.appendChild(card);
     });
-
+    
+    cont.appendChild(frag);
     currentIndex += page.length;
     document.getElementById('more-box').classList.toggle('hidden', currentIndex >= filtered.length);
+    isRendering = false;
 }
 
 function contact(id) { 
