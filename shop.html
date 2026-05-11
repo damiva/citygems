@@ -3,70 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CityGems — Каталог</title>
+    <title>CityGems — Эксклюзивный каталог</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Montserrat:wght@200;400;500&display=swap" rel="stylesheet">
     <script src="config.js"></script>
     <style>
-        body { font-family: 'Montserrat', sans-serif; background-color: #080808; color: #d1d5db; }
+        :root {
+            --bg: #080808; --card: #0c0c0c; --border: #1a1a1a; --text: #d1d5db; --text-main: #ffffff; --accent: #D4AF37;
+        }
+        body.light {
+            --bg: #F9F8F6; --card: #ffffff; --border: #e5e7eb; --text: #4b5563; --text-main: #111827; --accent: #b49431;
+        }
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color: var(--text); transition: background 0.3s ease; }
         .serif { font-family: 'Cormorant Garamond', serif; }
-        .diamond-card { background: #0c0c0c; border: 1px solid #1a1a1a; transition: all 0.3s ease; }
-        .diamond-card:hover { border-color: #333; background: #111; }
-        select, input { background: #111 !important; border: 1px solid #222 !important; color: #fff !important; border-radius: 0 !important; }
-        .gold-icon { color: #D4AF37; }
-        .sticky-sidebar { position: sticky; top: 100px; height: fit-content; }
-        .active-view { color: #D4AF37 !important; }
+        .diamond-card { background: var(--card); border: 1px solid var(--border); transition: all 0.3s ease; }
+        .diamond-card:hover { border-color: var(--accent); }
+        select, input { background: var(--card) !important; border: 1px solid var(--border) !important; color: var(--text-main) !important; border-radius: 0 !important; outline: none; }
         
-        /* Стили для двойного слайдера */
-        .range-slider { position: relative; width: 100%; height: 30px; margin-bottom: 10px; }
+        /* Слайдеры */
+        .range-slider { position: relative; width: 100%; height: 30px; margin-bottom: 5px; }
         .range-slider input[type="range"] {
             position: absolute; width: 100%; pointer-events: none; -webkit-appearance: none; 
             z-index: 2; height: 10px; opacity: 0; background: none; top: 10px;
         }
-        /* Делаем ползунки доступными для мыши */
         .range-slider input[type="range"]::-webkit-slider-thumb {
-            pointer-events: all; width: 20px; height: 20px; -webkit-appearance: none; cursor: pointer;
+            pointer-events: all; width: 24px; height: 24px; -webkit-appearance: none; cursor: pointer;
         }
-        .slider-track {
-            position: absolute; width: 100%; height: 2px; background: #222; top: 20px; z-index: 1;
-        }
+        .slider-track { position: absolute; width: 100%; height: 1px; background: var(--border); top: 20px; z-index: 1; }
         .slider-thumb-custom {
-            position: absolute; width: 12px; height: 12px; background: #D4AF37; top: 20px; 
-            transform: translate(-50%, -50%); z-index: 3; pointer-events: none;
+            position: absolute; width: 10px; height: 10px; background: var(--accent); top: 20px; 
+            transform: translate(-50%, -50%); z-index: 3; pointer-events: none; border-radius: 50%;
         }
 
+        .active-view { color: var(--accent) !important; }
         .view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
         .view-list { display: flex; flex-direction: column; gap: 1rem; }
     </style>
 </head>
 <body class="min-h-screen">
 
-<header class="border-b border-stone-900 sticky top-0 bg-black/95 backdrop-blur-md z-50">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center">
-        <div class="flex-1 text-xs uppercase tracking-widest text-white font-light">CityGems</div>
-        <div class="flex-1 text-center">
-            <button onclick="openContactModal()" class="text-[9px] border border-stone-800 px-6 py-2 hover:bg-white hover:text-black transition-all uppercase tracking-widest text-white">Связаться с нами</button>
+<header class="border-b border-stone-900/10 sticky top-0 bg-opacity-95 backdrop-blur-md z-50 shadow-sm" style="background-color: var(--bg); border-color: var(--border);">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex-1">
+            <h1 class="text-xl tracking-[0.3em] font-light uppercase text-main" style="color: var(--text-main)">City<span class="serif italic opacity-50 lowercase">Gems</span></h1>
         </div>
-        <div class="flex-1 flex justify-end gap-5">
-            <button id="btn-list" onclick="changeView('list')" class="text-stone-600 transition-colors"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg></button>
-            <button id="btn-grid" onclick="changeView('grid')" class="text-stone-600 transition-colors"><svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/></svg></button>
+        
+        <div class="hidden md:block">
+            <button onclick="openContactModal()" class="text-[9px] border border-stone-800 px-8 py-2 hover:bg-stone-800 hover:text-white transition-all uppercase tracking-widest" style="color: var(--text-main); border-color: var(--border);">
+                Связаться с нами
+            </button>
+        </div>
+        
+        <div class="flex-1 flex justify-end items-center gap-6">
+            <button onclick="toggleTheme()" class="text-[9px] uppercase tracking-widest opacity-60 hover:opacity-100">
+                <span id="theme-icon">Тёмная</span>
+            </button>
+
+            <select id="sort-order" onchange="applyFiltersAndSort()" class="text-[9px] uppercase bg-transparent border-none outline-none tracking-widest cursor-pointer">
+                <option value="new">По умолчанию</option>
+                <option value="p-asc">Цена: Минимум</option>
+                <option value="p-desc">Цена: Максимум</option>
+                <option value="w-asc">Вес: Минимум</option>
+                <option value="w-desc">Вес: Максимум</option>
+            </select>
+
+            <div class="flex gap-4 border-l border-stone-800 pl-6" style="border-color: var(--border);">
+                <button id="btn-list" onclick="changeView('list')" class="text-stone-500 hover:text-stone-300">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>
+                </button>
+                <button id="btn-grid" onclick="changeView('grid')" class="text-stone-500 hover:text-stone-300">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h3A1.5 1.5 0 0 1 7 2.5v3A1.5 1.5 0 0 1 5.5 7h-3A1.5 1.5 0 0 1 1 5.5v-3zM2.5 2a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 1h3A1.5 1.5 0 0 1 15 2.5v3A1.5 1.5 0 0 1 13.5 7h-3A1.5 1.5 0 0 1 9 5.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zM1 10.5A1.5 1.5 0 0 1 2.5 9h3A1.5 1.5 0 0 1 7 10.5v3A1.5 1.5 0 0 1 5.5 15h-3A1.5 1.5 0 0 1 1 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3zm6.5.5A1.5 1.5 0 0 1 10.5 9h3a1.5 1.5 0 0 1 1.5 1.5v3a1.5 1.5 0 0 1-1.5 1.5h-3A1.5 1.5 0 0 1 9 13.5v-3zm1.5-.5a.5.5 0 0 0-.5.5v3a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 0-.5-.5h-3z"/></svg>
+                </button>
+            </div>
         </div>
     </div>
 </header>
 
 <div class="max-w-7xl mx-auto flex flex-col lg:flex-row">
-    <aside class="w-full lg:w-72 p-8 border-r border-stone-900 bg-[#080808]">
+    <aside class="w-full lg:w-72 p-8 border-r bg-opacity-50" style="border-color: var(--border);">
         <div class="sticky-sidebar">
-            <h2 class="serif text-3xl text-white italic mb-8">Фильтры</h2>
+            <h2 class="serif text-3xl text-main italic mb-8" style="color: var(--text-main)">Фильтры</h2>
+            
             <div class="space-y-10">
                 <div>
-                    <label class="text-[8px] uppercase tracking-[0.3em] text-stone-500 mb-3 block">Огранка</label>
-                    <select id="f-shape" onchange="applyFilters()" class="w-full p-3 text-[10px] uppercase outline-none"></select>
+                    <label class="text-[8px] uppercase tracking-[0.3em] opacity-50 mb-3 block">Огранка</label>
+                    <select id="f-shape" onchange="applyFiltersAndSort()" class="w-full p-3 text-[10px] uppercase"></select>
                 </div>
 
                 <div>
-                    <label class="text-[8px] uppercase tracking-[0.3em] text-stone-500 mb-2 block">Вес (ct)</label>
-                    <div class="range-slider" id="slider-w">
+                    <label class="text-[8px] uppercase tracking-[0.3em] opacity-50 mb-2 block">Вес (ct)</label>
+                    <div class="range-slider">
                         <div class="slider-track"></div>
                         <input type="range" id="r-min-w" step="0.01" oninput="sync('w', 'min')">
                         <input type="range" id="r-max-w" step="0.01" oninput="sync('w', 'max')">
@@ -74,34 +100,36 @@
                         <div id="thumb-max-w" class="slider-thumb-custom"></div>
                     </div>
                     <div class="flex gap-2">
-                        <input type="number" id="f-min-w" step="0.01" oninput="syncInputs('w')" class="w-full p-2 text-[10px] text-center">
-                        <input type="number" id="f-max-w" step="0.01" oninput="syncInputs('w')" class="w-full p-2 text-[10px] text-center">
+                        <input type="number" id="f-min-w" step="0.01" oninput="syncInputs('w')" class="w-1/2 p-2 text-[10px] text-center" placeholder="От">
+                        <input type="number" id="f-max-w" step="0.01" oninput="syncInputs('w')" class="w-1/2 p-2 text-[10px] text-center" placeholder="До">
                     </div>
                 </div>
 
                 <div>
-                    <label class="text-[8px] uppercase tracking-[0.3em] text-stone-500 mb-2 block">Цена (₽)</label>
-                    <div class="range-slider" id="slider-p">
+                    <label class="text-[8px] uppercase tracking-[0.3em] opacity-50 mb-2 block">Цена (₽)</label>
+                    <div class="range-slider">
                         <div class="slider-track"></div>
                         <input type="range" id="r-min-p" step="1000" oninput="sync('p', 'min')">
                         <input type="range" id="r-max-p" step="1000" oninput="sync('p', 'max')">
                         <div id="thumb-min-p" class="slider-thumb-custom"></div>
                         <div id="thumb-max-p" class="slider-thumb-custom"></div>
                     </div>
-                    <div class="flex flex-col gap-2">
+                    <div class="space-y-2">
                         <input type="number" id="f-min-p" oninput="syncInputs('p')" class="w-full p-2 text-[10px]" placeholder="От">
                         <input type="number" id="f-max-p" oninput="syncInputs('p')" class="w-full p-2 text-[10px]" placeholder="До">
                     </div>
                 </div>
             </div>
 
-            <div id="stats-counter" class="mt-10 pt-6 border-t border-stone-900 text-[9px] uppercase tracking-[0.2em] text-stone-400 text-right italic">Загрузка...</div>
+            <div id="stats-counter" class="mt-10 pt-6 border-t text-[9px] uppercase tracking-[0.2em] opacity-50 text-right italic" style="border-color: var(--border);">Загрузка...</div>
         </div>
     </aside>
 
-    <main class="flex-1 p-6 bg-[#0a0a0a]">
+    <main class="flex-1 p-6">
         <div id="catalog" class="view-list"></div>
-        <div class="mt-12 flex justify-center"><button id="load-more" onclick="renderNextPage()" class="hidden border border-stone-800 px-12 py-4 text-[9px] uppercase tracking-[0.3em] text-stone-400 hover:text-white transition-all">Показать еще</button></div>
+        <div class="mt-12 flex justify-center pb-20">
+            <button id="load-more" onclick="renderNextPage()" class="hidden border px-16 py-4 text-[9px] uppercase tracking-[0.3em] opacity-60 hover:opacity-100 hover:border-white transition-all" style="border-color: var(--border); color: var(--text-main);">Показать еще</button>
+        </div>
     </main>
 </div>
 
@@ -109,50 +137,51 @@
 let db = [], filtered = [], currentIndex = 0, exchangeRate = 105, currentView = 'list';
 const parseNum = (s) => parseFloat(String(s || '').replace(',', '.')) || 0;
 
-// Умное переключение Z-index для работы мышки
-function handleSliderOverlap(type) {
-    const minInput = document.getElementById(`r-min-${type}`);
-    const maxInput = document.getElementById(`r-max-${type}`);
-    minInput.style.zIndex = (parseNum(minInput.value) > (parseNum(minInput.max) / 2)) ? 5 : 2;
+// Темы
+function toggleTheme() {
+    document.body.classList.toggle('light');
+    const isLight = document.body.classList.contains('light');
+    document.getElementById('theme-icon').innerText = isLight ? 'Светлая' : 'Тёмная';
 }
 
-function updateThumb(type, side) {
-    const minInput = document.getElementById(`r-min-${type}`);
-    const maxInput = document.getElementById(`r-max-${type}`);
-    const thumb = document.getElementById(`thumb-${side}-${type}`);
-    const val = side === 'min' ? minInput.value : maxInput.value;
-    const percent = ((val - minInput.min) / (minInput.max - minInput.min)) * 100;
-    thumb.style.left = percent + '%';
-    handleSliderOverlap(type);
-}
-
+// Управление наложением ползунков (мышка)
 function sync(type, side) {
     const min = document.getElementById(`r-min-${type}`);
     const max = document.getElementById(`r-max-${type}`);
     const fMin = document.getElementById(`f-min-${type}`);
     const fMax = document.getElementById(`f-max-${type}`);
 
-    if (side === 'min' && parseNum(min.value) > parseNum(max.value)) min.value = max.value;
-    if (side === 'max' && parseNum(max.value) < parseNum(min.value)) max.value = min.value;
+    // Логика: ползунки не должны пересекаться
+    if (side === 'min' && parseNum(min.value) >= parseNum(max.value)) min.value = max.value;
+    if (side === 'max' && parseNum(max.value) <= parseNum(min.value)) max.value = min.value;
 
     fMin.value = min.value;
     fMax.value = max.value;
-    updateThumb(type, 'min');
-    updateThumb(type, 'max');
-    applyFilters();
+    
+    // Поднимаем активный ползунок выше по z-index
+    min.style.zIndex = (side === 'min') ? "10" : "5";
+    max.style.zIndex = (side === 'max') ? "10" : "5";
+
+    updateThumbs(type);
+    applyFiltersAndSort();
+}
+
+function updateThumbs(type) {
+    ['min', 'max'].forEach(side => {
+        const input = document.getElementById(`r-${side}-${type}`);
+        const thumb = document.getElementById(`thumb-${side}-${type}`);
+        const percent = ((input.value - input.min) / (input.max - input.min)) * 100;
+        thumb.style.left = percent + '%';
+    });
 }
 
 function syncInputs(type) {
-    const min = document.getElementById(`r-min-${type}`);
-    const max = document.getElementById(`r-max-${type}`);
     const fMin = document.getElementById(`f-min-${type}`);
     const fMax = document.getElementById(`f-max-${type}`);
-    
-    min.value = fMin.value;
-    max.value = fMax.value;
-    updateThumb(type, 'min');
-    updateThumb(type, 'max');
-    applyFilters();
+    document.getElementById(`r-min-${type}`).value = fMin.value;
+    document.getElementById(`r-max-${type}`).value = fMax.value;
+    updateThumbs(type);
+    applyFiltersAndSort();
 }
 
 async function init() {
@@ -173,101 +202,135 @@ async function init() {
         const v = line.split(';');
         if (v.length < 12) return null;
         return {
-            re: v[0], shape: v[2], ct: v[3].replace(',', '.'), col: v[4], cla: v[5], cut: v[6],
-            s1: v[9], s2: v[10], s3: v[11], lab: v[1],
+            re: v[0], lab: v[1], shape: v[2], ct: v[3].replace(',', '.'), 
+            col: v[4], cla: v[5], cut: v[6], sym: v[7], pol: v[8],
+            s1: v[9], s2: v[10], s3: v[11],
             price: Math.ceil(parseNum(v[12]) * exchangeRate)
         };
     }).filter(i => i);
 
-    // ВЫЧИСЛЕНИЕ ГРАНИЦ ИЗ КАТАЛОГА
+    // Вычисляем границы из данных
     const weights = db.map(i => parseNum(i.ct));
     const prices = db.map(i => i.price);
     
-    const setRange = (id, min, max) => {
-        const elMin = document.getElementById(`r-min-${id}`);
-        const elMax = document.getElementById(`r-max-${id}`);
-        elMin.min = elMax.min = min;
-        elMin.max = elMax.max = max;
-        elMin.value = min;
-        elMax.value = max;
-        document.getElementById(`f-min-${id}`).value = min;
-        document.getElementById(`f-max-${id}`).value = max;
-        updateThumb(id, 'min'); updateThumb(id, 'max');
+    const setR = (id, min, max) => {
+        const rMin = document.getElementById(`r-min-${id}`), rMax = document.getElementById(`r-max-${id}`);
+        const fMin = document.getElementById(`f-min-${id}`), fMax = document.getElementById(`f-max-${id}`);
+        rMin.min = rMax.min = min; rMin.max = rMax.max = max;
+        rMin.value = min; rMax.value = max;
+        fMin.value = min; fMax.value = max;
+        updateThumbs(id);
     };
 
-    setRange('w', Math.min(...weights), Math.max(...weights));
-    setRange('p', Math.min(...prices), Math.max(...prices));
+    setR('w', Math.min(...weights), Math.max(...weights));
+    setR('p', Math.min(...prices), Math.max(...prices));
 
-    filtered = [...db];
-    updateStats();
-    renderNextPage(true);
+    applyFiltersAndSort();
 }
 
-function updateStats() {
+function applyFiltersAndSort() {
+    const s = document.getElementById('f-shape').value;
+    const minW = parseNum(document.getElementById('f-min-w').value), maxW = parseNum(document.getElementById('f-max-w').value);
+    const minP = parseNum(document.getElementById('f-min-p').value), maxP = parseNum(document.getElementById('f-max-p').value);
+    const sort = document.getElementById('sort-order').value;
+
+    filtered = db.filter(i => 
+        (!s || i.shape === s) && 
+        (parseNum(i.ct) >= minW && parseNum(i.ct) <= maxW) && 
+        (i.price >= minP && i.price <= maxP)
+    );
+
+    if (sort === 'p-asc') filtered.sort((a,b) => a.price - b.price);
+    else if (sort === 'p-desc') filtered.sort((a,b) => b.price - a.price);
+    else if (sort === 'w-asc') filtered.sort((a,b) => parseNum(a.ct) - parseNum(b.ct));
+    else if (sort === 'w-desc') filtered.sort((a,b) => parseNum(b.ct) - parseNum(a.ct));
+
     const total = db.length.toLocaleString('ru-RU');
     const found = filtered.length.toLocaleString('ru-RU');
-    document.getElementById('stats-counter').innerHTML = filtered.length === db.length ? `ВСЕГО: ${total}` : `НАЙДЕНО: <span class="text-white">${found}</span> <span class="text-stone-700">ИЗ ${total}</span>`;
-}
-
-function applyFilters() {
-    const s = document.getElementById('f-shape').value;
-    const minW = parseNum(document.getElementById('f-min-w').value);
-    const maxW = parseNum(document.getElementById('f-max-w').value);
-    const minP = parseNum(document.getElementById('f-min-p').value);
-    const maxP = parseNum(document.getElementById('f-max-p').value);
-
-    filtered = db.filter(i => (!s || i.shape === s) && (parseNum(i.ct) >= minW && parseNum(i.ct) <= maxW) && (i.price >= minP && i.price <= maxP));
-    updateStats();
+    document.getElementById('stats-counter').innerHTML = filtered.length === db.length ? `ВСЕГО: ${total}` : `НАЙДЕНО: <span style="color:var(--text-main)">${found}</span> <span style="opacity:0.4">ИЗ ${total}</span>`;
+    
     renderNextPage(true);
 }
 
 function changeView(v) {
     currentView = v;
     document.getElementById('catalog').className = v === 'grid' ? 'view-grid' : 'view-list';
-    document.getElementById('btn-grid').classList.toggle('active-view', v === 'grid');
     document.getElementById('btn-list').classList.toggle('active-view', v === 'list');
+    document.getElementById('btn-grid').classList.toggle('active-view', v === 'grid');
     renderNextPage(true);
 }
 
 function renderNextPage(reset = false) {
     const container = document.getElementById('catalog');
     if (reset) { container.innerHTML = ''; currentIndex = 0; }
-    const chunk = filtered.slice(currentIndex, currentIndex + DIAMOND_CONFIG.n);
     
+    const chunk = filtered.slice(currentIndex, currentIndex + DIAMOND_CONFIG.n);
     chunk.forEach(i => {
         const img = `${DIAMOND_CONFIG.i.p}${i.shape}${DIAMOND_CONFIG.i.e}`;
         const name = DIAMOND_CONFIG.s[i.shape] || i.shape;
         const price = i.price.toLocaleString('ru-RU');
-        const badge = `<div class="absolute top-2 left-2 bg-black border border-stone-800 px-1.5 py-0.5 text-[8px] text-white font-bold uppercase z-10">${i.lab}</div>`;
+        const badge = `<div class="absolute top-2 left-2 bg-black/80 backdrop-blur px-2 py-0.5 text-[7px] text-white font-bold uppercase z-10 border border-white/10">${i.lab}</div>`;
 
         if (currentView === 'list') {
-            container.innerHTML += `<div class="diamond-card p-4 flex flex-row items-center gap-6">
-                <div class="w-20 h-20 bg-[#111] relative flex-shrink-0">${badge}<img src="${img}" class="w-full h-full object-contain p-2" onerror="this.style.opacity='0'"></div>
-                <div class="flex-1 flex justify-between items-center">
-                    <div>
-                        <div class="flex items-center gap-3"><span class="serif italic text-lg text-stone-400">${name}</span><span class="text-xl text-white font-light">${i.ct} ct</span></div>
-                        <div class="text-[10px] uppercase text-stone-500">Цвет: ${i.col} | Чистота: ${i.cla} | Огранка: ${i.cut}</div>
-                    </div>
-                    <div class="text-right"><div class="text-lg text-white mb-2">${price} ₽</div><button onclick="openContactModal('${i.re}')" class="text-[9px] border border-stone-800 px-4 py-2 uppercase hover:bg-white hover:text-black transition-all">Запрос</button></div>
+            container.innerHTML += `
+            <div class="diamond-card p-5 flex flex-row items-center gap-8">
+                <div class="w-24 h-24 bg-stone-500/5 relative flex-shrink-0">
+                    ${badge}
+                    <video src="${img}" autoplay loop muted playsinline class="w-full h-full object-contain p-2" onerror="this.outerHTML='<div class=p-8>💎</div>'"></video>
                 </div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="serif italic text-xl mr-3" style="color:var(--text-main)">${name}</span>
+                            <span class="text-2xl font-light tracking-tight" style="color:var(--text-main)">${i.ct} ct</span>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xl font-medium mb-2" style="color:var(--text-main)">${price} ₽</div>
+                        </div>
+                    </div>
+                    <div class="text-[10px] uppercase tracking-wider opacity-60 flex flex-wrap gap-x-4 gap-y-1">
+                        <span>Цвет: <b style="color:var(--text-main)">${i.col}</b></span>
+                        <span>Чистота: <b style="color:var(--text-main)">${i.cla}</b></span>
+                        <span>Огранка: <b style="color:var(--text-main)">${i.cut}</b></span>
+                        <span>Размеры: <b style="color:var(--text-main)">${i.s1}×${i.s2}×${i.s3} мм</b></span>
+                    </div>
+                </div>
+                <button onclick="openContactModal('${i.re}')" class="px-8 py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="border-color:var(--border); color:var(--text-main)">Запрос</button>
             </div>`;
         } else {
-            container.innerHTML += `<div class="diamond-card p-4 flex flex-col">
-                <div class="aspect-square bg-[#111] mb-4 relative overflow-hidden">${badge}<img src="${img}" class="w-full h-full object-contain p-4" onerror="this.style.opacity='0'"></div>
-                <div class="flex justify-between items-baseline mb-2">
-                    <div class="flex flex-col"><span class="serif italic text-sm text-stone-400">${name}</span><span class="text-xl text-white font-light">${i.ct} ct</span></div>
-                    <span class="text-lg text-white font-medium">${price} ₽</span>
+            container.innerHTML += `
+            <div class="diamond-card p-5 flex flex-col">
+                <div class="aspect-square bg-stone-500/5 mb-5 relative overflow-hidden">
+                    ${badge}
+                    <video src="${img}" autoplay loop muted playsinline class="w-full h-full object-contain p-4"></video>
                 </div>
-                <div class="space-y-1 text-[9px] uppercase text-stone-500 pt-3 border-t border-white/5 flex justify-between"><span>${i.col}/${i.cla}</span><span>${i.s1}×${i.s2}</span></div>
-                <button onclick="openContactModal('${i.re}')" class="mt-4 w-full py-3 border border-stone-800 text-[9px] uppercase hover:bg-white hover:text-black transition-all">Запросить</button>
+                <div class="flex-1 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-baseline mb-1">
+                            <span class="serif italic text-stone-400 text-sm">${name}</span>
+                            <span class="text-lg font-medium" style="color:var(--text-main)">${price} ₽</span>
+                        </div>
+                        <div class="text-2xl font-light mb-4" style="color:var(--text-main)">${i.ct} ct</div>
+                        <div class="space-y-1 text-[9px] uppercase tracking-widest opacity-50 pt-4 border-t" style="border-color:var(--border)">
+                            <div class="flex justify-between"><span>Цвет/Чистота</span><span style="color:var(--text-main)">${i.col}/${i.cla}</span></div>
+                            <div class="flex justify-between"><span>Качество</span><span style="color:var(--text-main)">${i.cut}</span></div>
+                            <div class="flex justify-between"><span>Размеры</span><span style="color:var(--text-main)">${i.s1}×${i.s2}</span></div>
+                        </div>
+                    </div>
+                    <button onclick="openContactModal('${i.re}')" class="mt-6 w-full py-3 border border-stone-800 text-[9px] uppercase tracking-widest hover:bg-white hover:text-black transition-all" style="border-color:var(--border); color:var(--text-main)">Запросить</button>
+                </div>
             </div>`;
         }
     });
     currentIndex += chunk.length;
-    document.getElementById('load-more').style.display = currentIndex >= filtered.length ? 'none' : 'block';
+    document.getElementById('load-more').style.display = (currentIndex >= filtered.length) ? 'none' : 'block';
 }
 
-function openContactModal(id) { /* Логика модалки без изменений */ }
+function openContactModal(id) { 
+    // Здесь должна быть ваша функция модального окна (из предыдущих шагов)
+    alert("Запрос по камню: " + (id || "Общий вопрос"));
+}
+
 init();
 </script>
 </body>
