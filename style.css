@@ -67,7 +67,12 @@ body { font-family: 'Montserrat', sans-serif; background-color: var(--bg); color
 .view-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
 .view-list { display: flex; flex-direction: column; gap: 1.25rem; }
 
-.diamond-card { background: var(--card); border: 1px solid var(--border); transition: all 0.3s; }
+.diamond-card { 
+    position: relative; /* Добавили это! */
+    background: var(--card); 
+    border: 1px solid var(--border); 
+    transition: all 0.3s; 
+}
 .diamond-card:hover { border-color: var(--accent); transform: translateY(-3px); }
 
 .results-counter { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 10px; text-transform: uppercase; text-align: right; font-style: italic; }

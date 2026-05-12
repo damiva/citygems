@@ -13,7 +13,7 @@ const DIAMOND_CONFIG = {
     },
     c: {
         t: "ZmFuY3lkaWFtcw==", 
-        w: "Nzk4NTc3NzY2NTU=",
+        n: "Nzk4NTc3NzY2NTU=",
         m: "aXJpbmE="
     },
     i: { p: "/img/", e: ".png" },

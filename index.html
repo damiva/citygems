@@ -14,7 +14,7 @@
 <header class="header-main">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div class="logo cursor-pointer" onclick="location.reload()">
-            <img id="logo-img" src="/img/сgb.png" alt="CityGems" style="height: 40px; width: auto;">
+            <img id="logo-img" src="/img/cgb.png" alt="CityGems" style="height: 40px; width: auto;">
         </div>
 
         <nav class="nav-menu flex space-x-8 items-center">
@@ -123,7 +123,12 @@
     <div class="modal-content">
         <div class="flex justify-between items-center mb-8 border-b pb-4" style="border-color: var(--border)">
             <h2 class="serif text-3xl italic" style="color:var(--text-main)">Ваш выбор</h2>
-            <button onclick="closeWishlist()" class="opacity-50 hover:opacity-100">Закрыть</button>
+            <div class="flex items-center gap-6">
+                <button onclick="clearWishlist()" class="text-[10px] uppercase tracking-widest opacity-40 hover:opacity-100 hover:text-red-500 transition-colors">
+                    Очистить
+                </button>
+                <button onclick="closeWishlist()" class="opacity-50 hover:opacity-100 font-bold">✕</button>
+            </div>
         </div>
         <div id="wishlist-items" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
             </div>

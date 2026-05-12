@@ -84,7 +84,7 @@ function updateThemeButton(isLight) {
     const label = document.getElementById('theme-label');
     const logoImg = document.getElementById('logo-img');
     if (label) label.innerText = isLight ? 'Тёмная тема' : 'Светлая тема';
-    if (logoImg) logoImg.src = isLight ? '/img/сgb.png' : '/img/сgw.png';
+    if (logoImg) logoImg.src = isLight ? '/img/cgb.png' : '/img/cgw.png';
 }
 
 function syncRange(type, side) {
@@ -216,7 +216,17 @@ function toggleWish(id) {
     saveWish();
     renderNextPage(true); // Перерисовываем, чтобы обновить сердечки
 }
-
+// Полная очистка списка избранного
+function clearWishlist() {
+    if (wishlist.length === 0) return; // Если список и так пуст, ничего не делаем
+    
+    if (confirm('Вы уверены, что хотите очистить весь список?')) {
+        wishlist = []; // Обнуляем массив
+        saveWish();    // Сохраняем пустой массив в localStorage
+        renderWishlistModal(); // Перерисовываем модальное окно (покажет "Ваш список пуст")
+        renderNextPage(true);  // Перерисовываем каталог, чтобы сердечки погасли
+    }
+}
 function saveWish() {
     localStorage.setItem('citygems_wishlist', JSON.stringify(wishlist));
     document.getElementById('wish-count').innerText = wishlist.length;
