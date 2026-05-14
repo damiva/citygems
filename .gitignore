@@ -1,0 +1,17 @@
+# --- macOS Trash ---
+.DS_Store
+.AppleDouble
+._*
+.Spotlight-V100
+.Trashes
+
+# --- Windows Trash ---
+Thumbs.db
+ehthumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# --- Исходники (то, что не должно быть на сайте) ---
+data.csv
+*.xlsx
+*.tmp
