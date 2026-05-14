@@ -12,6 +12,6 @@ desktop.ini
 $RECYCLE.BIN/
 
 # --- Исходники (то, что не должно быть на сайте) ---
-data.csv
+*.csv
 *.xlsx
 *.tmp
