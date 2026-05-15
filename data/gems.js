@@ -1,6 +1,6 @@
 export const Gems = {
   ds: 20588,
-  shapes: "RO":{ru:"Круг",en:"Round",img:"img/RO.webp"},"PR":{ru:"Принцесса",en:"Princess",img:"img/PR.webp"},"OV":{ru:"Овал",en:"Oval",img:"img/OV.webp"},"CU":{ru:"Кушон",en:"Cushion",img:"img/CU.webp"},"PS":{ru:"Груша",en:"Pear",img:"img/PS.webp"},"EM":{ru:"Изумруд",en:"Emerald",img:"img/EM.webp"},"RA":{ru:"Радиант",en:"Radiant",img:"img/RA.webp"},"HB":{ru:"Сердце",en:"Heart",img:"img/HB.webp"},"MQ":{ru:"Маркиз",en:"Marquise",img:"img/MQ.webp"},"AS":{ru:"Ашер",en:"Asscher",img:"img/AS.webp"},
+  shapes: {RO:{ru:"Круг",en:"Round",img:"img/RO.webp"},PR:{ru:"Принцесса",en:"Princess",img:"img/PR.webp"},OV:{ru:"Овал",en:"Oval",img:"img/OV.webp"},CU:{ru:"Кушон",en:"Cushion",img:"img/CU.webp"},PS:{ru:"Груша",en:"Pear",img:"img/PS.webp"},EM:{ru:"Изумруд",en:"Emerald",img:"img/EM.webp"},RA:{ru:"Радиант",en:"Radiant",img:"img/RA.webp"},HB:{ru:"Сердце",en:"Heart",img:"img/HB.webp"},MQ:{ru:"Маркиз",en:"Marquise",img:"img/MQ.webp"},AS:{ru:"Ашер",en:"Asscher",img:"img/AS.webp"}},
   titles: {re:"Номер",lab:"Сертификат",sh:"Вес",ct:"Цвет",col:"Чистота",cla:"Огранка",cut:"Гладкость",pol:"Симетрия",sym:"Размер",s1:"Размер",s2:"Размер",s3:"Цена"},
   db: [
     {re:783627252,lab:"IGI",sh:"RD",ct:0.3,col:"D",cla:"VVS1",cut:"ID",pol:"EX",sym:"EX",s1:4.3,s2:4.32,s3:2.66},
