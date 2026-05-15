@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityGems — Список позиций</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Montserrat:wght@200;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .auth-btn { opacity: 0.1; transition: opacity 0.3s; position: fixed; top: 20px; right: 20px; cursor: pointer; }
+        .auth-btn:hover { opacity: 1; }
+        table { width: 100%; border-collapse: collapse; margin-top: 2rem; }
+        th { text-align: left; text-transform: uppercase; font-size: 10px; letter-spacing: 0.1em; padding: 1rem; border-bottom: 1px solid var(--border); opacity: 0.6; }
+        td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 13px; }
+        .eco-cell { background: rgba(180, 148, 49, 0.05); color: var(--accent); }
+    </style>
+</head>
+<body class="light-theme min-h-screen">
+
+<div class="max-w-5xl mx-auto px-6 py-12">
+    <header class="flex justify-between items-end mb-12 border-b pb-8">
+        <div>
+            <h1 class="serif text-4xl italic mb-2">Детали заказа</h1>
+            <p id="order-info" class="text-xs uppercase tracking-widest opacity-50"></p>
+        </div>
+        <div id="auth-trigger" class="auth-btn" onclick="promptLogin()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 15V17M12 7V11M20 12C20 16.4183 16.4183 20 12 20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12Z" stroke-linecap="round"/></svg>
+        </div>
+    </header>
+
+    <div id="table-container" class="overflow-x-auto">
+        </div>
+
+    <div id="total-box" class="mt-8 text-right">
+        </div>
+</div>
+
+<script type="module">
+    import { City } from './city.js';
+    import { Gems } from '/data/gems.js';
+
+    // Хэш-функция для пароля (SHA-256 -> Base36)
+    async function hashPass(password) {
+        const msgBuffer = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        // Берем часть хэша для короткого имени файла
+        const bigInt = BigInt('0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join(''));
+        return bigInt.toString(36).slice(0, 12);
+    }
+
+    async function checkAuth() {
+        const saved = localStorage.getItem('cg_auth');
+        if (!saved) return false;
+        
+        try {
+            // Проверяем наличие файла на сервере
+            const res = await fetch(`/pass/${saved}.json`);
+            return res.ok;
+        } catch (e) { return false; }
+    }
+
+    window.promptLogin = async () => {
+        const p = prompt("Введите ключ доступа:");
+        if (p) {
+            const h = await hashPass(p);
+            localStorage.setItem('cg_auth', h);
+            location.reload();
+        }
+    };
+
+    async function init() {
+        const q = new URLSearchParams(window.location.search).get('q');
+        if (!q) return;
+
+        const data = City.parseLink(q);
+        if (!data) return;
+
+        const isIra = await checkAuth();
+        const todayRate = await City.updateRate(); // Получаем актуальный курс
+        
+        renderTable(data, isIra, todayRate);
+    }
+
+    function renderTable(data, isIra, todayRate) {
+        const cont = document.getElementById('table-container');
+        const info = document.getElementById('order-info');
+        
+        info.innerText = `Курс фиксации: ${data.meta.rate} ₽ | Каталог от: ${new Date(data.meta.dsGems * 86400000).toLocaleDateString()}`;
+
+        let html = `<table><thead><tr>
+            <th>Артикул / Форма</th>
+            <th>Вес</th>
+            <th>Характеристики</th>
+            ${isIra ? '<th>USD</th><th>Курс Заказа</th><th>Курс Сегодня</th>' : ''}
+            <th class="text-right">Цена (RUB)</th>
+        </tr></thead><tbody>`;
+
+        let totalRub = 0;
+
+        data.items.forEach(item => {
+            const gem = Gems.db.find(g => g.re === item.re);
+            if (!gem) return;
+
+            const priceClient = Math.round(gem.usd * data.meta.rate);
+            const priceToday = Math.round(gem.usd * (todayRate + City.add));
+            totalRub += priceClient * item.qty;
+
+            html += `<tr>
+                <td><span class="font-bold">#${gem.re}</span><br><span class="opacity-50 text-[10px]">${Gems.shapes[gem.sh] || gem.sh}</span></td>
+                <td>${gem.ct} ct</td>
+                <td class="text-[10px] opacity-60">${gem.col}/${gem.cla} • ${gem.cut}</td>
+                ${isIra ? `
+                    <td class="eco-cell">$${gem.usd}</td>
+                    <td class="eco-cell">${data.meta.rate}</td>
+                    <td class="eco-cell">${(todayRate + City.add).toFixed(2)}</td>
+                ` : ''}
+                <td class="text-right font-bold">${(priceClient * item.qty).toLocaleString()} ₽</td>
+            </tr>`;
+        });
+
+        html += `</tbody></table>`;
+        cont.innerHTML = html;
+
+        document.getElementById('total-box').innerHTML = `
+            <div class="text-xs uppercase opacity-50 mb-1">Итого к оплате</div>
+            <div class="text-4xl serif italic">${totalRub.toLocaleString()} ₽</div>
+        `;
+    }
+
+    init();
+</script>
+</body>
+</html>
