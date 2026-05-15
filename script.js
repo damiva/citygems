@@ -51,7 +51,7 @@ async function init() {
     if (shapeSel && Gems.shapes) {
         shapeSel.innerHTML = '<option value="">Все формы</option>';
         Object.entries(Gems.shapes).forEach(([k, v]) => {
-            shapeSel.innerHTML += `<option value="${k}">${v.n}</option>`;
+            shapeSel.innerHTML += `<option value="${k}">${v.ru}</option>`;
         });
     }
 
@@ -120,8 +120,14 @@ function renderNextPage(reset = false) {
     let html = '';
     
     page.forEach(d => {
-        const priceStr = City.rubStr(d.val); // Используем готовую функцию форматирования
-        const shapeName = Gems.shapes[d.sh]?.n || d.sh;
+        const priceStr = City.rubStr(d.val);
+        
+        // --- ПРАВКИ ЗДЕСЬ: Достаем объект формы, название и путь к иконке ---
+        const shapeObj = Gems.shapes[d.sh] || {};
+        const shapeName = shapeObj.ru || d.sh;
+        // Путь в базе выглядит как "img/RO.webp", поэтому добавляем "/data/"
+        const shapeImg = shapeObj.img ? `<img src="/data/${shapeObj.img}" class="w-5 h-5 opacity-70" alt="${shapeName}">` : '';
+        
         const dims = `${d.s1} x ${d.s2} x ${d.s3} мм`;
         const inWish = wishlist.some(i => i.re === d.re);
         
@@ -142,7 +148,10 @@ function renderNextPage(reset = false) {
                 </div>
                 <div class="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-6 items-center">
                     <div>
-                        <div class="serif italic text-xl">${shapeName}</div>
+                        <div class="serif italic text-xl flex items-center gap-2">
+                            ${shapeImg}
+                            <span>${shapeName}</span>
+                        </div>
                         <div class="text-2xl font-light">${d.ct} CT</div>
                     </div>
                     <div class="text-[10px] uppercase opacity-70">
@@ -170,8 +179,9 @@ function renderNextPage(reset = false) {
                     <span class="text-2xl font-light">${d.ct} ct</span>
                     <span class="text-lg font-bold">${priceStr}</span>
                 </div>
-                <div class="text-[10px] uppercase opacity-60 pb-3 mb-4 border-b border-white/10">
-                    ${shapeName} • ${d.col} • ${d.cla}
+                <div class="flex items-center gap-2 text-[10px] uppercase opacity-60 pb-3 mb-4 border-b border-white/10">
+                    ${shapeImg}
+                    <span>${shapeName} • ${d.col} • ${d.cla}</span>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-[9px] uppercase opacity-50 mb-6">
                     <span>${t.cut || 'Огр'}: <span>${d.cut}</span></span>
