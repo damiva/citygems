@@ -26,7 +26,36 @@ export async function gems() {
     if ( gems.length > 2 ) {
         cbr = {
             dse: {re: 3, lab: 0, sh: 1, ct: 3, col: 0, cla: 0, cut: 0, pol: 0, sym: 0, s1: 2, s2: 2, s3: 2, val: 3}, 
-            ttl: {}, idx: {}, cat: {}
+            ttl: {}, idx: {}, cat: {},
+            row: function(i) {
+                if (i < 0 || i >= (this.cat.val?.length || 0)) return null;
+                let res = {};
+                Object.keys(this.cat).forEach(k => res[k] = this.cat[k][i]);
+                return res;
+            },
+            find: function(query = {}) {
+                let keys = Object.keys(query).filter(k => this.cat[k]);
+                let len = this.cat.val?.length || 0;
+                let matches = [];
+                for (let i = 0; i < len; i++) {
+                    let ok = true;
+                    for (let k of keys) {
+                        let val = query[k];
+                        let current = this.cat[k][i];                
+                        if (typeof val === 'string') {
+                            if (val !== '' && current !== val) { 
+                                ok = false; 
+                                break; 
+                            }
+                        } else if (typeof val === 'object' && val !== null) {
+                            if (val.min !== undefined && current < val.min) { ok = false; break; }
+                            if (val.max !== undefined && current > val.max) { ok = false; break; }
+                        }
+                    }
+                    if (ok) matches.push(i);
+                }
+                return matches;
+            }
         };
         
         gems.shift().split(sep).forEach((k, i) => {
@@ -49,8 +78,8 @@ export async function gems() {
 
     // 3. Парсинг данных каталога
     if ( gems.length > 1 && ns.length ) {
-        let ruHeaders = gems[0].split(sep);
-        ns.forEach(k => cbr.ttl[k] = (ruHeaders[cbr.idx[k]] || k).trim() );
+        gems[0] = gems[0].split(sep);
+        ns.forEach(k => cbr.ttl[k] = (gems[0][cbr.idx[k]] || k).trim() );
         
         const setSh = new Set();
         const setCol = new Set();        
@@ -67,17 +96,18 @@ export async function gems() {
                     
                     if ( t > 1 ) {
                         o[k] = parse(raw);
-                        // Если это колонка цены (val), умножаем на рублевый курс + надбавку
                         if (k === 'val' && mult !== 1) o[k] = Math.round(o[k] * mult);
                     } else {
-                        // Оставляем строки в оригинальном виде (никакого toUpperCase)
                         o[k] = raw;
-                    }
-                    
-                    if ( !o[k] && (t & 1) ) o = null; 
+                    }  
+                    if ( !o[k] && (t & 1) ) o = null;
                 }
             });
-            if ( o ) ns.forEach(k => cbr.cat[k].push(o[k]));
+            if ( o ) {
+                ns.forEach(k => cbr.cat[k].push(o[k]));
+                if (o.sh) setSh.add(o.sh);
+                if (o.col) setCol.add(o.col);
+            }
         });
 
         const prices = cbr.cat.val || [];
@@ -85,11 +115,24 @@ export async function gems() {
         
         // Линейный поиск мин/макс (уже замененный и безопасный)
         let minCt = 0, maxCt = 0;
-        if (weights.length) { /* ... твой быстрый цикл поиска ... */ }
+        if (weights.length) {
+            minCt = weights[0];
+            maxCt = weights[0];
+            for (let i = 1; i < weights.length; i++) {
+                if (weights[i] < minCt) minCt = weights[i];
+                if (weights[i] > maxCt) maxCt = weights[i];
+            }
+        }
 
         let minVal = 0, maxVal = 0;
-        if (prices.length) { /* ... твой быстрый цикл поиска ... */ }
-        
+        if (prices.length) {
+            minVal = prices[0];
+            maxVal = prices[0];
+            for (let i = 1; i < prices.length; i++) {
+                if (prices[i] < minVal) minVal = prices[i];
+                if (prices[i] > maxVal) maxVal = prices[i];
+            }
+        }
         // Теперь фильтры собираются моментально, так как в Сетах лежит всего по 10-30 элементов!
         cbr.filters = {
             sh: [...setSh].filter(Boolean).sort(),
@@ -97,44 +140,10 @@ export async function gems() {
             ct: { min: minCt, max: maxCt },
             val: { min: minVal, max: maxVal }
         };
-    }
+        cbr.dse = dse;
+        gems = cbr;
+    } else gems = null;
 
-    // Защита, если файла нет или он пустой
-    if (typeof cbr !== 'object' || !cbr.cat) cbr = { cat: {}, ttl: {}, filters: {} };
-    cbr.dse = dse;
-
-    // Твои функции row и find возвращены на место!
-    cbr.row = function(i) {
-        if (i < 0 || i >= (this.cat.val?.length || 0)) return null;
-        let res = {};
-        Object.keys(this.cat).forEach(k => res[k] = this.cat[k][i]);
-        return res;
-    };
-
-    cbr.find = function(query = {}) {
-        let keys = Object.keys(query).filter(k => this.cat[k]);
-        let len = this.cat.val?.length || 0;
-        let matches = [];
-
-        for (let i = 0; i < len; i++) {
-            let ok = true;
-            for (let k of keys) {
-                let val = query[k];
-                let current = this.cat[k][i];
-                
-                if (typeof val === 'string') {
-                    // Строгое соответствие без смены регистра
-                    if (current !== val) { ok = false; break; }
-                } else if (typeof val === 'object' && val !== null) {
-                    if (val.min !== undefined && current < val.min) { ok = false; break; }
-                    if (val.max !== undefined && current > val.max) { ok = false; break; }
-                }
-            }
-            if (ok) matches.push(i);
-        }
-        return matches;
-    };
-    gems = cbr;
     return {
         rate,
         shapes,
