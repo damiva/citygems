@@ -29,7 +29,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const navLinks = document.querySelectorAll('.nav-link');
     const tabSections = document.querySelectorAll('.tab-section');
-
+    // --- Логика мобильного меню (Бургер) ---
+    const menuToggle = document.getElementById('menu-toggle');
+    const navAndControls = document.getElementById('nav-and-controls');
+    if (menuToggle && navAndControls) {
+        // Открытие/закрытие по клику на бургер
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuToggle.classList.toggle('active');
+            navAndControls.classList.toggle('active');
+        });
+        // Закрытие меню при клике на любую ссылку внутри
+        navAndControls.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', () => {
+                menuToggle.classList.remove('active');
+                navAndControls.classList.remove('active');
+            });
+        });
+        // Закрытие меню при клике в любую пустую область экрана
+        document.addEventListener('click', (e) => {
+            if (!navAndControls.contains(e.target) && !menuToggle.contains(e.target)) {
+                menuToggle.classList.remove('active');
+                navAndControls.classList.remove('active');
+            }
+        });
+    }
     // Состояние приложения
     let currentMatches = [];
     let currentPage = 1;
