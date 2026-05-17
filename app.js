@@ -56,14 +56,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const itemsPerPage = db.limit || 20;
 
-    // Восстановление темы из хранилища
-    if (localStorage.getItem('gems-theme') === 'light') {
+    // Восстановление и инициализация темы из хранилища
+    const savedTheme = localStorage.getItem('gems-theme');
+    const isLightInitial = savedTheme === 'light';
+    if (isLightInitial) {
         document.documentElement.classList.add('light-theme');
+        if (themeToggle) themeToggle.innerHTML = '<span>🌙 Тёмная тема</span>';
+    } else {
+        document.documentElement.classList.remove('light-theme');
+        if (themeToggle) themeToggle.innerHTML = '<span>☀️ Светлая тема</span>';
     }
 
+    // Обработчик переключения темы
     if (themeToggle) {
-        themeToggle?.addEventListener('click', () => {
-            const isLight = document.body.classList.toggle('light-theme');
+        themeToggle.addEventListener('click', () => {
+            const isLight = document.documentElement.classList.toggle('light-theme');
+            localStorage.setItem('gems-theme', isLight ? 'light' : 'dark');
             themeToggle.innerHTML = isLight ? '<span>🌙 Тёмная тема</span>' : '<span>☀️ Светлая тема</span>';
         });
     }
@@ -116,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Наполнение селекторов фильтров уникальными значениями из метаструктуры
     if (catalog.filters) {
         catalog.filters.sh?.forEach(sh => {
-            const text = db.shapes.title(sh) || sh;
+            const text = db.shapes[sh]?.txt || sh;
             filterSh?.insertAdjacentHTML('beforeend', `<option value="${sh}">${text}</option>`);
         });
 
@@ -139,8 +147,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const gem = catalog.row(rowIndex);
         if (!gem) return '';
 
-        const shapeTitle = db.shapes.title(gem.sh) || gem.sh;
-        const shapeImg = db.shapes.image(gem.sh) || 'db/default.svg';
+        // Прямое чтение параметров формы из объекта db.shapes без вызова функций
+        const shapeTitle = db.shapes[gem.sh]?.txt || gem.sh;
+        const shapeImg = db.shapes[gem.sh]?.img ? db.shapes[gem.sh].img : '';
         const formattedPrice = gem.val ? gem.val.toLocaleString('ru-RU') + ' ₽' : 'По запросу';
         const isSaved = wishlist.includes(rowIndex);
         
@@ -155,7 +164,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </svg>
                 </button>
                 <div class="gem-image-wrapper">
-                    <img src="${shapeImg}" alt="${shapeTitle}" class="gem-shape-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'40\\' height=\\'40\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23666\\' stroke-width=\\'1\\'><path d=\\'M6 3h12l4 6-10 12L2 9z\\'/></svg>'">
+                    ${shapeImg ? `
+                        <img src="${shapeImg}" alt="${shapeTitle}" class="gem-shape-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'40\\' height=\\'40\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23666\\' stroke-width=\\'1\\'><path d=\\'M6 3h12l4 6-10 12L2 9z\\'/></svg>';">
+                    ` : `
+                        <div class="gem-placeholder-icon" style="display:flex;align-items:center;justify-content:center;height:100%;font-size:24px;color:var(--text-secondary);">💎</div>
+                    `}
                 </div>
                 <div class="gem-details">
                     <div class="gem-main-info">
@@ -285,7 +298,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // МАГИЯ ГРУППОВОЙ ОТПРАВКИ WISHLIST В ЯНДЕКС.ФОРМЫ
+    // ГРУППОВАЙ ОТПРАВКА WISHLIST В ЯНДЕКС.ФОРМЫ
     const submitWishlistBtn = document.getElementById('submit-wishlist-form-btn');
     if (submitWishlistBtn) {
         submitWishlistBtn.addEventListener('click', () => {
@@ -296,12 +309,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             wishlist.forEach((rowIndex, i) => {
                 const gem = catalog.row(rowIndex);
                 if (gem) {
-                    const shTitle = db.shapes.title(gem.sh) || gem.sh;
+                    const shTitle = db.shapes[gem.sh]?.txt || gem.sh;
                     descriptionString += `Лот #${i + 1}: ${shTitle} | ${gem.ct.toFixed(2)}ct | Цвет: ${gem.col} | Чистота: ${gem.cla} | Огранка: ${gem.cut || '—'} | Цена: ${gem.val ? gem.val.toLocaleString('ru-RU') + ' ₽' : 'По запросу'}\\n`;
                 }
             });
 
-            // "text" — замените на внутренний ID большого текстового поля в вашей Яндекс.Форме
             const paramName = "text"; 
             const finalFormUrl = `${YANDEX_FORM_WISHLIST_BASE}?${paramName}=${encodeURIComponent(descriptionString)}`;
 
