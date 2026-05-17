@@ -62,9 +62,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     if (themeToggle) {
-        themeToggle.addEventListener('click', () => {
-            document.documentElement.classList.toggle('light-theme');
-            localStorage.setItem('gems-theme', document.documentElement.classList.contains('light-theme') ? 'light' : 'dark');
+        themeToggle?.addEventListener('click', () => {
+            const isLight = document.body.classList.toggle('light-theme');
+            themeToggle.innerHTML = isLight ? '<span>🌙 Тёмная тема</span>' : '<span>☀️ Светлая тема</span>';
         });
     }
 

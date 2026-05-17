@@ -134,11 +134,6 @@ export async function gems() {
         }
         return matches;
     };
-
-    // Методы shapes ровно в том виде, в котором ты их написал
-    shapes.image = function(s) { return (s = this[s]) && (s = s.img) ? "/db/" + s : "" };
-    shapes.title = function(s) { return (s = this[s]) && s.txt || "" };
-
     gems = cbr;
     return {
         rate,
