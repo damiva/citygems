@@ -4,7 +4,7 @@ export async function gems() {
     // 1. Загрузка ресурсов
     let [cbr, gems, shapes] = await Promise.all([
         fetch('https://www.cbr-xml-daily.ru/daily_json.js').then(r => r.json()).then(d => d?.Valute?.USD?.Value).catch(() => null),
-        fetch('db/gems.csv', { cache: 'default' }).then(r => r.text().split(/\r?\n/)).catch(() => []),
+        fetch('db/gems.csv', { cache: 'default' }).then(r => r.text()).then(t => t.split(/\r?\n/)).catch(() => []),
         fetch('db/shapes.json', { cache: 'default' }).then(r => r.json()).catch(() => ({})) // result is: {<sh>: {txt: "...", img: "..."}}
     ]);
 
