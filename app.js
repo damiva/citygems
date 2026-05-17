@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Загрузка оптимизированного ядра базы данных (gems.js)
     const db = await initDB();
-    if (!db || !db.catalog) {
+    if (!db || !db.gems) {
         statusMsg.innerHTML = `
             <div style="text-align:center; padding: 40px; font-family: serif; color:#d4af37;">
                 <h2>Не удалось развернуть каталог CityGems</h2>
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    const catalog = db.catalog;
+    const catalog = db.gems;
 
     // Успешная инициализация — отображение основного контейнера сайта
     statusMsg.classList.add('hidden');
