@@ -147,3 +147,4 @@ export async function gems() {
         limit: 20 // show items per page
     };
 }
+//data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='1'><path d='M6 3h12l4 6-10 12L2 9z'/></svg>
