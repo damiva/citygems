@@ -3,12 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CityGems это бриллианты</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Montserrat:wght@200;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <title>CityGems — Бриллианты</title>
+    <style>
+        :root {
+            --bg-primary: #121212;
+            --bg-surface: #1e1e1e;
+            --bg-card: #252525;
+            --accent: #d4af37;
+            --accent-hover: #f3cf65;
+            --text-main: #f5f5f5;
+            --text-muted: #aaaaaa;
+            --border: #333333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        header {
+            border-bottom: 1px solid var(--border);
+            padding: 20px;
+            text-align: center;
+            background-color: var(--bg-surface);
+        }
+
+        header h1 {
+            color: var(--accent);
+            font-size: 24px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Панель фильтров */
+        .filters-panel {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            color: var(--text-muted);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-group select, .range-inputs input {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px;
+            border-radius: 4px;
+            outline: none;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group select:focus, .range-inputs input:focus {
+            border-color: var(--accent);
+        }
+
+        .range-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        /* Сетка каталога */
+        .catalog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .gem-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+
+        .gem-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .gem-image-wrapper {
+            background-color: var(--bg-card);
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .gem-shape-img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.15));
+        }
+
+        .gem-info {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .gem-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+
+        .gem-specs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .gem-specs span strong {
+            color: var(--text-main);
+        }
+
+        .gem-price-box {
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gem-price {
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .order-btn {
+            background-color: transparent;
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .order-btn:hover {
+            background-color: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        /* Пагинация */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        .page-btn {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        #page-info {
+            font-size: 15px;
+            color: var(--text-muted);
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+            font-size: 17px;
+            background-color: var(--bg-surface);
+            border-radius: 8px;
+            border: 1px dashed var(--border);
+        }
+
+        #status-msg {
+            text-align: center;
+            color: var(--accent);
+            padding: 20px;
+            font-style: italic;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
 </head>
-<body class="min-h-screen light-theme">
-    <script type="module" src="script.js"></script>
+<body>
+
+    <header>
+        <h1>City Gems</h1>
+    </header>
+
+    <div class="container">
+        <div id="status-msg">Загрузка каталога бриллиантов...</div>
+
+        <section class="filters-panel hidden" id="filters-section">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="filter-sh">Огранка</label>
+                    <select id="filter-sh">
+                        <option value="">Все огранки</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-col">Цвет</label>
+                    <select id="filter-col">
+                        <option value="">Все цвета</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Вес, карат</label>
+                    <div class="range-inputs">
+                        <input type="number" id="filter-ct-min" step="0.01" placeholder="от">
+                        <input type="number" id="filter-ct-max" step="0.01" placeholder="до">
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>Цена, ₽</label>
+                    <div class="range-inputs">
+                        <input type="number" id="filter-val-min" placeholder="от">
+                        <input type="number" id="filter-val-max" placeholder="до">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <main class="catalog-grid" id="catalog-container"></main>
+
+        <div class="pagination hidden" id="pagination-section">
+            <button class="page-btn" id="btn-prev" disabled>Назад</button>
+            <span id="page-info">Страница 1 из 1</span>
+            <button class="page-btn" id="btn-next" disabled>Вперед</button>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>

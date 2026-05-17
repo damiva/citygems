@@ -1,0 +1,12 @@
+{
+    "RO": {"txt": "Круг",       "img": "RO.webp"},
+    "PR": {"txt": "Принцесса",  "img": "PR.webp"},
+    "OV": {"txt": "Овал",       "img": "OV.webp"},
+    "CU": {"txt": "Кушон",      "img": "CU.webp"},
+    "PS": {"txt": "Груша",      "img": "PS.webp"},
+    "EM": {"txt": "Изумруд",    "img": "EM.webp"},
+    "RA": {"txt": "Радиант",    "img": "RA.webp"},
+    "HB": {"txt": "Сердце",     "img": "HB.webp"},
+    "MQ": {"txt": "Маркиз",     "img": "MQ.webp"},
+    "AS": {"txt": "Ашер",       "img": "AS.webp"}
+}
