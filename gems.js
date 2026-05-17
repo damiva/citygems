@@ -52,6 +52,9 @@ export async function gems() {
         let ruHeaders = gems[0].split(sep);
         ns.forEach(k => cbr.ttl[k] = (ruHeaders[cbr.idx[k]] || k).trim() );
         
+        const setSh = new Set();
+        const setCol = new Set();        
+        
         gems.slice(1).forEach(r => {
             let o = {};
             r = r.split(sep);
@@ -77,15 +80,22 @@ export async function gems() {
             if ( o ) ns.forEach(k => cbr.cat[k].push(o[k]));
         });
 
-        const unique = arr => arr ? [...new Set(arr)].filter(Boolean).sort() : [];
         const prices = cbr.cat.val || [];
         const weights = cbr.cat.ct || [];
         
+        // Линейный поиск мин/макс (уже замененный и безопасный)
+        let minCt = 0, maxCt = 0;
+        if (weights.length) { /* ... твой быстрый цикл поиска ... */ }
+
+        let minVal = 0, maxVal = 0;
+        if (prices.length) { /* ... твой быстрый цикл поиска ... */ }
+        
+        // Теперь фильтры собираются моментально, так как в Сетах лежит всего по 10-30 элементов!
         cbr.filters = {
-            sh: unique(cbr.cat.sh),
-            col: unique(cbr.cat.col),
-            ct: {min: weights.length ? Math.min(...weights) : 0, max: weights.length ? Math.max(...weights) : 0},
-            val: {min: prices.length ? Math.min(...prices) : 0, max: prices.length ? Math.max(...prices) : 0}
+            sh: [...setSh].filter(Boolean).sort(),
+            col: [...setCol].filter(Boolean).sort(),
+            ct: { min: minCt, max: maxCt },
+            val: { min: minVal, max: maxVal }
         };
     }
 

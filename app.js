@@ -1,7 +1,5 @@
 import { gems as initDB } from './gems.js';
 
-// ТВОЯ МАГИЯ С ЯНДЕКС-ФОРМАМИ:
-// Замени этот URL на реальный адрес твоей созданной формы
 const YANDEX_FORM_BASE = "https://forms.yandex.ru/u/65b2bc4cd046881234567890/";
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -21,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const btnNext = document.getElementById('btn-next');
     const pageInfo = document.getElementById('page-info');
 
-    // 1. Инициализация базы данных из gems.js
+    // Инициализация базы данных
     const db = await initDB();
     if (!db) {
         statusMsg.textContent = "Не удалось загрузить каталог. Пожалуйста, обновите страницу позже.";
@@ -33,9 +31,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let currentMatches = [];
     let currentPage = 1;
-    const itemsPerPage = db.limit || 20; // Берем лимит напрямую из конфига gems.js!
+    const itemsPerPage = db.limit || 20;
 
-    // 2. Наполнение селектов уникальными значениями из кэша фильтров csv
+    // Заполнение фильтров
     if (db.gems.filters) {
         db.gems.filters.sh?.forEach(sh => {
             const label = db.shapes.title(sh) || sh;
@@ -46,7 +44,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             filterCol.insertAdjacentHTML('beforeend', `<option value="${col}">${col}</option>`);
         });
 
-        // Интерактивные подсказки минимума и максимума в плейсхолдерах
         if (db.gems.filters.ct) {
             filterCtMin.placeholder = `от ${db.gems.filters.ct.min}`;
             filterCtMax.placeholder = `до ${db.gems.filters.ct.max}`;
@@ -57,10 +54,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // 3. Генерация карточек и пагинация
+    // ОПТИМИЗИРОВАННЫЙ РЕНДЕР
     function renderPage() {
-        catalogContainer.innerHTML = '';
-        
         if (currentMatches.length === 0) {
             catalogContainer.innerHTML = '<div class="no-results">Камни с указанными параметрами не найдены.</div>';
             paginationSection.classList.add('hidden');
@@ -75,6 +70,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const start = (currentPage - 1) * itemsPerPage;
         const end = Math.min(start + itemsPerPage, currentMatches.length);
         
+        // Оптимизация: собираем всё в одну большую строку в оперативной памяти
+        let htmlBuffer = '';
+        
         for (let i = start; i < end; i++) {
             const rowIndex = currentMatches[i];
             const gem = db.gems.row(rowIndex);
@@ -84,11 +82,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const shapeImg = db.shapes.image(gem.sh) || 'db/default.svg';
             const formattedPrice = gem.val ? gem.val.toLocaleString('ru-RU') + ' ₽' : 'По запросу';
             
-            // Формируем ссылку на Яндекс.Форму с предзаполнением полей через query-параметры.
-            // В настройках Яндекс-формы вы выставляете прием переменных с именами sh, ct, col, cla, val.
             const orderUrl = `${YANDEX_FORM_BASE}?sh=${encodeURIComponent(gem.sh)}&ct=${gem.ct}&col=${encodeURIComponent(gem.col)}&cla=${encodeURIComponent(gem.cla)}&val=${gem.val}`;
 
-            const cardHtml = `
+            htmlBuffer += `
                 <div class="gem-card">
                     <div class="gem-image-wrapper">
                         <img src="${shapeImg}" alt="${shapeTitle}" class="gem-shape-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'50\\' height=\\'50\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23666\\' stroke-width=\\'1\\'><path d=\\'M6 3h12l4 6-10 12L2 9z\\'/></svg>'">
@@ -108,15 +104,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                 </div>
             `;
-            catalogContainer.insertAdjacentHTML('beforeend', cardHtml);
         }
+
+        // Рендерим на страницу ОДНИМ действием. Браузер скажет спасибо.
+        catalogContainer.innerHTML = htmlBuffer;
 
         pageInfo.textContent = `Страница ${currentPage} из ${totalPages}`;
         btnPrev.disabled = currentPage === 1;
         btnNext.disabled = currentPage === totalPages || totalPages === 0;
     }
 
-    // 4. Сбор параметров из фильтров и вызов cbr.find()
+    // Функция фильтрации
     function applyFilters() {
         const query = {};
 
@@ -144,10 +142,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderPage();
     }
 
-    // Привязка событий реактивности интерфейса
-    [filterSh, filterCol].forEach(el => el.addEventListener('change', applyFilters));
-    [filterCtMin, filterCtMax, filterValMin, filterValMax].forEach(el => el.addEventListener('input', applyFilters));
+    // ПАТТЕРН DEBOUNCE (Задержка выполнения для инпутов ввода)
+    function debounce(func, delay) {
+        let timeoutId;
+        return function (...args) {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func.apply(this, args), delay);
+        };
+    }
 
+    const debouncedApplyFilters = debounce(applyFilters, 300);
+
+    // Привязка событий: выпадающие списки бьют сразу, инпуты — через дебаунс
+    filterSh.addEventListener('change', applyFilters);
+    filterCol.addEventListener('change', applyFilters);
+    
+    [filterCtMin, filterCtMax, filterValMin, filterValMax].forEach(el => {
+        el.addEventListener('input', debouncedApplyFilters);
+    });
+
+    // Пагинация
     btnPrev.addEventListener('click', () => {
         if (currentPage > 1) {
             currentPage--;
@@ -165,6 +179,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Стартовая прогрузка всего каталога
+    // Стартовый запуск
     applyFilters();
 });
