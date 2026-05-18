@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const catalogContainer = document.getElementById('catalog-container');
     const paginationSection = document.getElementById('pagination-section');
     const counterTotal = document.getElementById('counter-total');
+    const catalogTotal = document.getElemnttById('catalog-total');
     
     const filterSh = document.getElementById('filter-sh');
     const filterCol = document.getElementById('filter-col');
@@ -75,6 +76,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const catalog = db.gems;
 
     // Успешная инициализация — отображение основного контейнера сайта
+    catalogTotal.innerHTML = catalog.cat.re.length.toLocaleString('ru-RU');
+    
     statusMsg.classList.add('hidden');
     if (appWrapper) appWrapper.classList.remove('hidden');
 

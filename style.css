@@ -85,13 +85,15 @@ body {
     background-color: var(--bg-header); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
 }
 
+/* Десктопная сетка хедера: 3 равные зоны для идеального центрирования навигации */
 .header-content {
     position: relative; max-width: 1600px; height: 100%; margin: 0 auto; padding: 0 40px;
-    display: flex; justify-content: space-between; align-items: center;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
 }
 
-/* Обновленная зона логотипа */
+/* Зона логотипа */
 .logo-zone { 
+    grid-column: 1; justify-self: start;
     display: flex; align-items: center; gap: 12px; flex-direction: row; 
 }
 
@@ -108,12 +110,17 @@ body {
     font-weight: 500; color: var(--accent-gold); text-transform: lowercase; 
 }
 
-/* Контейнер навигации (для десктопа) */
+/* Развертывание контейнера на десктопе, чтобы дочерние элементы заняли свои Grid-позиции */
 .nav-and-controls {
-    display: flex; align-items: center; gap: 40px;
+    display: contents;
 }
 
-.main-nav { display: flex; gap: 40px; }
+/* Главное меню встает строго по центру */
+.main-nav { 
+    grid-column: 2; justify-self: center;
+    display: flex; gap: 40px; 
+}
+
 .nav-link {
     color: var(--text-secondary); text-decoration: none; font-size: 10pt; font-weight: 500;
     text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; position: relative; transition: var(--transition-smooth);
@@ -130,20 +137,32 @@ body {
     padding: 1px 6px; border-radius: 10px; margin-left: 4px; vertical-align: middle;
 }
 
-/* Компактная кнопка переключения темы */
-.theme-btn-compact {
+/* Компактная круглая кнопка переключения темы (скрывает любой текст внутри себя) */
+#theme-toggle, .theme-btn-compact {
+    grid-column: 3; justify-self: end;
     background: none; border: 1px solid var(--border-color); border-radius: 50%;
     width: 36px; height: 36px; display: flex; justify-content: center; align-items: center;
-    cursor: pointer; color: var(--text-secondary); transition: var(--transition-smooth);
+    cursor: pointer; transition: var(--transition-smooth);
+    
+    /* Трюк для полного скрытия текстовых подписей из JS без повреждения SVG */
+    font-size: 0 !important; color: transparent !important; line-height: 0 !important; overflow: hidden;
 }
 
-.theme-btn-compact:hover { border-color: var(--accent-gold-hover); color: var(--accent-gold); }
+#theme-toggle:hover, .theme-btn-compact:hover { 
+    border-color: var(--accent-gold-hover); 
+    box-shadow: 0 0 12px var(--border-hover);
+}
 
-.theme-btn-compact .sun-icon { display: block; }
-.theme-btn-compact .moon-icon { display: none; }
+#theme-toggle svg, .theme-btn-compact svg { 
+    width: 18px; height: 18px; stroke: var(--text-secondary); fill: none; transition: var(--transition-smooth); 
+}
+#theme-toggle:hover svg, .theme-btn-compact:hover svg { stroke: var(--accent-gold); }
 
-.light-theme .theme-btn-compact .sun-icon { display: none; }
-.light-theme .theme-btn-compact .moon-icon { display: block; }
+#theme-toggle .sun-icon, .theme-btn-compact .sun-icon { display: block; }
+#theme-toggle .moon-icon, .theme-btn-compact .moon-icon { display: none; }
+
+.light-theme #theme-toggle .sun-icon, .light-theme .theme-btn-compact .sun-icon { display: none; }
+.light-theme #theme-toggle .moon-icon, .light-theme .theme-btn-compact .moon-icon { display: block; }
 
 /* Бургер-меню (скрыто на десктопе) */
 .menu-toggle {
@@ -319,15 +338,42 @@ select:focus, .range-inputs input:focus { border-color: var(--accent-gold); }
     .gem-card-premium.card-row .gem-actions { width: 100%; }
 }
 
-/* Мобильная версия (Телефоны) - Бургер и выпадающее меню */
+/* Мобильная версия (Телефоны) - Бургер по центру, переключатель тем зафиксирован справа */
 @media (max-width: 768px) {
-    .header-content { padding: 0 20px; }
-    
-    .menu-toggle {
-        display: flex; /* Показываем бургер на мобильных */
+    .header-content {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start; /* Оставляет логотип на своем законном месте слева */
+        padding: 0 20px;
     }
 
-    /* Превращаем блок навигации в выпадающую панель */
+    .logo-zone {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    /* Бургер-меню строго по центру экрана */
+    .menu-toggle {
+        display: flex;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 1001;
+    }
+
+    /* Фиксируем кнопку смены темы на шапке справа, выводя её из трансформируемой мобильной панели */
+    #theme-toggle, .theme-btn-compact {
+        position: fixed;
+        right: 20px;
+        top: 22px; /* Выравнивание по центру высоты 80px: (80px - 36px) / 2 */
+        z-index: 1002; /* Выше подложки выпадающего меню */
+        margin: 0;
+    }
+
+    /* Выпадающая панель (теперь только для навигационных ссылок) */
     .nav-and-controls {
         position: fixed;
         top: 80px; /* Высота шапки */
@@ -336,7 +382,7 @@ select:focus, .range-inputs input:focus { border-color: var(--accent-gold); }
         height: calc(100vh - 80px); /* На всю оставшуюся высоту */
         background: var(--bg-surface);
         border-left: 1px solid var(--border-color);
-        box-shadow: -5px 10px 30px rgba(0,0,0,0.5);
+        box-shadow: -5px 10px 30px rgba(0, 0, 0, 0.5);
         flex-direction: column;
         align-items: flex-start;
         padding: 30px 24px;
@@ -344,9 +390,9 @@ select:focus, .range-inputs input:focus { border-color: var(--accent-gold); }
         transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         z-index: 1000;
         border-radius: 0 0 0 12px;
+        display: flex;
     }
 
-    /* Когда меню активно, выдвигаем его */
     .nav-and-controls.active {
         right: 0;
     }
