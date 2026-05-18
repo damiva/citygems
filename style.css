@@ -387,7 +387,7 @@ select:focus, .range-inputs input:focus { border-color: var(--accent-gold); }
         display: flex !important;
         flex-direction: row !important;
         gap: 20px !important;
-        align-items: center;
+        justify-self: center;
     }
 
     /* Скрываем текстовые подписи у ссылок меню, оставляя только векторные иконки */
