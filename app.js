@@ -59,6 +59,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentPage = 1;
     let currentView = localStorage.getItem('gems-view') || 'grid';
     let wishlist = JSON.parse(localStorage.getItem('gems-wishlist')) || [];
+    
+    // МИГРАЦИЯ ДАННЫХ: переход от массива индексов [1, 2] к массиву объектов [{id: 1, count: 1}]
+    if (wishlist.length > 0 && typeof wishlist[0] === 'number') {
+        wishlist = wishlist.map(id => ({ id, count: 1 }));
+    }
+    
     let currentTab = 'catalog';
 
     // Загрузка оптимизированного ядра базы данных (gems.js)
@@ -107,6 +113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    // Изменение/применение CSS классов отображения сетки или списка
     function applyViewSettings() {
         if (currentView === 'grid') {
             viewGridBtn?.classList.add('active');
@@ -126,7 +133,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Обработчик нажатия на логотип для вывода вкладки "О нас"
     if (logoZone) {
         logoZone.addEventListener('click', () => {
             switchTab('about');
@@ -165,6 +171,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Генерация HTML-разметки карточки лота
     function makeCardHtml(rowIndex) {
         const gem = catalog.row(rowIndex);
         if (!gem) return '';
@@ -172,12 +179,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         const shapeTitle = db.shapes[gem.sh]?.txt || gem.sh;
         const shapeImg = db.shapes[gem.sh]?.img ? db.shapes[gem.sh].img : '';
         const formattedPrice = gem.val ? gem.val.toLocaleString('ru-RU') + ' ₽' : 'По запросу';
-        const isSaved = wishlist.includes(rowIndex);
         
-        const directOrderUrl = `${YANDEX_FORM_WISHLIST_BASE}?sh=${encodeURIComponent(gem.sh)}&ct=${gem.ct}&col=${encodeURIComponent(gem.col)}&cla=${encodeURIComponent(gem.cla)}&val=${gem.val}`;
+        const wishlistItem = wishlist.find(item => item.id === rowIndex);
+        const isSaved = !!wishlistItem;
+        const count = wishlistItem ? wishlistItem.count : 1;
+        
+        // Форматирование габаритов s1 x s2 x s3
+        const formattedSize = (gem.s1 && gem.s2 && gem.s3) ? `${gem.s1.toFixed(2)} × ${gem.s2.toFixed(2)} × ${gem.s3.toFixed(2)} мм` : '—';
+
+        // Панель управления количеством и кнопка удаления (только для вкладки Избранного)
+        const wishlistControlsHtml = (currentTab === 'wishlist') ? `
+            <div class="wishlist-qty-container" style="display: flex; align-items: center; gap: 10px; margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <span class="spec-label" style="font-size: 11px; color: var(--text-secondary, #8a929e);">Кол-во:</span>
+                <div class="qty-controls" style="display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; background: rgba(0,0,0,0.15);">
+                    <button class="qty-btn btn-minus" data-index="${rowIndex}" style="background: none; border: none; color: var(--text-primary); padding: 4px 10px; cursor: pointer; font-weight: bold; font-size: 14px;">-</button>
+                    <input type="number" class="qty-input" data-index="${rowIndex}" value="${count}" min="1" style="width: 35px; text-align: center; background: none; border: none; color: var(--text-primary); font-size: 13px; font-weight: bold; -moz-appearance: textfield; padding: 0;">
+                    <button class="qty-btn btn-plus" data-index="${rowIndex}" style="background: none; border: none; color: var(--text-primary); padding: 4px 10px; cursor: pointer; font-weight: bold; font-size: 14px;">+</button>
+                </div>
+                <button class="remove-wishlist-item-btn" data-index="${rowIndex}" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 12px; margin-left: auto; display: flex; align-items: center; gap: 4px; font-weight: 500;">
+                    🗑️ Удалить
+                </button>
+            </div>
+        ` : '';
 
         return `
-            <div class="gem-card-premium ${currentView === 'list' ? 'card-row' : ''}" data-index="${rowIndex}">
+            <div class="gem-card-premium ${currentView === 'list' ? 'card-row' : ''}" data-index="${rowIndex}" style="position: relative;">
+                <div class="gem-lab-badge" style="position: absolute; top: 12px; left: 12px; background: rgba(0, 0, 0, 0.75); color: #d4af37; padding: 3px 8px; font-size: 11px; font-weight: 600; border-radius: 4px; letter-spacing: 0.5px; z-index: 2; border: 1px solid rgba(212, 175, 55, 0.4); font-family: sans-serif;">
+                    ${gem.lab || 'GIA'}
+                </div>
                 <button class="wishlist-btn ${isSaved ? 'in-wishlist' : ''}" aria-label="В коллекцию">
                     <svg viewBox="0 0 24 24" class="heart-icon">
                         <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
@@ -191,19 +220,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     `}
                 </div>
                 <div class="gem-details">
-                    <div class="gem-main-info">
-                        <h3 class="gem-title-text">${shapeTitle} &middot; ${gem.ct.toFixed(2)} Ct</h3>
-                        <span class="gem-price-tag">${formattedPrice}</span>
+                    <div class="gem-main-info" style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; margin-bottom: 10px;">
+                        <h3 class="gem-title-text" style="margin: 0; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${shapeTitle}</h3>
+                        <span class="gem-price-tag" style="margin-left: auto; white-space: nowrap; font-size: 14px; font-weight: 700; color: #d4af37;">${gem.ct.toFixed(2)} Ct &middot; ${formattedPrice}</span>
                     </div>
                     <div class="gem-specifications-grid">
                         <div class="spec-item"><span class="spec-label">Цвет</span><span class="spec-val">${gem.col}</span></div>
                         <div class="spec-item"><span class="spec-label">Чистота</span><span class="spec-val">${gem.cla}</span></div>
                         <div class="spec-item"><span class="spec-label">Огранка</span><span class="spec-val">${gem.cut || '—'}</span></div>
-                        <div class="spec-item"><span class="spec-label">Экспертиза</span><span class="spec-val">${gem.lab || 'GIA'}</span></div>
+                        <div class="spec-item"><span class="spec-label">Размер</span><span class="spec-val">${formattedSize}</span></div>
                     </div>
-                    <div class="gem-actions">
-                        <a href="${directOrderUrl}" target="_blank" class="premium-order-btn">Резерв лота</a>
-                    </div>
+                    ${wishlistControlsHtml}
                 </div>
             </div>
         `;
@@ -265,8 +292,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (panelCount) panelCount.textContent = wishlist.length;
 
         let htmlBuffer = '';
-        wishlist.forEach(idx => {
-            htmlBuffer += makeCardHtml(idx);
+        wishlist.forEach(item => {
+            htmlBuffer += makeCardHtml(item.id);
         });
         
         wishlistContainer.innerHTML = htmlBuffer;
@@ -274,13 +301,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function bindWishlistInteractions() {
+        // Логика нажатия на "Сердечко" на любой вкладке
         document.querySelectorAll('.wishlist-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const card = e.currentTarget.closest('[data-index]');
                 const index = parseInt(card.getAttribute('data-index'), 10);
                 
-                const position = wishlist.indexOf(index);
+                const position = wishlist.findIndex(item => item.id === index);
                 if (position > -1) {
                     wishlist.splice(position, 1);
                     e.currentTarget.classList.remove('in-wishlist');
@@ -293,7 +321,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 } else {
-                    wishlist.push(index);
+                    wishlist.push({ id: index, count: 1 });
                     e.currentTarget.classList.add('in-wishlist');
                 }
                 
@@ -301,6 +329,54 @@ document.addEventListener('DOMContentLoaded', async () => {
                 updateWishlistBadges();
             });
         });
+
+        // События изменения количества и полного удаления только внутри Вишлиста
+        if (currentTab === 'wishlist') {
+            document.querySelectorAll('.qty-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+                    const isPlus = e.currentTarget.classList.contains('btn-plus');
+                    const item = wishlist.find(item => item.id === index);
+                    if (item) {
+                        if (isPlus) {
+                            item.count++;
+                        } else if (item.count > 1) {
+                            item.count--;
+                        }
+                        const input = e.currentTarget.parentElement.querySelector('.qty-input');
+                        if (input) input.value = item.count;
+                        localStorage.setItem('gems-wishlist', JSON.stringify(wishlist));
+                    }
+                });
+            });
+
+            document.querySelectorAll('.qty-input').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+                    let val = parseInt(e.currentTarget.value, 10);
+                    if (isNaN(val) || val < 1) val = 1;
+                    e.currentTarget.value = val;
+                    const item = wishlist.find(item => item.id === index);
+                    if (item) {
+                        item.count = val;
+                        localStorage.setItem('gems-wishlist', JSON.stringify(wishlist));
+                    }
+                });
+            });
+
+            document.querySelectorAll('.remove-wishlist-item-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+                    const position = wishlist.findIndex(item => item.id === index);
+                    if (position > -1) {
+                        wishlist.splice(position, 1);
+                        localStorage.setItem('gems-wishlist', JSON.stringify(wishlist));
+                        renderWishlistTab();
+                        updateWishlistBadges();
+                    }
+                });
+            });
+        }
     }
 
     function updateWishlistBadges() {
@@ -315,18 +391,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Сборка данных для формы с учетом измененного количества лотов
     const submitWishlistBtn = document.getElementById('submit-wishlist-form-btn');
     if (submitWishlistBtn) {
         submitWishlistBtn.addEventListener('click', () => {
             if (wishlist.length === 0) return;
 
-            let descriptionString = "Запрос статуса наличия для партии бриллиантов:\\n\\n";
+            let descriptionString = "Запрос статуса наличия для партии бриллиантов:\n\n";
             
-            wishlist.forEach((rowIndex, i) => {
-                const gem = catalog.row(rowIndex);
+            wishlist.forEach((item, i) => {
+                const gem = catalog.row(item.id);
                 if (gem) {
                     const shTitle = db.shapes[gem.sh]?.txt || gem.sh;
-                    descriptionString += `Лот #${i + 1}: ${shTitle} | ${gem.ct.toFixed(2)}ct | Цвет: ${gem.col} | Чистота: ${gem.cla} | Огранка: ${gem.cut || '—'} | Цена: ${gem.val ? gem.val.toLocaleString('ru-RU') + ' ₽' : 'По запросу'}\\n`;
+                    descriptionString += `Лот #${i + 1}: ${shTitle} | ${gem.ct.toFixed(2)}ct | Цвет: ${gem.col} | Чистота: ${gem.cla} | Огранка: ${gem.cut || '—'} | Количество: ${item.count} | Цена: ${gem.val ? gem.val.toLocaleString('ru-RU') + ' ₽' : 'По запросу'}\n`;
                 }
             });
 
@@ -360,9 +437,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         currentMatches = catalog.find(query);
         
-        // ОБНОВЛЕННЫЙ СЧЕТЧИК: теперь выводит "Найдено X из Y"
         if (counterTotal) {
-            const totalGemsCount = catalog.cat.val ? catalog.cat.re.length : 0;
+            const totalGemsCount = catalog.cat.val ? catalog.cat.val.length : 0;
             counterTotal.innerHTML = `Найдено: <strong>${currentMatches.length.toLocaleString('ru-RU')}</strong> из ${totalGemsCount.toLocaleString('ru-RU')}`;
         }
         
@@ -418,4 +494,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     updateWishlistBadges();
     applyFilters();
+    switchTab('about'); // По умолчанию открывать вкладку "О нас" при старте
 });
