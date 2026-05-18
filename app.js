@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const catalogContainer = document.getElementById('catalog-container');
     const paginationSection = document.getElementById('pagination-section');
     const counterTotal = document.getElementById('counter-total');
-    const catalogTotal = document.getElementById('catalog-total'); // ИСПРАВЛЕНО: убрана опечатка getElemnttById
     
     const filterSh = document.getElementById('filter-sh');
     const filterCol = document.getElementById('filter-col');
@@ -74,11 +73,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const catalog = db.gems;
 
-    // Отображение общего количества лотов в системе
-    if (catalogTotal && catalog.cat.val) {
-        catalogTotal.innerHTML = catalog.cat.val.length.toLocaleString('ru-RU');
-    }
-    
     statusMsg.classList.add('hidden');
     if (appWrapper) appWrapper.classList.remove('hidden');
 
@@ -363,8 +357,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // ОБНОВЛЕННЫЙ СЧЕТЧИК: теперь выводит "Найдено X из Y"
         if (counterTotal) {
-            const totalGemsCount = catalog.cat.val ? catalog.cat.val.length : 0;
-            counterTotal.innerHTML = `Найдено позиций: <strong>${currentMatches.length.toLocaleString('ru-RU')}</strong> из <strong>${totalGemsCount.toLocaleString('ru-RU')}</strong>`;
+            const totalGemsCount = catalog.cat.val ? catalog.cat.re.length : 0;
+            counterTotal.innerHTML = `Найдено: <strong>${currentMatches.length.toLocaleString('ru-RU')}</strong> из ${totalGemsCount.toLocaleString('ru-RU')}`;
         }
         
         currentPage = 1; 
