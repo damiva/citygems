@@ -89,17 +89,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isLightInitial = savedTheme === 'light';
     if (isLightInitial) {
         document.documentElement.classList.add('light-theme');
-        if (themeToggle) themeToggle.innerHTML = '<span>🌙 Тёмная тема</span>';
+        if (themeToggle) themeToggle.innerHTML = '<span>🌙</span>';
     } else {
         document.documentElement.classList.remove('light-theme');
-        if (themeToggle) themeToggle.innerHTML = '<span>☀️ Светлая тема</span>';
+        if (themeToggle) themeToggle.innerHTML = '<span>☀️</span>';
     }
 
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
             const isLight = document.documentElement.classList.toggle('light-theme');
             localStorage.setItem('gems-theme', isLight ? 'light' : 'dark');
-            themeToggle.innerHTML = isLight ? '<span>🌙 Тёмная тема</span>' : '<span>☀️ Светлая тема</span>';
+            themeToggle.innerHTML = isLight ? '<span style="background:black">🌙</span>' : '<span>☀️</span>';
         });
     }
 

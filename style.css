@@ -145,7 +145,7 @@ body {
     cursor: pointer; transition: var(--transition-smooth);
     
     /* Трюк для полного скрытия текстовых подписей из JS без повреждения SVG */
-    font-size: 0 !important; color: transparent !important; line-height: 0 !important; overflow: hidden;
+    /* font-size: 0 !important; color: transparent !important; line-height: 0 !important; overflow: hidden; */
 }
 
 #theme-toggle:hover, .theme-btn-compact:hover { 
