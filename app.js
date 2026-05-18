@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const navLinks = document.querySelectorAll('.nav-link');
     const tabSections = document.querySelectorAll('.tab-section');
+    const logoZone = document.getElementById('logo-zone');
 
     // --- Логика мобильного меню (Бургер) ---
     const menuToggle = document.getElementById('menu-toggle');
@@ -78,22 +79,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const itemsPerPage = db.limit || 20;
 
-    // Восстановление и初始化 темы из хранилища
+    // Восстановление и инициализация темы из хранилища (без перезаписи SVG структуры)
     const savedTheme = localStorage.getItem('gems-theme');
     const isLightInitial = savedTheme === 'light';
     if (isLightInitial) {
         document.documentElement.classList.add('light-theme');
-        if (themeToggle) themeToggle.innerHTML = '<span>🌙</span>';
     } else {
         document.documentElement.classList.remove('light-theme');
-        if (themeToggle) themeToggle.innerHTML = '<span>☀️</span>';
     }
 
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
             const isLight = document.documentElement.classList.toggle('light-theme');
             localStorage.setItem('gems-theme', isLight ? 'light' : 'dark');
-            themeToggle.innerHTML = isLight ? '<span style="background:black">🌙</span>' : '<span>☀️</span>';
         });
     }
 
@@ -127,6 +125,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             switchTab(e.currentTarget.getAttribute('data-tab'));
         });
     });
+
+    // Обработчик нажатия на логотип для вывода вкладки "О нас"
+    if (logoZone) {
+        logoZone.addEventListener('click', () => {
+            switchTab('about');
+        });
+    }
 
     function switchTab(tabId) {
         currentTab = tabId;
