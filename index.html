@@ -8,13 +8,34 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Гарантирует, что до полной загрузки JS пользователь не увидит "сломанную" верстку */
+        #app-wrapper.hidden {
+            display: none !important;
+        }
+        /* Стартовый темный или светлый фон, чтобы экран не мигал белым цветом при загрузке стилей */
+        html {
+            background-color: #0a0b0d; /* Цвет по умолчанию для темной темы */
+        }
+        html.light-theme {
+            background-color: #f7f9fc; /* Цвет для светлой темы */
+        }
+    </style>
+    
+    <script>
+        // Мгновенная инициализация темы ДО рендеринга страницы (предотвращает белый миг)
+        const savedTheme = localStorage.getItem('gems-theme');
+        if (savedTheme === 'light') {
+            document.documentElement.classList.add('light-theme');
+        }
+    </script>
 </head>
 <body>
     <div id="status-msg" class="loader-overlay">
         <div class="luxury-spinner">
             <div class="spinner-rhombus"></div>
         </div>
-        <p class="loader-text">Инициализация премиального каталога...</p>
+        <p class="loader-text">Инициализация каталога...</p>
     </div>
 
     <div id="app-wrapper" class="app-container hidden">

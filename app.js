@@ -1,6 +1,6 @@
 import { gems as initDB } from './gems.js';
 
-// Премиальная ссылка на форму сбора вишлистов в Яндекс.Формах
+// Ссылка на форму сбора вишлистов в Яндекс.Формах
 const YANDEX_FORM_WISHLIST_BASE = "https://forms.yandex.ru/u/65b2bc4cd046881234567890/";
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const catalogContainer = document.getElementById('catalog-container');
     const paginationSection = document.getElementById('pagination-section');
     const counterTotal = document.getElementById('counter-total');
-    const catalogTotal = document.getElemnttById('catalog-total');
+    const catalogTotal = document.getElementById('catalog-total'); // ИСПРАВЛЕНО: убрана опечатка getElemnttById
     
     const filterSh = document.getElementById('filter-sh');
     const filterCol = document.getElementById('filter-col');
@@ -30,24 +30,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const navLinks = document.querySelectorAll('.nav-link');
     const tabSections = document.querySelectorAll('.tab-section');
+
     // --- Логика мобильного меню (Бургер) ---
     const menuToggle = document.getElementById('menu-toggle');
     const navAndControls = document.getElementById('nav-and-controls');
     if (menuToggle && navAndControls) {
-        // Открытие/закрытие по клику на бургер
         menuToggle.addEventListener('click', (e) => {
             e.stopPropagation();
             menuToggle.classList.toggle('active');
             navAndControls.classList.toggle('active');
         });
-        // Закрытие меню при клике на любую ссылку внутри
         navAndControls.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', () => {
                 menuToggle.classList.remove('active');
                 navAndControls.classList.remove('active');
             });
         });
-        // Закрытие меню при клике в любую пустую область экрана
         document.addEventListener('click', (e) => {
             if (!navAndControls.contains(e.target) && !menuToggle.contains(e.target)) {
                 menuToggle.classList.remove('active');
@@ -55,6 +53,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
     // Состояние приложения
     let currentMatches = [];
     let currentPage = 1;
@@ -75,15 +74,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const catalog = db.gems;
 
-    // Успешная инициализация — отображение основного контейнера сайта
-    catalogTotal.innerHTML = catalog.cat.re.length.toLocaleString('ru-RU');
+    // Отображение общего количества лотов в системе
+    if (catalogTotal && catalog.cat.val) {
+        catalogTotal.innerHTML = catalog.cat.val.length.toLocaleString('ru-RU');
+    }
     
     statusMsg.classList.add('hidden');
     if (appWrapper) appWrapper.classList.remove('hidden');
 
     const itemsPerPage = db.limit || 20;
 
-    // Восстановление и инициализация темы из хранилища
+    // Восстановление и初始化 темы из хранилища
     const savedTheme = localStorage.getItem('gems-theme');
     const isLightInitial = savedTheme === 'light';
     if (isLightInitial) {
@@ -94,7 +95,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (themeToggle) themeToggle.innerHTML = '<span>☀️ Светлая тема</span>';
     }
 
-    // Обработчик переключения темы
     if (themeToggle) {
         themeToggle.addEventListener('click', () => {
             const isLight = document.documentElement.classList.toggle('light-theme');
@@ -103,7 +103,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Инициализация режимов отображения (Сетка / Список)
     applyViewSettings();
 
     [viewGridBtn, viewListBtn].forEach(btn => {
@@ -128,7 +127,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Навигационная система по вкладкам
     navLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
@@ -148,7 +146,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Наполнение селекторов фильтров уникальными значениями из метаструктуры
     if (catalog.filters) {
         catalog.filters.sh?.forEach(sh => {
             const text = db.shapes[sh]?.txt || sh;
@@ -169,18 +166,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Высокооптимизированный строковый генератор разметки карточек
     function makeCardHtml(rowIndex) {
         const gem = catalog.row(rowIndex);
         if (!gem) return '';
 
-        // Прямое чтение параметров формы из объекта db.shapes без вызова функций
         const shapeTitle = db.shapes[gem.sh]?.txt || gem.sh;
         const shapeImg = db.shapes[gem.sh]?.img ? db.shapes[gem.sh].img : '';
         const formattedPrice = gem.val ? gem.val.toLocaleString('ru-RU') + ' ₽' : 'По запросу';
         const isSaved = wishlist.includes(rowIndex);
         
-        // Прямой резерв отдельного лота
         const directOrderUrl = `${YANDEX_FORM_WISHLIST_BASE}?sh=${encodeURIComponent(gem.sh)}&ct=${gem.ct}&col=${encodeURIComponent(gem.col)}&cla=${encodeURIComponent(gem.cla)}&val=${gem.val}`;
 
         return `
@@ -216,7 +210,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     }
 
-    // Рендеринг основного каталога
     function renderPage() {
         if (currentTab !== 'catalog') return;
 
@@ -251,7 +244,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (btnNext) btnNext.disabled = currentPage === totalPages || totalPages === 0;
     }
 
-    // Рендеринг и управление вкладкой Избранного
     function renderWishlistTab() {
         const wishlistContainer = document.getElementById('wishlist-container');
         const actionPanel = document.getElementById('wishlist-action-panel');
@@ -282,7 +274,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         bindWishlistInteractions();
     }
 
-    // Слушатель кликов по сердечкам
     function bindWishlistInteractions() {
         document.querySelectorAll('.wishlist-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -325,7 +316,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // ГРУППОВАЙ ОТПРАВКА WISHLIST В ЯНДЕКС.ФОРМЫ
     const submitWishlistBtn = document.getElementById('submit-wishlist-form-btn');
     if (submitWishlistBtn) {
         submitWishlistBtn.addEventListener('click', () => {
@@ -343,12 +333,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const paramName = "text"; 
             const finalFormUrl = `${YANDEX_FORM_WISHLIST_BASE}?${paramName}=${encodeURIComponent(descriptionString)}`;
-
             window.open(finalFormUrl, '_blank');
         });
     }
 
-    // Поисковая фильтрация
     function applyFilters() {
         const query = {};
 
@@ -372,12 +360,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         currentMatches = catalog.find(query);
-        if (counterTotal) counterTotal.textContent = currentMatches.length.toLocaleString('ru-RU');
+        
+        // ОБНОВЛЕННЫЙ СЧЕТЧИК: теперь выводит "Найдено X из Y"
+        if (counterTotal) {
+            const totalGemsCount = catalog.cat.val ? catalog.cat.val.length : 0;
+            counterTotal.innerHTML = `Найдено позиций: <strong>${currentMatches.length.toLocaleString('ru-RU')}</strong> из <strong>${totalGemsCount.toLocaleString('ru-RU')}</strong>`;
+        }
+        
         currentPage = 1; 
         renderPage();
     }
 
-    // Debounce для инпутов
     function debounce(func, delay) {
         let timeoutId;
         return function (...args) {
@@ -407,7 +400,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         clearFiltersAction();
     });
 
-    // Навигация
     btnPrev?.addEventListener('click', () => {
         if (currentPage > 1) {
             currentPage--;
