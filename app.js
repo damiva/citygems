@@ -172,15 +172,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Генерация HTML-разметки карточки лота
-    function makeCardHtml(rowIndex) {
+    function makeCardHtml(rowIndex, wishlistItem) {
         const gem = catalog.row(rowIndex);
         if (!gem) return '';
 
         const shapeTitle = db.shapes[gem.sh]?.txt || gem.sh;
         const shapeImg = db.shapes[gem.sh]?.img ? db.shapes[gem.sh].img : '';
         const formattedPrice = gem.val ? gem.val.toLocaleString('ru-RU') + ' ₽' : 'По запросу';
-        
-        const wishlistItem = wishlist.find(item => item.id === rowIndex);
         const isSaved = !!wishlistItem;
         const count = wishlistItem ? wishlistItem.count : 1;
         
@@ -189,22 +187,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Панель управления количеством и кнопка удаления (только для вкладки Избранного)
         const wishlistControlsHtml = (currentTab === 'wishlist') ? `
-            <div class="wishlist-qty-container" style="display: flex; align-items: center; gap: 10px; margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <span class="spec-label" style="font-size: 11px; color: var(--text-secondary, #8a929e);">Кол-во:</span>
-                <div class="qty-controls" style="display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; background: rgba(0,0,0,0.15);">
-                    <button class="qty-btn btn-minus" data-index="${rowIndex}" style="background: none; border: none; color: var(--text-primary); padding: 4px 10px; cursor: pointer; font-weight: bold; font-size: 14px;">-</button>
-                    <input type="number" class="qty-input" data-index="${rowIndex}" value="${count}" min="1" style="width: 35px; text-align: center; background: none; border: none; color: var(--text-primary); font-size: 13px; font-weight: bold; -moz-appearance: textfield; padding: 0;">
-                    <button class="qty-btn btn-plus" data-index="${rowIndex}" style="background: none; border: none; color: var(--text-primary); padding: 4px 10px; cursor: pointer; font-weight: bold; font-size: 14px;">+</button>
+            <div class="wishlist-qty-container">
+                <span class="spec-label">Кол-во:</span>
+                <div class="qty-controls">
+                    <button class="qty-btn btn-minus" data-index="${rowIndex}">-</button>
+                    <input type="number" class="qty-input" data-index="${rowIndex}" value="${count}" min="1">
+                    <button class="qty-btn btn-plus" data-index="${rowIndex}">+</button>
                 </div>
-                <button class="remove-wishlist-item-btn" data-index="${rowIndex}" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 12px; margin-left: auto; display: flex; align-items: center; gap: 4px; font-weight: 500;">
+                <button class="remove-wishlist-item-btn" data-index="${rowIndex}">
                     🗑️ Удалить
                 </button>
             </div>
         ` : '';
 
         return `
-            <div class="gem-card-premium ${currentView === 'list' ? 'card-row' : ''}" data-index="${rowIndex}" style="position: relative;">
-                <div class="gem-lab-badge" style="position: absolute; top: 12px; left: 12px; background: rgba(0, 0, 0, 0.75); color: #d4af37; padding: 3px 8px; font-size: 11px; font-weight: 600; border-radius: 4px; letter-spacing: 0.5px; z-index: 2; border: 1px solid rgba(212, 175, 55, 0.4); font-family: sans-serif;">
+            <div class="gem-card-premium ${currentView === 'list' ? 'card-row' : ''}" data-index="${rowIndex}">
+                <div class="gem-lab-badge">
                     ${gem.lab || 'GIA'}
                 </div>
                 <button class="wishlist-btn ${isSaved ? 'in-wishlist' : ''}" aria-label="В коллекцию">
@@ -214,15 +212,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </button>
                 <div class="gem-image-wrapper">
                     ${shapeImg ? `
-                        <img src="${shapeImg}" alt="${shapeTitle}" class="gem-shape-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'40\\' height=\\'40\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'%23666\\' stroke-width=\\'1\\'><path d=\\'M6 3h12l4 6-10 12L2 9z\\'/></svg>';">
+                        <img src="${shapeImg}" alt="${shapeTitle}" class="gem-shape-img" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"40\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23666\" stroke-width=\"1\"><path d=\"M6 3h12l4 6-10 12L2 9z\"/></svg>';">
                     ` : `
-                        <div class="gem-placeholder-icon" style="display:flex;align-items:center;justify-content:center;height:100%;font-size:24px;color:var(--text-secondary);">💎</div>
+                        <div class="gem-placeholder-icon">💎</div>
                     `}
                 </div>
                 <div class="gem-details">
-                    <div class="gem-main-info" style="display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; margin-bottom: 10px;">
-                        <h3 class="gem-title-text" style="margin: 0; font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${shapeTitle}</h3>
-                        <span class="gem-price-tag" style="margin-left: auto; white-space: nowrap; font-size: 14px; font-weight: 700; color: #d4af37;">${gem.ct.toFixed(2)} Ct &middot; ${formattedPrice}</span>
+                    <div class="gem-main-info">
+                        <h3 class="gem-title-text">${shapeTitle}</h3>
+                        <span class="gem-price-tag">${gem.ct.toFixed(2)} Ct &middot; ${formattedPrice}</span>
                     </div>
                     <div class="gem-specifications-grid">
                         <div class="spec-item"><span class="spec-label">Цвет</span><span class="spec-val">${gem.col}</span></div>
@@ -257,13 +255,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const start = (currentPage - 1) * itemsPerPage;
         const end = Math.min(start + itemsPerPage, currentMatches.length);
         
+        const wishlistMap = new Map(wishlist.map(item => [item.id, item]));
         let htmlBuffer = '';
         for (let i = start; i < end; i++) {
-            htmlBuffer += makeCardHtml(currentMatches[i]);
+            const rowIndex = currentMatches[i];
+            htmlBuffer += makeCardHtml(rowIndex, wishlistMap.get(rowIndex));
         }
 
         catalogContainer.innerHTML = htmlBuffer;
-        bindWishlistInteractions();
 
         if (pageInfo) pageInfo.textContent = `${currentPage} / ${totalPages}`;
         if (btnPrev) btnPrev.disabled = currentPage === 1;
@@ -293,90 +292,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let htmlBuffer = '';
         wishlist.forEach(item => {
-            htmlBuffer += makeCardHtml(item.id);
+            htmlBuffer += makeCardHtml(item.id, item);
         });
         
         wishlistContainer.innerHTML = htmlBuffer;
-        bindWishlistInteractions();
-    }
-
-    function bindWishlistInteractions() {
-        // Логика нажатия на "Сердечко" на любой вкладке
-        document.querySelectorAll('.wishlist-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const card = e.currentTarget.closest('[data-index]');
-                const index = parseInt(card.getAttribute('data-index'), 10);
-                
-                const position = wishlist.findIndex(item => item.id === index);
-                if (position > -1) {
-                    wishlist.splice(position, 1);
-                    e.currentTarget.classList.remove('in-wishlist');
-                    if (currentTab === 'wishlist') {
-                        card.remove();
-                        if (wishlist.length === 0) renderWishlistTab();
-                        else {
-                            const panelCount = document.getElementById('wishlist-panel-count');
-                            if (panelCount) panelCount.textContent = wishlist.length;
-                        }
-                    }
-                } else {
-                    wishlist.push({ id: index, count: 1 });
-                    e.currentTarget.classList.add('in-wishlist');
-                }
-                
-                localStorage.setItem('gems-wishlist', JSON.stringify(wishlist));
-                updateWishlistBadges();
-            });
-        });
-
-        // События изменения количества и полного удаления только внутри Вишлиста
-        if (currentTab === 'wishlist') {
-            document.querySelectorAll('.qty-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const index = parseInt(e.currentTarget.getAttribute('data-index'), 10);
-                    const isPlus = e.currentTarget.classList.contains('btn-plus');
-                    const item = wishlist.find(item => item.id === index);
-                    if (item) {
-                        if (isPlus) {
-                            item.count++;
-                        } else if (item.count > 1) {
-                            item.count--;
-                        }
-                        const input = e.currentTarget.parentElement.querySelector('.qty-input');
-                        if (input) input.value = item.count;
-                        localStorage.setItem('gems-wishlist', JSON.stringify(wishlist));
-                    }
-                });
-            });
-
-            document.querySelectorAll('.qty-input').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    const index = parseInt(e.currentTarget.getAttribute('data-index'), 10);
-                    let val = parseInt(e.currentTarget.value, 10);
-                    if (isNaN(val) || val < 1) val = 1;
-                    e.currentTarget.value = val;
-                    const item = wishlist.find(item => item.id === index);
-                    if (item) {
-                        item.count = val;
-                        localStorage.setItem('gems-wishlist', JSON.stringify(wishlist));
-                    }
-                });
-            });
-
-            document.querySelectorAll('.remove-wishlist-item-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const index = parseInt(e.currentTarget.getAttribute('data-index'), 10);
-                    const position = wishlist.findIndex(item => item.id === index);
-                    if (position > -1) {
-                        wishlist.splice(position, 1);
-                        localStorage.setItem('gems-wishlist', JSON.stringify(wishlist));
-                        renderWishlistTab();
-                        updateWishlistBadges();
-                    }
-                });
-            });
-        }
     }
 
     function updateWishlistBadges() {
@@ -412,6 +331,82 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.open(finalFormUrl, '_blank');
         });
     }
+
+    // --- ДЕЛЕГИРОВАНИЕ СОБЫТИЙ ---
+    // Единый обработчик кликов для всего приложения
+    appWrapper.addEventListener('click', (e) => {
+        // Кнопка "В избранное" (сердечко)
+        const wishlistBtn = e.target.closest('.wishlist-btn');
+        if (wishlistBtn) {
+            e.stopPropagation();
+            const card = wishlistBtn.closest('[data-index]');
+            if (!card) return;
+
+            const index = parseInt(card.getAttribute('data-index'), 10);
+            const position = wishlist.findIndex(item => item.id === index);
+
+            if (position > -1) {
+                wishlist.splice(position, 1);
+                wishlistBtn.classList.remove('in-wishlist');
+                if (currentTab === 'wishlist') {
+                    renderWishlistTab(); // Перерисовываем вкладку, чтобы обновить состояние
+                }
+            } else {
+                wishlist.push({ id: index, count: 1 });
+                wishlistBtn.classList.add('in-wishlist');
+            }
+            
+            localStorage.setItem('gems-wishlist', JSON.stringify(wishlist));
+            updateWishlistBadges();
+            return;
+        }
+
+        // Кнопки +/- для количества
+        const qtyBtn = e.target.closest('.qty-btn');
+        if (qtyBtn) {
+            const index = parseInt(qtyBtn.getAttribute('data-index'), 10);
+            const item = wishlist.find(item => item.id === index);
+            if (item) {
+                item.count += qtyBtn.classList.contains('btn-plus') ? 1 : -1;
+                if (item.count < 1) item.count = 1; // Не даем уйти в ноль
+                
+                const input = qtyBtn.closest('.qty-controls').querySelector('.qty-input');
+                if (input) input.value = item.count;
+                localStorage.setItem('gems-wishlist', JSON.stringify(wishlist));
+            }
+            return;
+        }
+
+        // Кнопка "Удалить" в избранном
+        const removeBtn = e.target.closest('.remove-wishlist-item-btn');
+        if (removeBtn) {
+            const index = parseInt(removeBtn.getAttribute('data-index'), 10);
+            const position = wishlist.findIndex(item => item.id === index);
+            if (position > -1) {
+                wishlist.splice(position, 1);
+                localStorage.setItem('gems-wishlist', JSON.stringify(wishlist));
+                renderWishlistTab();
+                updateWishlistBadges();
+            }
+            return;
+        }
+    });
+
+    // Единый обработчик для изменения в полях ввода
+    appWrapper.addEventListener('change', (e) => {
+        const qtyInput = e.target.closest('.qty-input');
+        if (qtyInput) {
+            const index = parseInt(qtyInput.getAttribute('data-index'), 10);
+            let val = parseInt(qtyInput.value, 10);
+            if (isNaN(val) || val < 1) val = 1;
+            qtyInput.value = val;
+            const item = wishlist.find(item => item.id === index);
+            if (item) {
+                item.count = val;
+                localStorage.setItem('gems-wishlist', JSON.stringify(wishlist));
+            }
+        }
+    });
 
     function applyFilters() {
         const query = {};
