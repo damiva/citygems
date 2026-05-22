@@ -1,6 +1,5 @@
-import { gems as initDB } from './gems.js';
+import gemsCatalogPromise from './gems.js';
 
-// Ссылка на форму сбора вишлистов в Яндекс.Формах
 const YANDEX_FORM_WISHLIST_BASE = "https://forms.yandex.ru/u/65b2bc4cd046881234567890/";
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -31,28 +30,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tabSections = document.querySelectorAll('.tab-section');
     const logoZone = document.getElementById('logo-zone');
 
-    // --- Логика мобильного меню (Бургер) ---
-    const menuToggle = document.getElementById('menu-toggle');
-    const navAndControls = document.getElementById('nav-and-controls');
-    if (menuToggle && navAndControls) {
-        menuToggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            menuToggle.classList.toggle('active');
-            navAndControls.classList.toggle('active');
-        });
-        navAndControls.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', () => {
-                menuToggle.classList.remove('active');
-                navAndControls.classList.remove('active');
-            });
-        });
-        document.addEventListener('click', (e) => {
-            if (!navAndControls.contains(e.target) && !menuToggle.contains(e.target)) {
-                menuToggle.classList.remove('active');
-                navAndControls.classList.remove('active');
-            }
-        });
-    }
+    // Кэшируем шаблон один раз, чтобы не искать его в DOM при рендере каждой карточки
+    const cardTemplate = document.getElementById('gem-card-template');
 
     // Состояние приложения
     let currentMatches = [];
@@ -60,15 +39,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentView = localStorage.getItem('gems-view') || 'grid';
     let wishlist = JSON.parse(localStorage.getItem('gems-wishlist')) || [];
     
-    // МИГРАЦИЯ ДАННЫХ: переход от массива индексов [1, 2] к массиву объектов [{id: 1, count: 1}]
+    // МИГРАЦИЯ ДАННЫХ
     if (wishlist.length > 0 && typeof wishlist[0] === 'number') {
         wishlist = wishlist.map(id => ({ id, count: 1 }));
     }
     
     let currentTab = 'catalog';
 
-    // Загрузка оптимизированного ядра базы данных (gems.js)
-    const db = await initDB();
+    // Загрузка через Promise экспорт по умолчанию
+    const db = await gemsCatalogPromise;
     if (!db || !db.gems) {
         statusMsg.innerHTML = `
             <div style="text-align:center; padding: 40px; font-family: serif; color:#d4af37;">
@@ -79,19 +58,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     const catalog = db.gems;
-
     statusMsg.classList.add('hidden');
     if (appWrapper) appWrapper.classList.remove('hidden');
 
     const itemsPerPage = db.limit || 20;
 
-    // Восстановление и инициализация темы из хранилища (без перезаписи SVG структуры)
-    const savedTheme = localStorage.getItem('gems-theme');
-    const isLightInitial = savedTheme === 'light';
-    if (isLightInitial) {
+    // Инициализация темы
+    if (localStorage.getItem('gems-theme') === 'light') {
         document.documentElement.classList.add('light-theme');
-    } else {
-        document.documentElement.classList.remove('light-theme');
     }
 
     if (themeToggle) {
@@ -113,7 +87,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    // Изменение/применение CSS классов отображения сетки или списка
     function applyViewSettings() {
         if (currentView === 'grid') {
             viewGridBtn?.classList.add('active');
@@ -134,9 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     if (logoZone) {
-        logoZone.addEventListener('click', () => {
-            switchTab('about');
-        });
+        logoZone.addEventListener('click', () => switchTab('about'));
     }
 
     function switchTab(tabId) {
@@ -171,67 +142,65 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Генерация HTML-разметки карточки лота
-    function makeCardHtml(rowIndex, wishlistItem) {
+    function createCardElement(rowIndex, wishlistItem) {
         const gem = catalog.row(rowIndex);
-        if (!gem) return '';
+        if (!gem || !cardTemplate) return null;
 
-        const shapeTitle = db.shapes[gem.sh]?.txt || gem.sh;
-        const shapeImg = db.shapes[gem.sh]?.img ? db.shapes[gem.sh].img : '';
-        const formattedPrice = gem.val ? gem.val.toLocaleString('ru-RU') + ' ₽' : 'По запросу';
-        const isSaved = !!wishlistItem;
-        const count = wishlistItem ? wishlistItem.count : 1;
+        const clone = cardTemplate.content.cloneNode(true);
+        const cardNode = clone.querySelector('.gem-card-premium');
         
-        // Форматирование габаритов s1 x s2 x s3
+        if (currentView === 'list') cardNode.classList.add('card-row');
+        cardNode.setAttribute('data-index', rowIndex);
+
+        cardNode.querySelector('[data-field="lab"]').textContent = gem.lab || 'GIA';
+        cardNode.querySelector('[data-field="title"]').textContent = db.shapes[gem.sh]?.txt || gem.sh;
+        
+        const formattedPrice = gem.val ? gem.val.toLocaleString('ru-RU') + ' ₽' : 'По запросу';
+        cardNode.querySelector('[data-field="price"]').textContent = `${gem.ct.toFixed(2)} Ct · ${formattedPrice}`;
+        
+        cardNode.querySelector('[data-field="color"]').textContent = gem.col;
+        cardNode.querySelector('[data-field="clarity"]').textContent = gem.cla;
+        cardNode.querySelector('[data-field="cut"]').textContent = gem.cut || '—';
+        
         const formattedSize = (gem.s1 && gem.s2 && gem.s3) ? `${gem.s1.toFixed(2)} × ${gem.s2.toFixed(2)} × ${gem.s3.toFixed(2)} мм` : '—';
+        cardNode.querySelector('[data-field="size"]').textContent = formattedSize;
 
-        // Панель управления количеством и кнопка удаления (только для вкладки Избранного)
-        const wishlistControlsHtml = (currentTab === 'wishlist') ? `
-            <div class="wishlist-qty-container">
-                <span class="spec-label">Кол-во:</span>
-                <div class="qty-controls">
-                    <button class="qty-btn btn-minus" data-index="${rowIndex}">-</button>
-                    <input type="number" class="qty-input" data-index="${rowIndex}" value="${count}" min="1">
-                    <button class="qty-btn btn-plus" data-index="${rowIndex}">+</button>
-                </div>
-                <button class="remove-wishlist-item-btn" data-index="${rowIndex}">
-                    🗑️ Удалить
-                </button>
-            </div>
-        ` : '';
+        const wishlistBtn = cardNode.querySelector('.wishlist-btn');
+        if (wishlistItem) wishlistBtn.classList.add('in-wishlist');
 
-        return `
-            <div class="gem-card-premium ${currentView === 'list' ? 'card-row' : ''}" data-index="${rowIndex}">
-                <div class="gem-lab-badge">
-                    ${gem.lab || 'GIA'}
-                </div>
-                <button class="wishlist-btn ${isSaved ? 'in-wishlist' : ''}" aria-label="В коллекцию">
-                    <svg viewBox="0 0 24 24" class="heart-icon">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                    </svg>
-                </button>
-                <div class="gem-image-wrapper">
-                    ${shapeImg ? `
-                        <img src="${shapeImg}" alt="${shapeTitle}" class="gem-shape-img" loading="lazy" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"40\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"%23666\" stroke-width=\"1\"><path d=\"M6 3h12l4 6-10 12L2 9z\"/></svg>';">
-                    ` : `
-                        <div class="gem-placeholder-icon">💎</div>
-                    `}
-                </div>
-                <div class="gem-details">
-                    <div class="gem-main-info">
-                        <h3 class="gem-title-text">${shapeTitle}</h3>
-                        <span class="gem-price-tag">${gem.ct.toFixed(2)} Ct &middot; ${formattedPrice}</span>
-                    </div>
-                    <div class="gem-specifications-grid">
-                        <div class="spec-item"><span class="spec-label">Цвет</span><span class="spec-val">${gem.col}</span></div>
-                        <div class="spec-item"><span class="spec-label">Чистота</span><span class="spec-val">${gem.cla}</span></div>
-                        <div class="spec-item"><span class="spec-label">Огранка</span><span class="spec-val">${gem.cut || '—'}</span></div>
-                        <div class="spec-item"><span class="spec-label">Размер</span><span class="spec-val">${formattedSize}</span></div>
-                    </div>
-                    ${wishlistControlsHtml}
-                </div>
-            </div>
-        `;
+        const imgWrapper = cardNode.querySelector('.gem-image-wrapper');
+        const shapeImgUrl = db.shapes[gem.sh]?.img;
+        if (shapeImgUrl) {
+            const imgEl = document.createElement('img');
+            imgEl.src = shapeImgUrl;
+            imgEl.alt = db.shapes[gem.sh]?.txt || gem.sh;
+            imgEl.className = 'gem-shape-img';
+            imgEl.loading = 'lazy';
+            imgEl.onerror = () => {
+                imgEl.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="1"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>';
+            };
+            imgWrapper.appendChild(imgEl);
+        } else {
+            const placeholderEl = document.createElement('div');
+            placeholderEl.className = 'gem-placeholder-icon';
+            placeholderEl.textContent = '💎';
+            imgWrapper.appendChild(placeholderEl);
+        }
+
+        if (currentTab === 'wishlist' && wishlistItem) {
+            const qtyContainer = cardNode.querySelector('[data-field="qty-container"]');
+            qtyContainer.classList.remove('hidden');
+            
+            const qtyInput = qtyContainer.querySelector('[data-action="input"]');
+            qtyInput.setAttribute('data-index', rowIndex);
+            qtyInput.value = wishlistItem.count;
+            
+            qtyContainer.querySelector('[data-action="minus"]').setAttribute('data-index', rowIndex);
+            qtyContainer.querySelector('[data-action="plus"]').setAttribute('data-index', rowIndex);
+            qtyContainer.querySelector('[data-action="delete"]').setAttribute('data-index', rowIndex);
+        }
+
+        return clone;
     }
 
     function renderPage() {
@@ -254,15 +223,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const start = (currentPage - 1) * itemsPerPage;
         const end = Math.min(start + itemsPerPage, currentMatches.length);
-        
         const wishlistMap = new Map(wishlist.map(item => [item.id, item]));
-        let htmlBuffer = '';
+        
+        catalogContainer.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+        
         for (let i = start; i < end; i++) {
             const rowIndex = currentMatches[i];
-            htmlBuffer += makeCardHtml(rowIndex, wishlistMap.get(rowIndex));
+            const cardElement = createCardElement(rowIndex, wishlistMap.get(rowIndex));
+            if (cardElement) fragment.appendChild(cardElement);
         }
-
-        catalogContainer.innerHTML = htmlBuffer;
+        catalogContainer.appendChild(fragment);
 
         if (pageInfo) pageInfo.textContent = `${currentPage} / ${totalPages}`;
         if (btnPrev) btnPrev.disabled = currentPage === 1;
@@ -290,12 +261,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         actionPanel?.classList.remove('hidden');
         if (panelCount) panelCount.textContent = wishlist.length;
 
-        let htmlBuffer = '';
+        wishlistContainer.innerHTML = '';
+        const fragment = document.createDocumentFragment();
+        
         wishlist.forEach(item => {
-            htmlBuffer += makeCardHtml(item.id, item);
+            const cardElement = createCardElement(item.id, item);
+            if (cardElement) fragment.appendChild(cardElement);
         });
         
-        wishlistContainer.innerHTML = htmlBuffer;
+        wishlistContainer.appendChild(fragment);
     }
 
     function updateWishlistBadges() {
@@ -310,14 +284,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Сборка данных для формы с учетом измененного количества лотов
     const submitWishlistBtn = document.getElementById('submit-wishlist-form-btn');
     if (submitWishlistBtn) {
         submitWishlistBtn.addEventListener('click', () => {
             if (wishlist.length === 0) return;
 
             let descriptionString = "Запрос статуса наличия для партии бриллиантов:\n\n";
-            
             wishlist.forEach((item, i) => {
                 const gem = catalog.row(item.id);
                 if (gem) {
@@ -326,16 +298,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
 
-            const paramName = "text"; 
-            const finalFormUrl = `${YANDEX_FORM_WISHLIST_BASE}?${paramName}=${encodeURIComponent(descriptionString)}`;
-            window.open(finalFormUrl, '_blank');
+            window.open(`${YANDEX_FORM_WISHLIST_BASE}?text=${encodeURIComponent(descriptionString)}`, '_blank');
         });
     }
 
-    // --- ДЕЛЕГИРОВАНИЕ СОБЫТИЙ ---
-    // Единый обработчик кликов для всего приложения
+    // ДЕЛЕГИРОВАНИЕ СОБЫТИЙ КЛИКА
     appWrapper.addEventListener('click', (e) => {
-        // Кнопка "В избранное" (сердечко)
         const wishlistBtn = e.target.closest('.wishlist-btn');
         if (wishlistBtn) {
             e.stopPropagation();
@@ -348,9 +316,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (position > -1) {
                 wishlist.splice(position, 1);
                 wishlistBtn.classList.remove('in-wishlist');
-                if (currentTab === 'wishlist') {
-                    renderWishlistTab(); // Перерисовываем вкладку, чтобы обновить состояние
-                }
+                if (currentTab === 'wishlist') renderWishlistTab(); 
             } else {
                 wishlist.push({ id: index, count: 1 });
                 wishlistBtn.classList.add('in-wishlist');
@@ -361,14 +327,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Кнопки +/- для количества
         const qtyBtn = e.target.closest('.qty-btn');
         if (qtyBtn) {
             const index = parseInt(qtyBtn.getAttribute('data-index'), 10);
             const item = wishlist.find(item => item.id === index);
             if (item) {
-                item.count += qtyBtn.classList.contains('btn-plus') ? 1 : -1;
-                if (item.count < 1) item.count = 1; // Не даем уйти в ноль
+                const action = qtyBtn.getAttribute('data-action');
+                item.count += (action === 'plus') ? 1 : -1;
+                if (item.count < 1) item.count = 1; 
                 
                 const input = qtyBtn.closest('.qty-controls').querySelector('.qty-input');
                 if (input) input.value = item.count;
@@ -377,7 +343,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Кнопка "Удалить" в избранном
         const removeBtn = e.target.closest('.remove-wishlist-item-btn');
         if (removeBtn) {
             const index = parseInt(removeBtn.getAttribute('data-index'), 10);
@@ -392,7 +357,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Единый обработчик для изменения в полях ввода
     appWrapper.addEventListener('change', (e) => {
         const qtyInput = e.target.closest('.qty-input');
         if (qtyInput) {
@@ -410,7 +374,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function applyFilters() {
         const query = {};
-
         if (filterSh?.value) query.sh = filterSh.value;
         if (filterCol?.value) query.col = filterCol.value;
 
@@ -433,8 +396,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         currentMatches = catalog.find(query);
         
         if (counterTotal) {
-            const totalGemsCount = catalog.cat.val ? catalog.cat.val.length : 0;
-            counterTotal.innerHTML = `Найдено: <strong>${currentMatches.length.toLocaleString('ru-RU')}</strong> из ${totalGemsCount.toLocaleString('ru-RU')}`;
+            counterTotal.innerHTML = `Найдено: <strong>${currentMatches.length.toLocaleString('ru-RU')}</strong>`;
         }
         
         currentPage = 1; 
@@ -453,7 +415,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     filterSh?.addEventListener('change', applyFilters);
     filterCol?.addEventListener('change', applyFilters);
-    
     [filterCtMin, filterCtMax, filterValMin, filterValMax].forEach(el => {
         el?.addEventListener('input', debouncedApplyFilters);
     });
@@ -489,5 +450,5 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     updateWishlistBadges();
     applyFilters();
-    switchTab('about'); // По умолчанию открывать вкладку "О нас" при старте
+    switchTab('about'); 
 });

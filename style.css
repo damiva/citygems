@@ -1,6 +1,5 @@
-/* Подключение премиального шрифта для логотипа */
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Playfair+Display:wght@400&display=swap');
+/* Объединенный импорт шрифтов (устраняет лишние HTTP-запросы и блокировку рендеринга) */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Montserrat:wght@400;500;600&family=Playfair+Display:wght@400;500;600&display=swap');
 
 /* Premium Minimalist Luxury Design Palette */
 :root {
@@ -86,37 +85,36 @@ body {
     background-color: var(--bg-header); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
 }
 
-/* Десктопная сетка хедера: 3 равные зоны для идеального центрирования навигации */
 .header-content {
     position: relative; max-width: 1600px; height: 100%; margin: 0 auto; padding: 0 20px;
     display: flex; justify-content: space-between; align-items: center;
 }
 
-/* Зона логотипа */
 .logo-zone { 
     display: flex; align-items: center; gap: 12px;
     transition: var(--transition-smooth);
 }
-.logo-zone:hover {
-    opacity: 0.8;
-}
+.logo-zone:hover { opacity: 0.8; }
 
 .brand-logo-svg {
     width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 0 4px var(--accent-gold));
 }
 
 .brand-title { 
-    display: none; /* Скрыт по умолчанию (Mobile First) */
+    display: none; 
     font-family: 'Cinzel', serif; font-size: 16pt; font-weight: 700; letter-spacing: 2px;
     color: var(--text-primary); text-transform: none;
 }
+.brand-title .accent { font-weight: 500; color: var(--accent-gold); text-transform: lowercase; }
 
-.brand-title .accent { 
-    font-weight: 500; color: var(--accent-gold); text-transform: lowercase; 
+/* Навигация для мобильных устройств */
+.nav-and-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
-/* На мобильных - это flex-контейнер для иконок */
-.nav-and-controls {
+.main-nav {
     display: flex;
     align-items: center;
     gap: 20px;
@@ -125,15 +123,9 @@ body {
 .nav-link {
     color: var(--text-secondary); text-decoration: none; font-size: 10pt; font-weight: 500;
     text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; position: relative; transition: var(--transition-smooth);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    display: inline-flex; align-items: center; gap: 8px;
 }
-
-/* Скрываем текст в ссылках по умолчанию (Mobile First) */
-.nav-link .link-text {
-    display: none;
-}
+.nav-link .link-text { display: none; }
 
 .nav-link:hover, .nav-link.active { color: var(--text-primary); }
 .nav-link::after {
@@ -141,31 +133,23 @@ body {
     background-color: var(--accent-gold); transition: var(--transition-smooth);
 }
 .nav-link.active::after, .nav-link:hover::after { width: 100%; }
-
-.nav-icon {
-    flex-shrink: 0;
-}
+.nav-icon { flex-shrink: 0; }
 
 .wishlist-count-badge {
     background-color: var(--accent-gold); color: #000; font-size: 8pt; font-weight: 600;
     padding: 1px 6px; border-radius: 10px; margin-left: 2px; vertical-align: middle;
 }
 
-/* Компактная круглая кнопка переключения темы */
 #theme-toggle, .theme-btn-compact {
     background: none; border: 1px solid var(--border-color); border-radius: 50%;
     width: 36px; height: 36px; display: flex; justify-content: center; align-items: center;
     cursor: pointer; transition: var(--transition-smooth);
 }
-
 #theme-toggle:hover, .theme-btn-compact:hover { 
     border-color: var(--accent-gold-hover); 
     box-shadow: 0 0 12px var(--border-hover);
 }
-
-#theme-toggle svg, .theme-btn-compact svg { 
-    width: 18px; height: 18px; stroke: var(--text-secondary); fill: none; transition: var(--transition-smooth); 
-}
+#theme-toggle svg, .theme-btn-compact svg { width: 18px; height: 18px; stroke: var(--text-secondary); fill: none; transition: var(--transition-smooth); }
 #theme-toggle:hover svg, .theme-btn-compact:hover svg { stroke: var(--accent-gold); }
 
 #theme-toggle .sun-icon, .theme-btn-compact .sun-icon { display: block; }
@@ -207,8 +191,8 @@ select:focus, .range-inputs input:focus { border-color: var(--accent-gold); }
 /* Feed Controls */
 .catalog-feed { display: flex; flex-direction: column; }
 .feed-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); }
-.found-counter { font-size: 10pt; color: var(--text-secondary); }
-.found-counter strong { color: var(--text-primary); font-weight: 600; }
+.counter-total { font-size: 10pt; color: var(--text-secondary); }
+.counter-total strong { color: var(--text-primary); font-weight: 600; }
 .view-toggles { display: flex; gap: 8px; }
 .view-btn {
     background-color: var(--bg-surface); border: 1px solid var(--border-color); color: var(--text-secondary);
@@ -261,74 +245,46 @@ select:focus, .range-inputs input:focus { border-color: var(--accent-gold); }
 }
 
 .gem-details { padding: 24px; display: flex; flex-direction: column; flex-grow: 1; }
-
-.gem-main-info {
-    display: flex; justify-content: space-between; align-items: center;
-    width: 100%; gap: 10px; margin-bottom: 10px;
-}
-
-.gem-title-text {
-    font-family: var(--font-serif); font-size: 16px; font-weight: 600; margin: 0;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-
+.gem-main-info { display: flex; justify-content: space-between; align-items: center; width: 100%; gap: 10px; margin-bottom: 10px; }
+.gem-title-text { font-family: var(--font-serif); font-size: 16px; font-weight: 600; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .gem-price-tag { font-size: 14px; font-weight: 700; color: var(--accent-gold); margin-left: auto; white-space: nowrap; }
 
 .gem-specifications-grid {
     display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin-bottom: 20px;
     font-size: 9pt; border-top: 1px dashed var(--border-color); padding-top: 14px;
 }
-.spec-item { display: flex; justify-content: space-between; }
+.spec-item { display: flex; justify-content: space-between; gap: 8px; }
 .spec-label { color: var(--text-secondary); }
 .spec-val { color: var(--text-primary); font-weight: 500; }
 
-.gem-actions { margin-top: auto; }
-.premium-order-btn {
-    display: block; width: 100%; text-align: center; background: transparent; border: 1px solid var(--accent-gold);
-    color: var(--accent-gold); text-decoration: none; font-size: 9pt; font-weight: 500; text-transform: uppercase;
-    letter-spacing: 1.5px; padding: 12px; transition: var(--transition-smooth); cursor: pointer;
-}
-.premium-order-btn:hover { background-color: var(--accent-gold); color: #000; box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2); }
-
-/* Wishlist-specific controls inside cards */
+/* Wishlist controls */
 .wishlist-qty-container {
-    display: flex; align-items: center; gap: 10px;
-    margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--border-color);
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    margin-top: auto; padding-top: 12px; border-top: 1px dashed var(--border-color);
 }
 .wishlist-qty-container .spec-label { font-size: 11px; color: var(--text-secondary); }
-
-.qty-controls {
-    display: flex; align-items: center;
-    border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden;
-}
-
-.qty-btn {
-    background: none; border: none; color: var(--text-primary);
-    padding: 4px 10px; cursor: pointer; font-weight: bold; font-size: 14px; line-height: 1;
-}
+.qty-controls { display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 4px; overflow: hidden; background: var(--bg-main); }
+.qty-btn { background: none; border: none; color: var(--text-primary); padding: 4px 12px; cursor: pointer; font-weight: bold; font-size: 12px; }
 .qty-btn:hover { background: var(--border-hover); }
-
-.qty-input {
-    width: 35px; text-align: center; background: none; border: none;
-    color: var(--text-primary); font-size: 13px; font-weight: bold; padding: 0;
-    -moz-appearance: textfield;
-}
+.qty-input { width: 40px; text-align: center; background: none; border: none; color: var(--text-primary); font-size: 12px; font-weight: bold; }
 .qty-input::-webkit-outer-spin-button, .qty-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
 .remove-wishlist-item-btn {
-    background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 12px;
-    margin-left: auto; display: flex; align-items: center; gap: 4px; font-weight: 500;
+    background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 11px;
+    margin-left: auto; display: flex; align-items: center; gap: 4px; font-weight: 500; transition: var(--transition-smooth);
 }
 .remove-wishlist-item-btn:hover { color: #ff7a7a; }
 
-/* List View Modifier */
+/* КОРРЕКТНЫЙ LIST VIEW (Исправлено наложение сердечка и позиционирование) */
 .gem-card-premium.card-row { flex-direction: row; height: 160px; }
-.gem-card-premium.card-row .gem-image-wrapper { width: 180px; height: 100%; border-bottom: none; border-right: 1px solid var(--border-color); }
-.gem-card-premium.card-row .gem-details { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; padding: 15px 30px; }
-.gem-card-premium.card-row .gem-main-info { width: 25%; margin-bottom: 0; }
-.gem-card-premium.card-row .gem-specifications-grid { width: 45%; grid-template-columns: repeat(4, 1fr); border-top: none; padding-top: 0; margin-bottom: 0; }
-.gem-card-premium.card-row .gem-specifications-grid .spec-item { flex-direction: column; gap: 4px; }
-.gem-card-premium.card-row .gem-actions { width: 20%; margin-top: 0; }
+.gem-card-premium.card-row .wishlist-btn { right: auto; left: 135px; top: 12px; width: 30px; height: 30px; } /* Перемещено на изображение */
+.gem-card-premium.card-row .gem-image-wrapper { width: 180px; height: 100%; border-bottom: none; border-right: 1px solid var(--border-color); flex-shrink: 0; }
+.gem-card-premium.card-row .gem-details { flex-direction: row; align-items: center; justify-content: space-between; width: 100%; padding: 20px 30px; gap: 24px; }
+.gem-card-premium.card-row .gem-main-info { width: 30%; margin-bottom: 0; flex-direction: column; align-items: flex-start; gap: 6px; }
+.gem-card-premium.card-row .gem-main-info .gem-price-tag { margin-left: 0; }
+.gem-card-premium.card-row .gem-specifications-grid { width: 45%; grid-template-columns: repeat(4, 1fr); border-top: none; padding-top: 0; margin-bottom: 0; gap: 10px; }
+.gem-card-premium.card-row .gem-specifications-grid .spec-item { flex-direction: column; justify-content: center; align-items: flex-start; gap: 4px; }
+.gem-card-premium.card-row .wishlist-qty-container { width: 25%; margin-top: 0; border-top: none; padding-top: 0; justify-content: flex-end; }
 
 /* Pagination */
 .pagination-wrapper { display: flex; justify-content: center; align-items: center; gap: 24px; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color); }
@@ -337,12 +293,13 @@ select:focus, .range-inputs input:focus { border-color: var(--accent-gold); }
 .page-arrow-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .page-indicator { font-size: 10pt; color: var(--text-secondary); letter-spacing: 1px; }
 
-/* Wishlist Layout */
+/* Wishlist Layout (Исправлен баг пустой корзины с селектором :has) */
 .wishlist-hero { text-align: center; margin-bottom: 40px; }
 .luxury-title { font-family: var(--font-serif); font-size: 24pt; font-weight: 400; margin-bottom: 12px; letter-spacing: 1px; }
 .luxury-subtitle { font-size: 11pt; color: var(--text-secondary); }
 
 .wishlist-workspace { display: grid; grid-template-columns: 1fr; gap: 40px; }
+/* Правило срабатывает только тогда, когда у сайдбара НЕТ класса .hidden */
 .wishlist-workspace:has(.wishlist-sidebar:not(.hidden)) { grid-template-columns: 1fr 340px; }
 .wishlist-sidebar { position: sticky; top: 120px; height: fit-content; }
 
@@ -377,54 +334,35 @@ select:focus, .range-inputs input:focus { border-color: var(--accent-gold); }
 /* Footer */
 .main-footer { margin-top: auto; padding: 30px 40px; border-top: 1px solid var(--border-color); text-align: center; font-size: 8pt; color: var(--text-secondary); letter-spacing: 0.5px; }
 
-/* Планшеты и адаптив */
+/* Адаптивность и медиа-запросы */
 @media (max-width: 1024px) {
     .grid-layout { grid-template-columns: 1fr; }
     .filter-sidebar { border-right: none; padding-right: 0; margin-bottom: 20px; }
     .wishlist-workspace:has(.wishlist-sidebar:not(.hidden)) { grid-template-columns: 1fr; }
     .about-grid { grid-template-columns: 1fr; gap: 40px; }
+    
+    /* Перестроение строк в полноценные карточки на планшетах */
     .gem-card-premium.card-row { flex-direction: column; height: auto; }
+    .gem-card-premium.card-row .wishlist-btn { right: 15px; left: auto; top: 15px; width: 36px; height: 36px; }
     .gem-card-premium.card-row .gem-image-wrapper { width: 100%; border-right: none; border-bottom: 1px solid var(--border-color); }
-    .gem-card-premium.card-row .gem-details { flex-direction: column; align-items: stretch; gap: 15px; }
-    .gem-card-premium.card-row .gem-main-info, 
-    .gem-card-premium.card-row .gem-specifications-grid, 
-    .gem-card-premium.card-row .gem-actions { width: 100%; }
+    .gem-card-premium.card-row .gem-details { flex-direction: column; align-items: stretch; gap: 15px; padding: 24px; }
+    .gem-card-premium.card-row .gem-main-info { width: 100%; flex-direction: row; align-items: center; }
+    .gem-card-premium.card-row .gem-main-info .gem-price-tag { margin-left: auto; }
+    .gem-card-premium.card-row .gem-specifications-grid { width: 100%; grid-template-columns: 1fr 1fr; border-top: 1px dashed var(--border-color); padding-top: 14px; }
+    .gem-card-premium.card-row .gem-specifications-grid .spec-item { flex-direction: row; justify-content: space-between; }
+    .gem-card-premium.card-row .wishlist-qty-container { width: 100%; justify-content: flex-start; border-top: 1px dashed var(--border-color); padding-top: 12px; }
 }
 
-/* Стили для десктопа и больших планшетов */
 @media (min-width: 769px) {
     .header-content {
         padding: 0 40px;
         display: grid;
         grid-template-columns: 1fr auto 1fr;
     }
-
-    .logo-zone {
-        grid-column: 1;
-        justify-self: start;
-    }
-
-    .brand-title {
-        display: block;
-    }
-
-    /* Разворачиваем контейнер, чтобы его дочерние элементы стали частью грида .header-content */
-    .nav-and-controls {
-        display: contents;
-    }
-
-    .main-nav {
-        grid-column: 2;
-        justify-self: center;
-        gap: 40px;
-    }
-
-    .nav-link .link-text {
-        display: inline;
-    }
-
-    #theme-toggle, .theme-btn-compact {
-        grid-column: 3;
-        justify-self: end;
-    }
+    .logo-zone { grid-column: 1; justify-self: start; }
+    .brand-title { display: block; }
+    .nav-and-controls { display: contents; }
+    .main-nav { grid-column: 2; justify-self: center; gap: 40px; }
+    .nav-link .link-text { display: inline; }
+    #theme-toggle, .theme-btn-compact { grid-column: 3; justify-self: end; }
 }

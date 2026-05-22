@@ -1,154 +1,145 @@
-export async function gems() {
-    const parse = s => s && parseFloat(s.replace(',', '.')) || 0;
-    
-    // 1. Загрузка ресурсов
-    let [cbr, gems, shapes] = await Promise.all([
-        fetch('https://www.cbr-xml-daily.ru/daily_json.js').then(r => r.json()).then(d => d?.Valute?.USD?.Value).catch(() => null),
-        fetch('db/gems.csv', { cache: 'default' }).then(r => r.text()).then(t => t.split(/\r?\n/)).catch(() => []),
-        fetch('db/shapes.json', { cache: 'default' }).then(r => r.json()).catch(() => ({})) // result is: {<sh>: {txt: "...", img: "..."}}
-    ]);
+const gemsCatalog = {
+    limit: 20,
+    rate: null,
+    shapes: {},
+    gems: null,
 
-    // Безопасный сдвиг первой строки (защита от пустого файла)
-    let rate = gems.shift()?.trim() || "";
-    if (!rate) return null;
+    row(i) {
+        if (!this.gems || i < 0 || i >= (this.gems.cat.val?.length || 0)) return null;
+        let res = {};
+        Object.keys(this.gems.cat).forEach(k => res[k] = this.gems.cat[k][i]);
+        return res;
+    },
 
-    let dse = Date.now() / 86400000;
-    let sep = rate.startsWith('rate;') ? ';' : rate.startsWith('rate\t') ? '\t' : ',';
-
-    rate = rate.split(sep);
-    rate = { val: cbr || parse(rate[1]) || 1, add: parse(rate[2]), dse: cbr && dse || 0 };
-    
-    // Итоговый множитель для цен
-    let mult = rate.val + rate.add;
-    let ns = []; 
-
-    // 2. Сборка метаструктуры
-    if ( gems.length > 2 ) {
-        cbr = {
-            dse: {re: 3, lab: 0, sh: 1, ct: 3, col: 0, cla: 0, cut: 0, pol: 0, sym: 0, s1: 2, s2: 2, s3: 2, val: 3}, 
-            ttl: {}, idx: {}, cat: {},
-            row: function(i) {
-                if (i < 0 || i >= (this.cat.val?.length || 0)) return null;
-                let res = {};
-                Object.keys(this.cat).forEach(k => res[k] = this.cat[k][i]);
-                return res;
-            },
-            find: function(query = {}) {
-                let keys = Object.keys(query).filter(k => this.cat[k]);
-                let len = this.cat.val?.length || 0;
-                let matches = [];
-                for (let i = 0; i < len; i++) {
-                    let ok = true;
-                    for (let k of keys) {
-                        let val = query[k];
-                        let current = this.cat[k][i];                
-                        if (typeof val === 'string') {
-                            if (val !== '' && current !== val) { 
-                                ok = false; 
-                                break; 
-                            }
-                        } else if (typeof val === 'object' && val !== null) {
-                            if (val.min !== undefined && current < val.min) { ok = false; break; }
-                            if (val.max !== undefined && current > val.max) { ok = false; break; }
-                        }
-                    }
-                    if (ok) matches.push(i);
+    find(query = {}) {
+        if (!this.gems) return [];
+        let keys = Object.keys(query).filter(k => this.gems.cat[k]);
+        let len = this.gems.cat.val?.length || 0;
+        let matches = [];
+        
+        for (let i = 0; i < len; i++) {
+            let ok = true;
+            for (let k of keys) {
+                let val = query[k];
+                let current = this.gems.cat[k][i];                
+                if (typeof val === 'string') {
+                    if (val !== '' && current !== val) { ok = false; break; }
+                } else if (typeof val === 'object' && val !== null) {
+                    if (val.min !== undefined && current < val.min) { ok = false; break; }
+                    if (val.max !== undefined && current > val.max) { ok = false; break; }
                 }
-                return matches;
             }
+            if (ok) matches.push(i);
+        }
+        return matches;
+    },
+
+    async load() {
+        const parse = s => s && parseFloat(s.replace(',', '.')) || 0;
+        
+        let [cbr, csvText, shapesJson] = await Promise.all([
+            fetch('https://www.cbr-xml-daily.ru/daily_json.js').then(r => r.json()).then(d => d?.Valute?.USD?.Value).catch(() => null),
+            fetch('db/gems.csv', { cache: 'default' }).then(r => r.text()).catch(() => ''),
+            fetch('db/shapes.json', { cache: 'default' }).then(r => r.json()).catch(() => ({}))
+        ]);
+
+        this.shapes = shapesJson;
+
+        let lines = csvText ? csvText.split(/\r?\n/).map(l => l.trim()).filter(Boolean) : [];
+        if (!lines.length) {
+            this.gems = null;
+            return this;
+        }
+
+        let rateLine = lines.shift() || "";
+        let sep = rateLine.startsWith('rate;') ? ';' : rateLine.startsWith('rate\t') ? '\t' : ',';
+        let rateParts = rateLine.split(sep);
+        let dse = Date.now() / 86400000;
+
+        this.rate = { 
+            val: cbr || parse(rateParts[1]) || 1, 
+            add: parse(rateParts[2]), 
+            dse: cbr && dse || 0 
         };
         
-        gems.shift().split(sep).forEach((k, i) => {
-            k = k.trim();
-            if ( typeof cbr.dse[k] == 'number' ) {
-                cbr.idx[k] = i;
-                cbr.cat[k] = [];
-            }
-        });
+        let mult = this.rate.val + this.rate.add;
+        let ns = []; 
 
-        ns = Object.keys(cbr.dse).filter(k => {
-            if ( typeof cbr.idx[k] == 'number') return true;
-            if ( cbr.dse[k] & 1 ) {
-                console.error("gems.csv error: required column " + k + " is not found");
-                gems = [];
-            }
-            return false;
-        });
-    }
-
-    // 3. Парсинг данных каталога
-    if ( gems.length > 1 && ns.length ) {
-        gems[0] = gems[0].split(sep);
-        ns.forEach(k => cbr.ttl[k] = (gems[0][cbr.idx[k]] || k).trim() );
-        
-        const setSh = new Set();
-        const setCol = new Set();        
-        
-        gems.slice(1).forEach(r => {
-            let o = {};
-            r = r.split(sep);
-            if (r.length < ns.length) return; 
-
-            ns.forEach(k => {
-                if ( o ) {
-                    const t = cbr.dse[k];
-                    let raw = (r[cbr.idx[k]] || "").trim(); 
-                    
-                    if ( t > 1 ) {
-                        o[k] = parse(raw);
-                        if (k === 'val' && mult !== 1) o[k] = Math.round(o[k] * mult);
-                    } else {
-                        o[k] = raw;
-                    }  
-                    if ( !o[k] && (t & 1) ) o = null;
+        if (lines.length > 2) {
+            this.gems = {
+                dse: {re: 3, lab: 0, sh: 1, ct: 3, col: 0, cla: 0, cut: 0, pol: 0, sym: 0, s1: 2, s2: 2, s3: 2, val: 3}, 
+                idx: {}, 
+                cat: {}
+            };
+            
+            lines.shift().split(sep).forEach((k, i) => {
+                k = k.trim();
+                if (typeof this.gems.dse[k] === 'number') {
+                    this.gems.idx[k] = i;
+                    this.gems.cat[k] = [];
                 }
             });
-            if ( o ) {
-                ns.forEach(k => cbr.cat[k].push(o[k]));
-                if (o.sh) setSh.add(o.sh);
-                if (o.col) setCol.add(o.col);
-            }
-        });
 
-        const prices = cbr.cat.val || [];
-        const weights = cbr.cat.ct || [];
-        
-        // Линейный поиск мин/макс (уже замененный и безопасный)
-        let minCt = 0, maxCt = 0;
-        if (weights.length) {
-            minCt = weights[0];
-            maxCt = weights[0];
+            ns = Object.keys(this.gems.dse).filter(k => typeof this.gems.idx[k] === 'number');
+        }
+
+        if (lines.length > 1 && ns.length) {
+            const setSh = new Set();
+            const setCol = new Set();        
+            
+            lines.slice(1).forEach(r => {
+                let o = {};
+                r = r.split(sep);
+                if (r.length < ns.length) return; 
+
+                ns.forEach(k => {
+                    if (o) {
+                        const t = this.gems.dse[k];
+                        let raw = (r[this.gems.idx[k]] || "").trim(); 
+                        if (t > 1) {
+                            o[k] = parse(raw);
+                            if (k === 'val' && mult !== 1) o[k] = Math.round(o[k] * mult);
+                        } else {
+                            o[k] = raw;
+                        }  
+                        if (!o[k] && (t & 1)) o = null;
+                    }
+                });
+                if (o) {
+                    ns.forEach(k => this.gems.cat[k].push(o[k]));
+                    if (o.sh) setSh.add(o.sh);
+                    if (o.col) setCol.add(o.col);
+                }
+            });
+
+            const prices = this.gems.cat.val || [];
+            const weights = this.gems.cat.ct || [];
+            
+            let minCt = weights[0] || 0, maxCt = weights[0] || 0;
             for (let i = 1; i < weights.length; i++) {
                 if (weights[i] < minCt) minCt = weights[i];
                 if (weights[i] > maxCt) maxCt = weights[i];
             }
-        }
 
-        let minVal = 0, maxVal = 0;
-        if (prices.length) {
-            minVal = prices[0];
-            maxVal = prices[0];
+            let minVal = prices[0] || 0, maxVal = prices[0] || 0;
             for (let i = 1; i < prices.length; i++) {
                 if (prices[i] < minVal) minVal = prices[i];
                 if (prices[i] > maxVal) maxVal = prices[i];
             }
-        }
-        // Теперь фильтры собираются моментально, так как в Сетах лежит всего по 10-30 элементов!
-        cbr.filters = {
-            sh: [...setSh].filter(Boolean).sort(),
-            col: [...setCol].filter(Boolean).sort(),
-            ct: { min: minCt, max: maxCt },
-            val: { min: minVal, max: maxVal }
-        };
-        cbr.dse = dse;
-        gems = cbr;
-    } else gems = null;
 
-    return {
-        rate,
-        shapes,
-        gems,
-        limit: 20 // show items per page
-    };
-}
-//data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='1'><path d='M6 3h12l4 6-10 12L2 9z'/></svg>
+            this.gems.filters = {
+                sh: [...setSh].filter(Boolean).sort(),
+                col: [...setCol].filter(Boolean).sort(),
+                ct: { min: minCt, max: maxCt },
+                val: { min: minVal, max: maxVal }
+            };
+            this.gems.dse = dse;
+        } else {
+            this.gems = null;
+        }
+
+        return this;
+    }
+};
+const gemsCatalogPromise = gemsCatalog.load();
+export default gemsCatalogPromise;
