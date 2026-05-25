@@ -1,10 +1,11 @@
 const Gems = {
-  initPromise: null,            // Promise для ожидания готовности во внешних скриптах
-  Columns: null,                // Колонки данных
-  RowsCount: 0,                 // Общее количество записей
-  Currency: null,               // Информация о курсе валюты
-  Date: null,                   // Дата обновления каталога
-  _img: {pth: "", ext: ".png"}, // Базовый URL для относительных путей (картинок)
+  initPromise: null, // Promise для ожидания готовности во внешних скриптах
+  Columns: null,     // Колонки данных
+  RowsCount: 0,      // Общее количество записей
+  Currency: null,    // Информация о курсе валюты
+  Date: null,        // Дата обновления каталога
+  _uri: "",          // Базовый URL для относительных путей (картинок)
+  _ext: "jpg",       // Внутреннее расширение для всех файлов изображений (форм и сертификатов)
 
   async _init(url = 'https://citygems.ru/db/gems.json') {
     try {
@@ -42,7 +43,9 @@ const Gems = {
       this.RowsCount = db.RowsCount;
       this.Currency = currency;
       this.Date = db.Date || null;
-      this._img.pth = url.substring(0, url.lastIndexOf("/") + 1);
+      
+      // Определяем базовый путь (папку) для картинок на основе URL каталога
+      this._uri = url.substring(0, url.lastIndexOf("/") + 1);
       
       console.log(`[Gems] Каталог готов: записей: ${this.RowsCount}, курс: ${this.Currency ? this.Currency.Rate : 'не указан'} руб.`);
       return this;
@@ -53,7 +56,7 @@ const Gems = {
   },
 
   /**
-   * Быстрое получение значения ячейки БЕЗ создания лишних объектов (нужно для фильтрации)
+   * Быстрое получение значения ячейки БЕЗ создания лишних объектов
    */
   getValue(colName, rowIndex) {
     const col = this.Columns[colName];
@@ -64,38 +67,69 @@ const Gems = {
 
   /**
    * Ленивая сборка объекта только для одной строки на основе индекса.
-   * Теперь красиво использует getValue для централизованного разрешения Enum.
    */
   getItem(rowIndex) {
     if (rowIndex < 0 || rowIndex >= this.RowsCount) return null;
     const item = { _index: rowIndex };
-    Object.keys(this.Columns).forEach(k => {item[k] = this.getValue(k, rowIndex)});
-    item.image = item['Форма'] ? `${this._img.pth}${item['Форма']}${this._img.ext}` : "";
-    item.lab = item['Сертификат'] ? `${this._img.pth}${item['Сертификат']}${this._img.ext}` : "";
+    Object.keys(this.Columns).forEach(k => {
+      item[k] = this.getValue(k, rowIndex);
+    });
+    
+    // Вычисляем свойство lab для логотипа сертификата (например, GIA, IGI, HRD...)
+    // Все картинки запрашиваются из той же папки, что и каталог, с использованием расширения _ext
+    const cert = item['Сертификат'] || '';
+    item.lab = "";
+    if (cert) {
+      const lowerCert = cert.toLowerCase();
+      if (lowerCert.includes('gia')) item.lab = `${this._uri}gia.${this._ext}`;
+      else if (lowerCert.includes('igi')) item.lab = `${this._uri}igi.${this._ext}`;
+      else if (lowerCert.includes('hrd')) item.lab = `${this._uri}hrd.${this._ext}`;
+    }
+    
+    item.image = item['Форма'] ? `${this._uri}${item['Форма']}.${this._ext}` : "";
     return item;
   },
 
   /**
-   * Поиск и фильтрация по плоским массивам с пагинацией.
-   * Объекты собираются только для отфильтрованного подмножества.
+   * Мощный и быстрый метод фильтрации, поддерживающий мультивыбор и глобальную сортировку цен.
+   * @param {Object} exact - Критерии точного совпадения. Значением может быть строка ИЛИ массив строк для мультивыбора.
+   * @param {Object} ranges - Числовые диапазоны { 'Цена': {min, max} }
+   * @param {string} sortBy - Тип сортировки: 'price_asc' (возрастание цены) или 'price_desc' (убывание цены)
+   * @param {number} limit - Количество элементов на страницу
+   * @param {number} offset - Смещение пагинации
+   * @returns {Object} { items: Array, total: number } - массив объектов страницы и общее количество совпадений
    */
-  filter(exact = {}, ranges = {}, limit = 20, offset = 0) {
-    const results = [];
-    let skipped = 0;
+  filter(exact = {}, ranges = {}, sortBy = 'price_asc', limit = 20, offset = 0) {
+    const matchingIndices = [];
 
+    // 1. Фильтруем все индексы строк по плоским массивам в памяти
     for (let i = 0; i < this.RowsCount; i++) {
       let matches = true;
 
-      // 1. Проверка точных фильтров
+      // Проверка точных совпадений (поддерживает мультивыбор)
       for (const colName in exact) {
-        if (this.getValue(colName, i) !== exact[colName]) {
-          matches = false;
-          break;
+        const filterVal = exact[colName];
+        if (filterVal === undefined || filterVal === null || filterVal === '') continue;
+
+        const gemVal = this.getValue(colName, i);
+
+        if (Array.isArray(filterVal)) {
+          // Если передан массив (мультивыбор), значение камня должно быть в этом массиве
+          if (filterVal.length > 0 && !filterVal.includes(gemVal)) {
+            matches = false;
+            break;
+          }
+        } else {
+          // Иначе проверяем классическое одиночное совпадение
+          if (gemVal !== filterVal) {
+            matches = false;
+            break;
+          }
         }
       }
       if (!matches) continue;
 
-      // 2. Проверка числовых диапазонов
+      // Проверка числовых диапазонов
       for (const colName in ranges) {
         const val = this.getValue(colName, i);
         if (typeof val === 'number') {
@@ -105,17 +139,29 @@ const Gems = {
         }
       }
 
-      // Если камень прошел все фильтры
       if (matches) {
-        if (skipped < offset) {
-          skipped++;
-          continue;
-        }
-        results.push(this.getItem(i));
-        if (results.length >= limit) break; 
+        matchingIndices.push(i);
       }
     }
-    return results;
+
+    // 2. Сортируем отфильтрованные индексы по цене
+    const priceCol = this.Columns['Цена'];
+    if (priceCol && Array.isArray(priceCol.Data)) {
+      if (sortBy === 'price_asc') {
+        matchingIndices.sort((a, b) => priceCol.Data[a] - priceCol.Data[b]);
+      } else if (sortBy === 'price_desc') {
+        matchingIndices.sort((a, b) => priceCol.Data[b] - priceCol.Data[a]);
+      }
+    }
+
+    // 3. Срезаем массив под пагинацию и превращаем в полноценные JS-объекты только нужные строки
+    const sliced = matchingIndices.slice(offset, offset + limit);
+    const items = sliced.map(idx => this.getItem(idx));
+
+    return {
+      items,
+      total: matchingIndices.length
+    };
   },
 
   /**
