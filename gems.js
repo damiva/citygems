@@ -42,7 +42,7 @@ const Gems = {
       this.RowsCount = db.RowsCount;
       this.Currency = currency;
       this.Date = db.Date || null;
-      this._uri.pth = url.substring(0, url.lastIndexOf("/") + 1);
+      this._img.pth = url.substring(0, url.lastIndexOf("/") + 1);
       
       console.log(`[Gems] Каталог готов: записей: ${this.RowsCount}, курс: ${this.Currency ? this.Currency.Rate : 'не указан'} руб.`);
       return this;
