@@ -45,6 +45,69 @@
     .logo-spin {
       animation: spin-slow 15s linear infinite;
     }
+
+    /* Стили для кастомного двойного слайдера */
+    .slider-container {
+      position: relative;
+      width: 100%;
+      height: 6px;
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+    .slider-track {
+      position: absolute;
+      height: 4px;
+      width: 100%;
+      background-color: #E5E5E0;
+      border-radius: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1;
+    }
+    .slider-range-highlight {
+      position: absolute;
+      height: 4px;
+      background-color: #C5A880;
+      border-radius: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+    .double-range-slider {
+      position: absolute;
+      width: 100%;
+      height: 0;
+      pointer-events: none;
+      -webkit-appearance: none;
+      appearance: none;
+      outline: none;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 3;
+      background: none;
+    }
+    /* Стилизация бегунков для Chrome, Safari, Opera */
+    .double-range-slider::-webkit-slider-thumb {
+      height: 16px;
+      width: 16px;
+      border-radius: 50%;
+      background: #1A1A1A;
+      border: 2px solid #C5A880;
+      cursor: pointer;
+      pointer-events: auto;
+      -webkit-appearance: none;
+    }
+    /* Стилизация бегунков для Firefox */
+    .double-range-slider::-moz-range-thumb {
+      height: 14px;
+      width: 14px;
+      border-radius: 50%;
+      background: #1A1A1A;
+      border: 2px solid #C5A880;
+      cursor: pointer;
+      pointer-events: auto;
+      border: none;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased">
@@ -191,44 +254,40 @@
             </div>
             
             <div id="filters-container" class="space-y-5">
-              <!-- Сюда динамически рендерятся кнопочные фильтры -->
+              <!-- Сюда динамически рендерятся кнопочные фильтры (БЕЗ Сертификата) -->
             </div>
 
-            <!-- Слайдер цен с бегунками -->
+            <!-- Слайдер цен с кастомным двойным бегунком -->
             <div class="mt-5 pt-5 border-t border-[#FAF9F6] space-y-3">
               <label class="block text-xs font-bold uppercase tracking-wider">Цена, ₽</label>
               <div class="grid grid-cols-2 gap-2">
-                <input type="number" id="price-min-input" oninput="handleRangeInputChange('Цена', 'min', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="от">
-                <input type="number" id="price-max-input" oninput="handleRangeInputChange('Цена', 'max', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="до">
+                <input type="number" id="price-min-input" oninput="handleDoubleSliderInput('Цена', 'min', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="от">
+                <input type="number" id="price-max-input" oninput="handleDoubleSliderInput('Цена', 'max', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="до">
               </div>
-              <div class="space-y-1.5 pt-1">
-                <div class="flex items-center justify-between text-[10px] text-[#7F7F7F]">
-                  <span>Мин: <span id="price-min-val" class="font-semibold text-[#1A1A1A]">0</span></span>
-                  <input type="range" id="price-min-range" class="w-2/3 accent-[#C5A880] cursor-pointer" oninput="handleRangeSliderChange('Цена', 'min', this.value)">
-                </div>
-                <div class="flex items-center justify-between text-[10px] text-[#7F7F7F]">
-                  <span>Макс: <span id="price-max-val" class="font-semibold text-[#1A1A1A]">0</span></span>
-                  <input type="range" id="price-max-range" class="w-2/3 accent-[#C5A880] cursor-pointer" oninput="handleRangeSliderChange('Цена', 'max', this.value)">
-                </div>
+              
+              <!-- Контейнер для двух бегунков на одной линии -->
+              <div class="slider-container">
+                <div class="slider-track"></div>
+                <div id="price-range-highlight" class="slider-range-highlight"></div>
+                <input type="range" id="price-min-range" class="double-range-slider" oninput="updateDoubleSliderValues('Цена', 'min', this.value)">
+                <input type="range" id="price-max-range" class="double-range-slider" oninput="updateDoubleSliderValues('Цена', 'max', this.value)">
               </div>
             </div>
 
-            <!-- Слайдер веса с бегунками -->
+            <!-- Слайдер веса с кастомным двойным бегунком -->
             <div class="mt-5 pt-5 border-t border-[#FAF9F6] space-y-3">
               <label class="block text-xs font-bold uppercase tracking-wider">Вес, Карат</label>
               <div class="grid grid-cols-2 gap-2">
-                <input type="number" id="weight-min-input" step="0.1" oninput="handleRangeInputChange('Вес', 'min', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="от">
-                <input type="number" id="weight-max-input" step="0.1" oninput="handleRangeInputChange('Вес', 'max', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="до">
+                <input type="number" id="weight-min-input" step="0.01" oninput="handleDoubleSliderInput('Вес', 'min', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="от">
+                <input type="number" id="weight-max-input" step="0.01" oninput="handleDoubleSliderInput('Вес', 'max', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="до">
               </div>
-              <div class="space-y-1.5 pt-1">
-                <div class="flex items-center justify-between text-[10px] text-[#7F7F7F]">
-                  <span>Мин: <span id="weight-min-val" class="font-semibold text-[#1A1A1A]">0</span></span>
-                  <input type="range" id="weight-min-range" class="w-2/3 accent-[#C5A880] cursor-pointer" oninput="handleRangeSliderChange('Вес', 'min', this.value)">
-                </div>
-                <div class="flex items-center justify-between text-[10px] text-[#7F7F7F]">
-                  <span>Макс: <span id="weight-max-val" class="font-semibold text-[#1A1A1A]">0</span></span>
-                  <input type="range" id="weight-max-range" class="w-2/3 accent-[#C5A880] cursor-pointer" oninput="handleRangeSliderChange('Вес', 'max', this.value)">
-                </div>
+              
+              <!-- Контейнер для двух бегунков на одной линии -->
+              <div class="slider-container">
+                <div class="slider-track"></div>
+                <div id="weight-range-highlight" class="slider-range-highlight"></div>
+                <input type="range" id="weight-min-range" class="double-range-slider" oninput="updateDoubleSliderValues('Вес', 'min', this.value)">
+                <input type="range" id="weight-max-range" class="double-range-slider" oninput="updateDoubleSliderValues('Вес', 'max', this.value)">
               </div>
             </div>
 
@@ -361,7 +420,11 @@
       sortBy: 'price_asc', 
       page: 0, 
       limit: 9, 
-      totalCount: 0 
+      totalCount: 0,
+      limits: {
+        Price: { min: 0, max: 1000000 },
+        Weight: { min: 0, max: 10 }
+      }
     };
 
     window.addEventListener('DOMContentLoaded', async () => {
@@ -381,7 +444,7 @@
       }
     });
 
-    // Определение цен/весов из данных каталога и инициализация слайдеров
+    // Определение цен/весов из данных каталога и инициализация двойных слайдеров
     function initRangeBoundaries() {
       const priceCol = Gems.Columns['Цена']?.Data || [];
       const weightCol = Gems.Columns['Вес']?.Data || [];
@@ -389,6 +452,8 @@
       if (priceCol.length) {
         const minPrice = Math.min(...priceCol);
         const maxPrice = Math.max(...priceCol);
+        
+        state.limits.Price = { min: minPrice, max: maxPrice };
         state.filters.ranges['Цена'] = { min: minPrice, max: maxPrice };
         
         document.getElementById('price-min-input').value = minPrice;
@@ -405,13 +470,14 @@
         sliderMax.max = maxPrice;
         sliderMax.value = maxPrice;
         
-        document.getElementById('price-min-val').innerText = minPrice.toLocaleString();
-        document.getElementById('price-max-val').innerText = maxPrice.toLocaleString();
+        drawDoubleSliderTrack('Цена');
       }
       
       if (weightCol.length) {
         const minWeight = Math.min(...weightCol);
         const maxWeight = Math.max(...weightCol);
+        
+        state.limits.Weight = { min: minWeight, max: maxWeight };
         state.filters.ranges['Вес'] = { min: minWeight, max: maxWeight };
         
         document.getElementById('weight-min-input').value = minWeight;
@@ -430,17 +496,36 @@
         sliderMax.step = 0.01;
         sliderMax.value = maxWeight;
         
-        document.getElementById('weight-min-val').innerText = minWeight.toFixed(2);
-        document.getElementById('weight-max-val').innerText = maxWeight.toFixed(2);
+        drawDoubleSliderTrack('Вес');
       }
     }
 
-    // Рендер фильтров кнопками в ряд
+    // Отрисовка цветного золотистого промежутка между бегунками
+    function drawDoubleSliderTrack(colName) {
+      const isPrice = colName === 'Цена';
+      const minSlider = document.getElementById(isPrice ? 'price-min-range' : 'weight-min-range');
+      const maxSlider = document.getElementById(isPrice ? 'price-max-range' : 'weight-max-range');
+      const highlight = document.getElementById(isPrice ? 'price-range-highlight' : 'weight-range-highlight');
+      
+      if (!minSlider || !maxSlider || !highlight) return;
+      
+      const limits = isPrice ? state.limits.Price : state.limits.Weight;
+      const totalRange = limits.max - limits.min;
+      
+      const minPercent = ((minSlider.value - limits.min) / totalRange) * 100;
+      const maxPercent = ((maxSlider.value - limits.min) / totalRange) * 100;
+      
+      highlight.style.left = minPercent + '%';
+      highlight.style.width = (maxPercent - minPercent) + '%';
+    }
+
+    // Рендер фильтров кнопками в ряд (БЕЗ Сертификата)
     function buildDynamicFilters() {
       const container = document.getElementById('filters-container');
       container.innerHTML = '';
       
-      ['Форма', 'Цвет', 'Чистота', 'Сертификат'].forEach(name => {
+      // Исключили 'Сертификат' из списка фильтров по вашему ТЗ
+      ['Форма', 'Цвет', 'Чистота'].forEach(name => {
         const col = Gems.Columns[name];
         if (col?.Enum) {
           state.filters.exact[name] = [];
@@ -481,9 +566,10 @@
       renderCatalog();
     }
 
-    // Обработка ручного ввода числовых диапазонов
-    function handleRangeInputChange(colName, limitType, value) {
+    // Обработка ручного ввода числовых диапазонов в инпуты
+    function handleDoubleSliderInput(colName, limitType, value) {
       const numVal = value !== '' ? parseFloat(value) : undefined;
+      const isPrice = colName === 'Цена';
       
       if (!state.filters.ranges[colName]) {
         state.filters.ranges[colName] = {};
@@ -492,60 +578,70 @@
       if (numVal === undefined) {
         delete state.filters.ranges[colName][limitType];
       } else {
-        state.filters.ranges[colName][limitType] = numVal;
+        // Ограничиваем ввод рамками максимумов/минимумов
+        const limits = isPrice ? state.limits.Price : state.limits.Weight;
+        const boundedVal = Math.max(limits.min, Math.min(limits.max, numVal));
         
-        // Синхронизация с бегунками
-        if (colName === 'Цена') {
-          const slider = document.getElementById(limitType === 'min' ? 'price-min-range' : 'price-max-range');
-          if (slider) {
-            slider.value = numVal;
-            document.getElementById(limitType === 'min' ? 'price-min-val' : 'price-max-val').innerText = Math.round(numVal).toLocaleString();
-          }
-        } else {
-          const slider = document.getElementById(limitType === 'min' ? 'weight-min-range' : 'weight-max-range');
-          if (slider) {
-            slider.value = numVal;
-            document.getElementById(limitType === 'min' ? 'weight-min-val' : 'weight-max-val').innerText = numVal.toFixed(2);
-          }
+        state.filters.ranges[colName][limitType] = boundedVal;
+        
+        // Синхронизируем положение соответствующего бегунка
+        const slider = document.getElementById(isPrice 
+          ? (limitType === 'min' ? 'price-min-range' : 'price-max-range') 
+          : (limitType === 'min' ? 'weight-min-range' : 'weight-max-range')
+        );
+        
+        if (slider) {
+          slider.value = boundedVal;
         }
       }
       
+      drawDoubleSliderTrack(colName);
       state.page = 0;
       renderCatalog();
     }
 
-    // Обработка перемещения бегунков
-    function handleRangeSliderChange(colName, limitType, value) {
+    // Изменение значений при перемещении двойного бегунка пальцем/мышкой
+    function updateDoubleSliderValues(colName, limitType, value) {
       const numVal = parseFloat(value);
+      const isPrice = colName === 'Цена';
       
-      // Защита от перекрестного пересечения ползунков (мин не может быть больше макс)
+      if (!state.filters.ranges[colName]) {
+        state.filters.ranges[colName] = {};
+      }
+      
+      // Защита от перекрестного заезда ползунков друг за друга
       if (limitType === 'min') {
-        const currentMax = state.filters.ranges[colName].max;
-        if (numVal > currentMax) {
-          const slider = document.getElementById(colName === 'Цена' ? 'price-min-range' : 'weight-min-range');
-          slider.value = currentMax;
+        const sliderMaxVal = parseFloat(document.getElementById(isPrice ? 'price-max-range' : 'weight-max-range').value);
+        if (numVal > sliderMaxVal) {
+          document.getElementById(isPrice ? 'price-min-range' : 'weight-min-range').value = sliderMaxVal;
+          state.filters.ranges[colName].min = sliderMaxVal;
+          document.getElementById(isPrice ? 'price-min-input' : 'weight-min-input').value = isPrice ? Math.round(sliderMaxVal) : sliderMaxVal.toFixed(2);
+          drawDoubleSliderTrack(colName);
           return;
         }
       } else {
-        const currentMin = state.filters.ranges[colName].min;
-        if (numVal < currentMin) {
-          const slider = document.getElementById(colName === 'Цена' ? 'price-max-range' : 'weight-max-range');
-          slider.value = currentMin;
+        const sliderMinVal = parseFloat(document.getElementById(isPrice ? 'price-min-range' : 'weight-min-range').value);
+        if (numVal < sliderMinVal) {
+          document.getElementById(isPrice ? 'price-max-range' : 'weight-max-range').value = sliderMinVal;
+          state.filters.ranges[colName].max = sliderMinVal;
+          document.getElementById(isPrice ? 'price-max-input' : 'weight-max-input').value = isPrice ? Math.round(sliderMinVal) : sliderMinVal.toFixed(2);
+          drawDoubleSliderTrack(colName);
           return;
         }
       }
-
+      
       state.filters.ranges[colName][limitType] = numVal;
       
-      // Синхронизация с числовыми полями ввода и текстом
-      if (colName === 'Цена') {
-        document.getElementById(limitType === 'min' ? 'price-min-input' : 'price-max-input').value = Math.round(numVal);
-        document.getElementById(limitType === 'min' ? 'price-min-val' : 'price-max-val').innerText = Math.round(numVal).toLocaleString();
-      } else {
-        document.getElementById(limitType === 'min' ? 'weight-min-input' : 'weight-max-input').value = numVal.toFixed(2);
-        document.getElementById(limitType === 'min' ? 'weight-min-val' : 'weight-max-val').innerText = numVal.toFixed(2);
+      // Синхронизируем текстовое поле ввода
+      const input = document.getElementById(isPrice 
+        ? (limitType === 'min' ? 'price-min-input' : 'price-max-input')
+        : (limitType === 'min' ? 'weight-min-input' : 'weight-max-input')
+      );
+      if (input) {
+        input.value = isPrice ? Math.round(numVal) : numVal.toFixed(2);
       }
       
+      drawDoubleSliderTrack(colName);
       state.page = 0;
       renderCatalog();
     }
@@ -560,11 +656,6 @@
         btn.classList.remove('bg-[#1A1A1A]', 'text-[#FAF9F6]', 'border-[#1A1A1A]');
         btn.classList.add('bg-transparent', 'text-[#7F7F7F]', 'border-[#E5E5E0]');
       });
-      
-      document.getElementById('price-min-input').value = '';
-      document.getElementById('price-max-input').value = '';
-      document.getElementById('weight-min-input').value = '';
-      document.getElementById('weight-max-input').value = '';
       
       initRangeBoundaries();
       state.page = 0;
@@ -637,7 +728,7 @@
             <!-- Изображение сертификата сверху слева -->
             ${logoHtml}
 
-            <!-- Контейнер для фото огранки -->
+            <!-- Контейнер для фото огранки (квадратный и аккуратный, без искажений) -->
             <div class="aspect-square bg-[#FAF9F6]/50 border border-[#FAF9F6] py-2 flex items-center justify-center mb-4 relative overflow-hidden">
               <img src="${gem.image || 'https://citygems.ru/db/круглый.png'}" alt="${shape}" class="w-32 h-32 object-contain transition-premium group-hover:scale-110" onerror="this.src='https://citygems.ru/db/круглый.png'">
             </div>
