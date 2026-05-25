@@ -71,6 +71,7 @@ const Gems = {
     const item = { _index: rowIndex };
     Object.keys(this.Columns).forEach(k => {item[k] = this.getValue(k, rowIndex)});
     item.image = item['Форма'] ? `${this._img.pth}${item['Форма']}${this._img.ext}` : "";
+    item.lab = item['Сертификат'] ? `${this._img.pth}${item['Сертификат']}${this._img.ext}` : "";
     return item;
   },
 
