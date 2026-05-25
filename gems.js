@@ -5,7 +5,7 @@ const Gems = {
   Currency: null,    // Информация о курсе валюты
   Date: null,        // Дата обновления каталога
   _uri: "",          // Базовый URL для относительных путей (картинок)
-  _ext: "jpg",       // Внутреннее расширение для всех файлов изображений (форм и сертификатов)
+  _ext: "png",       // Внутреннее расширение для всех файлов изображений (форм и сертификатов)
 
   async _init(url = 'https://citygems.ru/db/gems.json') {
     try {
@@ -71,22 +71,9 @@ const Gems = {
   getItem(rowIndex) {
     if (rowIndex < 0 || rowIndex >= this.RowsCount) return null;
     const item = { _index: rowIndex };
-    Object.keys(this.Columns).forEach(k => {
-      item[k] = this.getValue(k, rowIndex);
-    });
-    
-    // Вычисляем свойство lab для логотипа сертификата (например, GIA, IGI, HRD...)
-    // Все картинки запрашиваются из той же папки, что и каталог, с использованием расширения _ext
-    const cert = item['Сертификат'] || '';
-    item.lab = "";
-    if (cert) {
-      const lowerCert = cert.toLowerCase();
-      if (lowerCert.includes('gia')) item.lab = `${this._uri}gia.${this._ext}`;
-      else if (lowerCert.includes('igi')) item.lab = `${this._uri}igi.${this._ext}`;
-      else if (lowerCert.includes('hrd')) item.lab = `${this._uri}hrd.${this._ext}`;
-    }
-    
-    item.image = item['Форма'] ? `${this._uri}${item['Форма']}.${this._ext}` : "";
+    Object.keys(this.Columns).forEach(k => {item[k] = this.getValue(k, rowIndex)});
+    item.lab = item['Сертификат'] ? `${this._uri}${item['Сертификат']}.${this._ext}` : '';
+    item.image = item['Форма'] ? `${this._uri}${item['Форма']}.${this._ext}` : '';
     return item;
   },
 
