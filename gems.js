@@ -1,10 +1,10 @@
 const Gems = {
-  initPromise: null, // Promise для ожидания готовности во внешних скриптах
-  Columns: null,     // Колонки данных
-  RowsCount: 0,      // Общее количество записей
-  Currency: null,    // Информация о курсе валюты
-  Date: null,        // Дата обновления каталога
-  _uri: "",          // Базовый URL для относительных путей (картинок)
+  initPromise: null,            // Promise для ожидания готовности во внешних скриптах
+  Columns: null,                // Колонки данных
+  RowsCount: 0,                 // Общее количество записей
+  Currency: null,               // Информация о курсе валюты
+  Date: null,                   // Дата обновления каталога
+  _img: {pth: "", ext: ".png"}, // Базовый URL для относительных путей (картинок)
 
   async _init(url = 'https://citygems.ru/db/gems.json') {
     try {
@@ -42,7 +42,7 @@ const Gems = {
       this.RowsCount = db.RowsCount;
       this.Currency = currency;
       this.Date = db.Date || null;
-      this._uri = url.substring(0, url.lastIndexOf("/") + 1);
+      this._uri.pth = url.substring(0, url.lastIndexOf("/") + 1);
       
       console.log(`[Gems] Каталог готов: записей: ${this.RowsCount}, курс: ${this.Currency ? this.Currency.Rate : 'не указан'} руб.`);
       return this;
@@ -70,7 +70,7 @@ const Gems = {
     if (rowIndex < 0 || rowIndex >= this.RowsCount) return null;
     const item = { _index: rowIndex };
     Object.keys(this.Columns).forEach(k => {item[k] = this.getValue(k, rowIndex)});
-    item.image = item['Форма'] ? `${this._uri}${item['Форма']}.jpg` : "";
+    item.image = item['Форма'] ? `${this._img.pth}${item['Форма']}${this._img.ext}` : "";
     return item;
   },
 
