@@ -27,20 +27,14 @@ const Gems = {
 
       // Проверяем актуальность курса и необходимость пересчета
       const currency = db.Currency;
-      if (currency && cbr && cbr.rate) {
-        // Безопасное сравнение дат через приведение к Timestamp
-        const cbrTime = Date.parse(cbr.date);
-        const dbTime = Date.parse(currency.Date);
-
-        if (!isNaN(cbrTime) && !isNaN(dbTime) && cbrTime > dbTime) {
-          const dif = cbr.rate / currency.Rate;
-          const col = db.Columns[currency.Column];
-          if (col && !col.Enum && (dif < 0.90 || dif > 1.05)) {
-            console.log(`[Gems] Курс изменился (x${dif.toFixed(2)}). Пересчитываем цены в рублях...`);
-            col.Data = col.Data.map(v => Math.round(v * dif / 10) * 10);
-            currency.Rate = cbr.rate;
-            currency.Date = cbr.date;
-          }
+      if (currency && cbr && cbr.rate && cbr.date > currency.Date) {
+        const dif = cbr.rate / currency.Rate;
+        const col = db.Columns[currency.Column];
+        if (col && !col.Enum && (dif < 0.90 || dif > 1.05)) {
+          console.log(`Курс изменился (x${dif.toFixed(2)}). Пересчитываем цены в рублях...`);
+          col.Data = col.Data.map(v => Math.round(v * dif / 10) * 10);
+          currency.Rate = cbr.rate;
+          currency.Date = cbr.date;
         }
       }
 
@@ -65,19 +59,10 @@ const Gems = {
    * Быстрое получение значения ячейки БЕЗ создания лишних объектов
    */
   getValue(colName, rowIndex) {
-    const col = this.Columns?.[colName];
+    const col = this.Columns[colName];
     if (!col || rowIndex < 0 || rowIndex >= this.RowsCount) return null; 
     const rawValue = col.Data[rowIndex];
     return (col.Enum && Array.isArray(col.Enum)) ? col.Enum[rawValue] : rawValue;
-  },
-
-  /**
-   * Получение сырого индекса Enum (полезно для быстрой числовой фильтрации)
-   */
-  getRawValue(colName, rowIndex) {
-    const col = this.Columns?.[colName];
-    if (!col || rowIndex < 0 || rowIndex >= this.RowsCount) return null;
-    return col.Data[rowIndex];
   },
 
   /**
@@ -86,22 +71,20 @@ const Gems = {
   getItem(rowIndex) {
     if (rowIndex < 0 || rowIndex >= this.RowsCount) return null;
     const item = { _index: rowIndex };
-    Object.keys(this.Columns).forEach(k => {
-      item[k] = this.getValue(k, rowIndex);
-    });
-    
-    // Экранируем спецсимволы и русские буквы для безопасных путей к файлам на сервере.
-    // Регистр букв (Большие/маленькие) сохраняется в точности как в базе данных gems.json!
-    const shapeVal = item['Форма'] ? encodeURIComponent(item['Форма']) : '';
-    const certVal = item['Сертификат'] ? encodeURIComponent(item['Сертификат']) : '';
-
-    item.lab = certVal ? `${this._uri}${certVal}.${this._ext}` : '';
-    item.image = shapeVal ? `${this._uri}${shapeVal}.${this._ext}` : '';
+    Object.keys(this.Columns).forEach(k => {item[k] = this.getValue(k, rowIndex)});
+    item.lab = item['Сертификат'] ? `${this._uri}${item['Сертификат']}.${this._ext}` : '';
+    item.image = item['Форма'] ? `${this._uri}${item['Форма']}.${this._ext}` : '';
     return item;
   },
 
   /**
    * Мощный и быстрый метод фильтрации, поддерживающий мультивыбор и глобальную сортировку цен.
+   * @param {Object} exact - Критерии точного совпадения. Значением может быть строка ИЛИ массив строк для мультивыбора.
+   * @param {Object} ranges - Числовые диапазоны { 'Цена': {min, max} }
+   * @param {string} sortBy - Тип сортировки: 'price_asc' (возрастание цены) или 'price_desc' (убывание цены)
+   * @param {number} limit - Количество элементов на страницу
+   * @param {number} offset - Смещение пагинации
+   * @returns {Object} { items: Array, total: number } - массив объектов страницы и общее количество совпадений
    */
   filter(exact = {}, ranges = {}, sortBy = 'price_asc', limit = 20, offset = 0) {
     const matchingIndices = [];
@@ -118,7 +101,7 @@ const Gems = {
         const gemVal = this.getValue(colName, i);
 
         if (Array.isArray(filterVal)) {
-          // Если передан пустой массив — игнорируем фильтр (показываем всё)
+          // Если передан массив (мультивыбор), значение камня должно быть в этом массиве
           if (filterVal.length > 0 && !filterVal.includes(gemVal)) {
             matches = false;
             break;
@@ -133,16 +116,13 @@ const Gems = {
       }
       if (!matches) continue;
 
-      // Проверка числовых диапазонов с защитой от undefined свойств в объекте ranges
+      // Проверка числовых диапазонов
       for (const colName in ranges) {
-        const rangeObj = ranges[colName];
-        if (!rangeObj) continue; // Защита от null/undefined диапазона
-
         const val = this.getValue(colName, i);
         if (typeof val === 'number') {
-          const { min, max } = rangeObj;
-          if (min !== undefined && min !== null && val < min) { matches = false; break; }
-          if (max !== undefined && max !== null && val > max) { matches = false; break; }
+          const { min, max } = ranges[colName];
+          if (min !== undefined && val < min) { matches = false; break; }
+          if (max !== undefined && val > max) { matches = false; break; }
         }
       }
 
