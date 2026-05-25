@@ -5,915 +5,865 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>citygems — Премиальные лабораторные бриллианты</title>
   
-  <!-- Подключение Tailwind CSS для современного адаптивного дизайна -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Премиальные шрифты Google Fonts (Playfair Display для заголовков, Montserrat для интерфейса) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-  
-  <!-- Иконки Lucide для минималистичного интерфейса -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-
-  <!-- Подключение вашего скрипта каталога -->
+  <!-- Ваша обновленная библиотека Gems.js -->
   <script src="https://citygems.ru/gems.js"></script>
 
   <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-      background-color: #FAF9F6; /* Благородный мягкий белый (ivory) */
-      color: #1A1A1A;
+    body { 
+      font-family: 'Montserrat', sans-serif; 
+      background-color: #FAF9F6; 
+      color: #1A1A1A; 
     }
-    .serif-title {
-      font-family: 'Playfair Display', serif;
+    .serif-title { 
+      font-family: 'Playfair Display', serif; 
     }
-    /* Кастомная стилизация скроллбара для премиального вида */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+    /* Плавный переход для интерактивных элементов */
+    .transition-premium {
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    ::-webkit-scrollbar-track {
-      background: #FAF9F6;
+    /* Стилизация скроллбара в фильтрах */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
     }
-    ::-webkit-scrollbar-thumb {
-      background: #E5E5E0;
-      border-radius: 3px;
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #C5A880;
+      border-radius: 2px;
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #C5A880; /* Мягкое золото */
+    
+    /* Анимация вращения логотипа в шапке */
+    @keyframes spin-slow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .logo-spin {
+      animation: spin-slow 15s linear infinite;
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between antialiased">
 
-  <!-- Шапка сайта (Header) -->
-  <header class="sticky top-0 z-50 bg-[#FAF9F6]/90 backdrop-blur-md border-b border-[#E5E5E0]">
+  <!-- ШАПКА САЙТА -->
+  <header class="sticky top-0 z-40 bg-[#FAF9F6]/90 backdrop-blur-md border-b border-[#E5E5E0]">
     <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-      
-      <!-- Логотип -->
-      <a href="#" onclick="switchTab('about')" class="flex items-center space-x-2 group">
-        <svg class="w-8 h-8 text-[#C5A880] transition-transform duration-500 group-hover:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-          <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5" />
-          <polygon points="12,2 12,22" />
-          <polygon points="2,8.5 22,8.5" />
-          <polygon points="2,15.5 22,15.5" />
-          <polygon points="12,2 2,15.5" />
-          <polygon points="12,2 22,15.5" />
-          <polygon points="12,22 2,8.5" />
-          <polygon points="12,22 22,8.5" />
-        </svg>
-        <span class="text-2xl font-light tracking-[0.25em] text-[#1A1A1A] transition-colors duration-300 group-hover:text-[#C5A880]">citygems</span>
+      <a href="#" onclick="switchTab('about')" class="flex items-center space-x-3 group">
+        <!-- Геометрический вращающийся логотип -->
+        <div class="relative w-8 h-8 flex items-center justify-center">
+          <div class="absolute inset-0 border border-[#C5A880]/40 rotate-45 logo-spin"></div>
+          <div class="absolute inset-1.5 border border-[#C5A880] -rotate-12 logo-spin" style="animation-direction: reverse; animation-duration: 10s;"></div>
+          <i data-lucide="gem" class="w-4 h-4 text-[#C5A880] absolute"></i>
+        </div>
+        <span class="text-2xl font-light tracking-[0.25em] text-[#1A1A1A] transition-premium group-hover:text-[#C5A880]">citygems</span>
       </a>
-
-      <!-- Навигация -->
-      <nav class="hidden md:flex space-x-10 text-sm tracking-widest uppercase font-medium">
-        <a href="#" id="nav-about" onclick="switchTab('about')" class="nav-link text-[#C5A880] hover:text-[#C5A880] transition-colors duration-300">О камнях</a>
-        <a href="#" id="nav-catalog" onclick="switchTab('catalog')" class="nav-link text-[#7F7F7F] hover:text-[#1A1A1A] transition-colors duration-300">Каталог</a>
+      
+      <nav class="hidden md:flex space-x-10 text-xs tracking-widest uppercase font-semibold">
+        <a href="#" id="nav-about" onclick="switchTab('about')" class="nav-link py-2 border-b-2 border-[#C5A880] text-[#1A1A1A] transition-premium">О нас</a>
+        <a href="#" id="nav-catalog" onclick="switchTab('catalog')" class="nav-link py-2 border-b-2 border-transparent text-[#7F7F7F] hover:text-[#1A1A1A] transition-premium">Каталог</a>
       </nav>
 
-      <!-- Корзина -->
       <div class="flex items-center space-x-4">
-        <button onclick="switchTab('cart')" class="relative p-2 text-[#1A1A1A] hover:text-[#C5A880] transition-colors duration-300" aria-label="Корзина">
-          <i data-lucide="shopping-bag" class="w-6 h-6 stroke-[1.5]"></i>
-          <span id="cart-badge" class="absolute -top-1 -right-1 bg-[#C5A880] text-[#FAF9F6] text-[10px] font-semibold w-5 h-5 rounded-full flex items-center justify-center opacity-0 transition-opacity duration-300">0</span>
+        <button onclick="toggleCart(true)" class="relative p-2 text-[#1A1A1A] hover:text-[#C5A880] transition-premium" aria-label="Корзина">
+          <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+          <span id="cart-badge" class="absolute top-1 right-1 bg-[#C5A880] text-[#FAF9F6] text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold opacity-0 transition-all duration-300">0</span>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- Основной контент -->
+  <!-- ЛОАДЕР ЗАГРУЗКИ КАТАЛОГА -->
+  <div id="loader" class="fixed inset-0 bg-[#FAF9F6] z-50 flex flex-col items-center justify-center space-y-4">
+    <div class="w-12 h-12 border-2 border-[#C5A880] border-t-transparent rounded-full animate-spin"></div>
+    <p class="text-xs tracking-widest uppercase text-[#7F7F7F]">Загрузка коллекции бриллиантов...</p>
+  </div>
+
+  <!-- ОСНОВНОЙ КОНТЕНТ -->
   <main class="flex-grow">
     
-    <!-- Загрузчик (Loader) -->
-    <div id="loader" class="fixed inset-0 bg-[#FAF9F6] z-50 flex flex-col items-center justify-center transition-opacity duration-500">
-      <div class="relative w-20 h-20 mb-4">
-        <div class="absolute inset-0 border-2 border-[#E5E5E0] rounded-full"></div>
-        <div class="absolute inset-0 border-2 border-t-[#C5A880] rounded-full animate-spin"></div>
+    <!-- ТАБ: О НАC -->
+    <section id="tab-about" class="tab-content py-16 md:py-24 max-w-5xl mx-auto px-6 space-y-24">
+      
+      <!-- Приветствие и Наша философия -->
+      <div class="text-center max-w-3xl mx-auto space-y-6">
+        <span class="text-xs tracking-widest uppercase text-[#C5A880] font-semibold">Эстетика и совершенство технологий</span>
+        <h1 class="serif-title text-4xl md:text-5xl text-[#1A1A1A] leading-tight">Роскошь нового поколения</h1>
+        <p class="text-[#7F7F7F] font-light leading-relaxed text-sm md:text-base">
+          Мы в <span class="font-semibold text-[#1A1A1A]">citygems</span> верим, что истинная красота ювелирных изделий кроется в балансе вековых природных богатств и утонченных технологий будущего. Наша миссия — создавать безупречные ювелирные решения, которые объединяют первозданную прелесть природы и чистую технологическую мысль.
+        </p>
       </div>
-      <p class="serif-title text-xl tracking-widest text-[#7F7F7F] animate-pulse">Инициализация каталога citygems...</p>
-    </div>
 
-    <!-- РАЗДЕЛ: О КАМНЯХ (About Section) -->
-    <section id="tab-about" class="tab-content py-16 md:py-24 max-w-7xl mx-auto px-6">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-        <!-- Текстовый блок -->
-        <div class="lg:col-span-7 space-y-8">
-          <div class="space-y-2">
-            <span class="text-xs uppercase tracking-[0.3em] text-[#C5A880] font-semibold">Будущее роскоши</span>
-            <h1 class="serif-title text-4xl md:text-6xl font-light leading-tight text-[#1A1A1A]">Лабораторные бриллианты</h1>
+      <!-- Две стороны коллекции: Бриллианты и Полудрагоценные камни -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12 pt-8">
+        <!-- Блок 1: Лабораторные бриллианты -->
+        <div class="border border-[#E5E5E0] bg-white p-8 space-y-6 transition-premium hover:border-[#C5A880] flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="w-12 h-12 bg-[#FAF9F6] flex items-center justify-center border border-[#E5E5E0]">
+              <i data-lucide="sparkles" class="w-6 h-6 text-[#C5A880]"></i>
+            </div>
+            <h2 class="serif-title text-2xl font-medium">Лабораторные бриллианты</h2>
+            <p class="text-xs text-[#7F7F7F] font-light leading-relaxed">
+              Абсолютные ювелирные шедевры, выращенные в передовых научных комплексах. Это не имитация и не фианит — это настоящие алмазы с кристаллической решеткой из чистого углерода, граненой по золотым стандартам ювелирного искусства.
+            </p>
           </div>
-          
-          <p class="text-[#4A4A4A] leading-relaxed text-lg font-light">
-            Технологический триумф современности. Это не имитация и не искусственные заменители вроде фианитов. Это истинные бриллианты, выращенные в контролируемых лабораторных условиях, в точности повторяющих недра Земли.
-          </p>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
-            <div class="space-y-3 p-6 bg-white border border-[#E5E5E0] rounded-lg shadow-sm">
-              <div class="text-[#C5A880]"><i data-lucide="award" class="w-8 h-8 stroke-[1.5]"></i></div>
-              <h3 class="font-medium text-lg tracking-wider">100% Идентичность</h3>
-              <p class="text-sm text-[#7F7F7F] font-light leading-relaxed">Обладают абсолютно теми же химическими, физическими и оптическими свойствами, что и добытые камни.</p>
-            </div>
-            <div class="space-y-3 p-6 bg-white border border-[#E5E5E0] rounded-lg shadow-sm">
-              <div class="text-[#C5A880]"><i data-lucide="globe" class="w-8 h-8 stroke-[1.5]"></i></div>
-              <h3 class="font-medium text-lg tracking-wider">Этичность и Экология</h3>
-              <p class="text-sm text-[#7F7F7F] font-light leading-relaxed">Выращивание камней не наносит вреда экосистемам и исключает использование неэтичного труда.</p>
-            </div>
-            <div class="space-y-3 p-6 bg-white border border-[#E5E5E0] rounded-lg shadow-sm">
-              <div class="text-[#C5A880]"><i data-lucide="sparkles" class="w-8 h-8 stroke-[1.5]"></i></div>
-              <h3 class="font-medium text-lg tracking-wider">Идеальная Чистота</h3>
-              <p class="text-sm text-[#7F7F7F] font-light leading-relaxed">Строгий контроль выращивания позволяет получать кристаллы высочайших характеристик цвета и чистоты.</p>
-            </div>
-            <div class="space-y-3 p-6 bg-white border border-[#E5E5E0] rounded-lg shadow-sm">
-              <div class="text-[#C5A880]"><i data-lucide="coins" class="w-8 h-8 stroke-[1.5]"></i></div>
-              <h3 class="font-medium text-lg tracking-wider">Разумная Стоимость</h3>
-              <p class="text-sm text-[#7F7F7F] font-light leading-relaxed">Вы получаете камень премиального ювелирного качества без переплаты за сложнейшую добычу.</p>
-            </div>
-          </div>
-
-          <div class="pt-6">
-            <button onclick="switchTab('catalog')" class="px-10 py-4 bg-[#1A1A1A] text-[#FAF9F6] text-xs uppercase tracking-[0.25em] font-medium hover:bg-[#C5A880] hover:text-[#FAF9F6] transition-all duration-300 rounded shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-              Перейти в каталог
-            </button>
+          <div class="pt-4 border-t border-[#E5E5E0]/40">
+            <span class="text-[10px] tracking-widest uppercase text-[#C5A880] font-bold">100% алмаз · Идеальная чистота</span>
           </div>
         </div>
 
-        <!-- Иллюстрация / Декоративный элемент -->
-        <div class="lg:col-span-5 flex justify-center">
-          <div class="relative w-full max-w-md aspect-square bg-white rounded-full border border-[#E5E5E0] flex items-center justify-center p-8 shadow-inner">
-            <!-- Элегантный вращающийся SVG-бриллиант -->
-            <svg class="w-4/5 h-4/5 text-[#C5A880] opacity-90 animate-[spin_120s_linear_infinite]" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.5">
-              <circle cx="50" cy="50" r="48" stroke-dasharray="2 4" />
-              <polygon points="50,5 95,35 78,85 22,85 5,35" />
-              <polygon points="50,95 95,35 78,85 22,85 5,35" />
-              <line x1="50" y1="5" x2="50" y2="95" />
-              <line x1="5" y1="35" x2="95" y2="35" />
-              <line x1="22" y1="85" x2="78" y2="85" />
-              <polygon points="50,25 75,45 65,75 35,75 25,45" />
-              <line x1="50" y1="5" x2="50" y2="25" />
-              <line x1="5" y1="35" x2="25" y2="45" />
-              <line x1="95" y1="35" x2="75" y2="45" />
-              <line x1="22" y1="85" x2="35" y2="75" />
-              <line x1="78" y1="85" x2="65" y2="75" />
-            </svg>
-            <div class="absolute text-center">
-              <span class="serif-title text-3xl font-light tracking-widest text-[#1A1A1A]">citygems</span>
-              <p class="text-[10px] uppercase tracking-[0.3em] text-[#7F7F7F] mt-2">pure lab grown</p>
+        <!-- Блок 2: Полудрагоценные камни -->
+        <div class="border border-[#E5E5E0] bg-white p-8 space-y-6 transition-premium hover:border-[#C5A880] flex flex-col justify-between">
+          <div class="space-y-4">
+            <div class="w-12 h-12 bg-[#FAF9F6] flex items-center justify-center border border-[#E5E5E0]">
+              <i data-lucide="gem" class="w-6 h-6 text-[#C5A880]"></i>
             </div>
+            <h2 class="serif-title text-2xl font-medium">Природные самоцветы</h2>
+            <p class="text-xs text-[#7F7F7F] font-light leading-relaxed">
+              Очарование первозданных недр земли. Мы бережно отбираем натуральные полудрагоценные камни — аметисты, топазы, гранаты и турмалины, сохранившие в себе первозданный дух, узоры и космическую цветовую палитру природы.
+            </p>
+          </div>
+          <div class="pt-4 border-t border-[#E5E5E0]/40">
+            <span class="text-[10px] tracking-widest uppercase text-[#C5A880] font-bold">Сила природы · Уникальные текстуры</span>
           </div>
         </div>
       </div>
+
+      <!-- Детальный разбор: Почему Lab-Grown бриллианты — это превосходный выбор -->
+      <div class="bg-white border border-[#E5E5E0] p-10 md:p-14 space-y-12">
+        <div class="text-center max-w-2xl mx-auto space-y-3">
+          <h3 class="serif-title text-3xl">Новый взгляд на вечные ценности</h3>
+          <p class="text-xs text-[#7F7F7F] tracking-wider uppercase">Особенности и преимущества выращенных камней</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Преимущество 1 -->
+          <div class="space-y-3 text-center md:text-left">
+            <span class="text-xs font-bold text-[#C5A880] tracking-widest block">01 / ИДЕНТИЧНОСТЬ</span>
+            <h4 class="font-semibold text-sm uppercase">Физика и Химия</h4>
+            <p class="text-xs text-[#7F7F7F] font-light leading-relaxed">
+              Лабораторный кристалл имеет ту же твердость (10 по шкале Мооса), показатель преломления света (2.42) и дисперсию, что и добытый в шахте. Даже опытный геммолог не найдет оптических различий.
+            </p>
+          </div>
+
+          <!-- Преимущество 2 -->
+          <div class="space-y-3 text-center md:text-left">
+            <span class="text-xs font-bold text-[#C5A880] tracking-widest block">02 / ЭТИЧНОСТЬ</span>
+            <h4 class="font-semibold text-sm uppercase">Чистая совесть</h4>
+            <p class="text-xs text-[#7F7F7F] font-light leading-relaxed">
+              Выращивание алмазов в лаборатории не нарушает экосистемы регионов, не требует разрушения ландшафтов, исключает "кровавые" цепочки поставок и гарантирует 100% гуманное и прозрачное происхождение.
+            </p>
+          </div>
+
+          <!-- Преимущество 3 -->
+          <div class="space-y-3 text-center md:text-left">
+            <span class="text-xs font-bold text-[#C5A880] tracking-widest block">03 / ДОСТУПНОСТЬ</span>
+            <h4 class="font-semibold text-sm uppercase">Разумные инвестиции</h4>
+            <p class="text-xs text-[#7F7F7F] font-light leading-relaxed">
+              Вы больше не переплачиваете за монопольные наценки добывающих гигантов. Это позволяет приобрести ювелирное изделие с чистейшим камнем большей каратности без компромиссов в бюджете.
+            </p>
+          </div>
+        </div>
+
+        <div class="text-center pt-4">
+          <button onclick="switchTab('catalog')" class="border border-[#1A1A1A] hover:bg-[#1A1A1A] text-[#1A1A1A] hover:text-white px-10 py-4 text-xs tracking-widest uppercase font-semibold transition-premium rounded-none">
+            Посмотреть коллекцию в каталоге
+          </button>
+        </div>
+      </div>
+
     </section>
 
-    <!-- РАЗДЕЛ: КАТАЛОГ (Catalog Section) -->
+    <!-- ТАБ: КАТАЛОГ -->
     <section id="tab-catalog" class="tab-content hidden py-10 max-w-7xl mx-auto px-6">
-      <div class="flex flex-col lg:flex-row gap-10">
+      
+      <div class="flex flex-col lg:flex-row gap-10 items-start">
         
-        <!-- Сайдбар фильтров (левая часть) -->
-        <aside class="w-full lg:w-72 shrink-0 space-y-8">
-          <div class="bg-white p-6 border border-[#E5E5E0] rounded-lg shadow-sm space-y-6">
-            <div class="flex items-center justify-between pb-4 border-b border-[#E5E5E0]">
-              <h2 class="font-medium text-sm uppercase tracking-wider text-[#1A1A1A]">Фильтры</h2>
-              <button onclick="resetFilters()" class="text-xs text-[#7F7F7F] hover:text-[#C5A880] transition-colors duration-300">Сбросить все</button>
+        <!-- ФИЛЬТРЫ (Слева, подняты на самый верх страницы) -->
+        <aside class="w-full lg:w-72 shrink-0 space-y-6">
+          <div class="bg-white p-6 border border-[#E5E5E0] rounded-none">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#FAF9F6]">
+              <h3 class="text-sm font-bold tracking-widest uppercase">Фильтры</h3>
+              <button onclick="resetFilters()" class="text-[10px] tracking-wider uppercase text-[#C5A880] hover:text-[#1A1A1A] transition-premium">Сбросить всё</button>
+            </div>
+            
+            <div id="filters-container" class="space-y-5">
+              <!-- Сюда динамически рендерятся кнопочные фильтры -->
             </div>
 
-            <!-- Контейнер для динамических фильтров -->
-            <div id="filters-container" class="space-y-6">
-              <!-- Сюда JS сгенерирует селекторы характеристик -->
+            <!-- Слайдер цен с бегунками -->
+            <div class="mt-5 pt-5 border-t border-[#FAF9F6] space-y-3">
+              <label class="block text-xs font-bold uppercase tracking-wider">Цена, ₽</label>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" id="price-min-input" oninput="handleRangeInputChange('Цена', 'min', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="от">
+                <input type="number" id="price-max-input" oninput="handleRangeInputChange('Цена', 'max', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="до">
+              </div>
+              <div class="space-y-1.5 pt-1">
+                <div class="flex items-center justify-between text-[10px] text-[#7F7F7F]">
+                  <span>Мин: <span id="price-min-val" class="font-semibold text-[#1A1A1A]">0</span></span>
+                  <input type="range" id="price-min-range" class="w-2/3 accent-[#C5A880] cursor-pointer" oninput="handleRangeSliderChange('Цена', 'min', this.value)">
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-[#7F7F7F]">
+                  <span>Макс: <span id="price-max-val" class="font-semibold text-[#1A1A1A]">0</span></span>
+                  <input type="range" id="price-max-range" class="w-2/3 accent-[#C5A880] cursor-pointer" oninput="handleRangeSliderChange('Цена', 'max', this.value)">
+                </div>
+              </div>
             </div>
+
+            <!-- Слайдер веса с бегунками -->
+            <div class="mt-5 pt-5 border-t border-[#FAF9F6] space-y-3">
+              <label class="block text-xs font-bold uppercase tracking-wider">Вес, Карат</label>
+              <div class="grid grid-cols-2 gap-2">
+                <input type="number" id="weight-min-input" step="0.1" oninput="handleRangeInputChange('Вес', 'min', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="от">
+                <input type="number" id="weight-max-input" step="0.1" oninput="handleRangeInputChange('Вес', 'max', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="до">
+              </div>
+              <div class="space-y-1.5 pt-1">
+                <div class="flex items-center justify-between text-[10px] text-[#7F7F7F]">
+                  <span>Мин: <span id="weight-min-val" class="font-semibold text-[#1A1A1A]">0</span></span>
+                  <input type="range" id="weight-min-range" class="w-2/3 accent-[#C5A880] cursor-pointer" oninput="handleRangeSliderChange('Вес', 'min', this.value)">
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-[#7F7F7F]">
+                  <span>Макс: <span id="weight-max-val" class="font-semibold text-[#1A1A1A]">0</span></span>
+                  <input type="range" id="weight-max-range" class="w-2/3 accent-[#C5A880] cursor-pointer" oninput="handleRangeSliderChange('Вес', 'max', this.value)">
+                </div>
+              </div>
+            </div>
+
           </div>
         </aside>
 
-        <!-- Витрина (правая часть) -->
-        <div class="flex-grow space-y-8">
-          
-          <!-- Сортировка и мета-информация -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E5E5E0]">
-            <div>
-              <p class="text-sm text-[#7F7F7F] font-light">
-                Найдено позиций: <span id="total-count" class="font-semibold text-[#1A1A1A]">0</span>
-              </p>
-            </div>
+        <!-- КОЛОНКА С КАРТОЧКАМИ (Справа) -->
+        <div class="flex-grow w-full space-y-8">
+          <!-- Верхняя микро-панель: Найдено и Сортировка на одной горизонтальной линии -->
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-5 border-b border-[#E5E5E0] gap-4 w-full">
+            <p class="text-xs uppercase tracking-widest text-[#7F7F7F] font-semibold">
+              Найдено камней: <span id="total-count" class="font-bold text-[#1A1A1A]">0</span>
+            </p>
             
-            <!-- Премиальная Сортировка -->
-            <div class="flex items-center space-x-2 text-xs">
-              <span class="text-[#7F7F7F] font-light">Сортировка:</span>
-              <select id="sort-select" onchange="handleSortChange(this.value)" class="bg-white border border-[#E5E5E0] rounded px-3 py-2 text-xs outline-none focus:border-[#C5A880] transition-colors duration-300 cursor-pointer">
-                <option value="price_asc">Цена по возрастанию</option>
-                <option value="price_desc">Цена по убыванию</option>
+            <div class="flex items-center space-x-3 w-full sm:w-auto">
+              <span class="text-xs text-[#7F7F7F] whitespace-nowrap uppercase tracking-wider">Сортировка:</span>
+              <select id="sort-select" onchange="handleSortChange(this.value)" class="bg-[#FAF9F6] border border-[#E5E5E0] px-3 py-2 text-xs uppercase tracking-wider font-semibold focus:outline-none focus:border-[#C5A880] transition-premium w-full sm:w-auto">
+                <option value="price_asc">Сначала дешевле</option>
+                <option value="price_desc">Сначала дороже</option>
               </select>
             </div>
           </div>
 
-          <!-- Сетка бриллиантов -->
+          <!-- Сетка товаров -->
           <div id="gems-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            <!-- Сюда рендерятся карточки камней -->
+            <!-- Динамические карточки товаров -->
           </div>
 
-          <!-- Пустое состояние -->
-          <div id="empty-state" class="hidden text-center py-20 space-y-4">
-            <i data-lucide="search-x" class="w-12 h-12 text-[#C5A880] mx-auto stroke-[1.5]"></i>
-            <h3 class="serif-title text-xl font-light tracking-wider">Ничего не найдено</h3>
-            <p class="text-sm text-[#7F7F7F] font-light">Попробуйте изменить параметры фильтрации или сбросить их.</p>
-          </div>
-
-          <!-- Пагинация -->
-          <div id="pagination" class="flex items-center justify-between pt-8 border-t border-[#E5E5E0]">
-            <button id="btn-prev" onclick="changePage(-1)" class="flex items-center space-x-2 text-xs uppercase tracking-wider font-medium text-[#7F7F7F] hover:text-[#1A1A1A] transition-colors duration-300 disabled:opacity-30 disabled:pointer-events-none">
-              <i data-lucide="chevron-left" class="w-4 h-4"></i>
-              <span>Назад</span>
+          <!-- ПАГИНАЦИЯ -->
+          <div id="pagination" class="flex justify-between items-center pt-8 border-t border-[#E5E5E0]">
+            <button id="btn-prev" onclick="changePage(-1)" class="uppercase text-[11px] tracking-widest font-semibold text-[#7F7F7F] hover:text-[#1A1A1A] transition-premium flex items-center disabled:opacity-30 disabled:pointer-events-none">
+              <i data-lucide="chevron-left" class="w-4 h-4 mr-1"></i> Назад
             </button>
-            <span id="page-info" class="text-xs tracking-widest text-[#7F7F7F] font-light">Страница 1</span>
-            <button id="btn-next" onclick="changePage(1)" class="flex items-center space-x-2 text-xs uppercase tracking-wider font-medium text-[#7F7F7F] hover:text-[#1A1A1A] transition-colors duration-300 disabled:opacity-30 disabled:pointer-events-none">
-              <span>Вперед</span>
-              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            <span id="page-info" class="text-xs tracking-widest font-medium uppercase text-[#7F7F7F]">Страница 1 из 1</span>
+            <button id="btn-next" onclick="changePage(1)" class="uppercase text-[11px] tracking-widest font-semibold text-[#7F7F7F] hover:text-[#1A1A1A] transition-premium flex items-center disabled:opacity-30 disabled:pointer-events-none">
+              Вперед <i data-lucide="chevron-right" class="w-4 h-4 ml-1"></i>
             </button>
           </div>
-
         </div>
+
       </div>
     </section>
+  </main>
 
-    <!-- РАЗДЕЛ: КОРЗИНА (Cart Section) -->
-    <section id="tab-cart" class="tab-content hidden py-10 max-w-4xl mx-auto px-6">
-      <div class="space-y-8">
-        <h2 class="serif-title text-3xl font-light tracking-wider border-b border-[#E5E5E0] pb-4">Ваш заказ</h2>
+  <!-- БОКОВАЯ КОРЗИНА (Оверлей) -->
+  <div id="cart-overlay" class="fixed inset-0 bg-black/40 z-50 backdrop-blur-sm hidden transition-all duration-300 opacity-0" onclick="toggleCart(false)">
+    <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-[#FAF9F6] shadow-2xl p-6 flex flex-col justify-between" onclick="event.stopPropagation()">
+      <div>
+        <div class="flex items-center justify-between pb-4 border-b border-[#E5E5E0]">
+          <h3 class="serif-title text-2xl">Ваша корзина</h3>
+          <button onclick="toggleCart(false)" class="text-[#7F7F7F] hover:text-[#1A1A1A] transition-premium">
+            <i data-lucide="x" class="w-6 h-6"></i>
+          </button>
+        </div>
         
         <!-- Список товаров в корзине -->
-        <div id="cart-list" class="space-y-6">
-          <!-- Сюда рендерятся товары из корзины -->
-        </div>
-
-        <!-- Итог и Оформление -->
-        <div id="cart-summary" class="grid grid-cols-1 md:grid-cols-12 gap-8 pt-8 border-t border-[#E5E5E0]">
-          
-          <!-- Форма контактов -->
-          <form id="order-form" onsubmit="handleCheckout(event)" class="md:col-span-7 space-y-4">
-            <h3 class="font-medium text-sm uppercase tracking-wider text-[#1A1A1A] mb-2">Детали бронирования</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input type="text" id="order-name" placeholder="Ваше имя" required class="w-full px-4 py-3 bg-white border border-[#E5E5E0] focus:border-[#C5A880] focus:ring-1 focus:ring-[#C5A880] text-sm rounded outline-none transition-all duration-300">
-              <input type="tel" id="order-phone" placeholder="Телефон" required class="w-full px-4 py-3 bg-white border border-[#E5E5E0] focus:border-[#C5A880] focus:ring-1 focus:ring-[#C5A880] text-sm rounded outline-none transition-all duration-300">
-            </div>
-            <textarea id="order-comment" placeholder="Пожелания к заказу (оправа, подарочная упаковка...)" class="w-full h-24 px-4 py-3 bg-white border border-[#E5E5E0] focus:border-[#C5A880] focus:ring-1 focus:ring-[#C5A880] text-sm rounded outline-none transition-all duration-300 resize-none"></textarea>
-            <p class="text-[10px] text-[#7F7F7F] font-light">Нажимая кнопку «Оформить запрос», вы соглашаетесь с условиями конфиденциальности бренда.</p>
-          </form>
-
-          <!-- Смета -->
-          <div class="md:col-span-5 bg-white p-6 border border-[#E5E5E0] rounded-lg shadow-sm flex flex-col justify-between h-fit space-y-6">
-            <div class="space-y-4">
-              <div class="flex justify-between text-sm text-[#7F7F7F] font-light">
-                <span>Всего позиций:</span>
-                <span id="summary-qty" class="font-medium text-[#1A1A1A]">0</span>
-              </div>
-              <div class="flex justify-between text-lg font-medium border-t border-[#E5E5E0] pt-4">
-                <span>Итого к оплате:</span>
-                <span id="summary-total" class="text-[#C5A880]">0 ₽</span>
-              </div>
-            </div>
-            <button type="submit" form="order-form" class="w-full py-4 bg-[#1A1A1A] text-[#FAF9F6] text-xs uppercase tracking-[0.25em] font-medium hover:bg-[#C5A880] hover:text-[#FAF9F6] transition-all duration-300 rounded shadow-md">
-              Оформить запрос
-            </button>
-          </div>
-        </div>
-
-        <!-- Корзина пуста -->
-        <div id="cart-empty" class="hidden text-center py-20 space-y-4">
-          <i data-lucide="shopping-bag" class="w-12 h-12 text-[#C5A880] mx-auto stroke-[1.5]"></i>
-          <h3 class="serif-title text-xl font-light tracking-wider">Корзина пуста</h3>
-          <p class="text-sm text-[#7F7F7F] font-light">Добавьте прекрасные камни из каталога для оформления заказа.</p>
-          <button onclick="switchTab('catalog')" class="mt-4 px-8 py-3 bg-[#1A1A1A] text-[#FAF9F6] text-xs uppercase tracking-[0.2em] hover:bg-[#C5A880] rounded transition-all duration-300">В каталог</button>
+        <div id="cart-items" class="mt-6 space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+          <!-- Динамические элементы корзины -->
         </div>
       </div>
-    </section>
 
-    <!-- Модальное окно успешного заказа -->
-    <div id="success-modal" class="fixed inset-0 bg-[#1A1A1A]/50 z-50 hidden flex items-center justify-center p-4">
-      <div class="bg-[#FAF9F6] border border-[#E5E5E0] max-w-md w-full p-8 rounded-lg shadow-2xl text-center space-y-6 animate-in fade-in zoom-in-95 duration-300">
-        <div class="w-16 h-16 bg-[#C5A880]/10 text-[#C5A880] rounded-full flex items-center justify-center mx-auto">
-          <i data-lucide="check-circle-2" class="w-8 h-8 stroke-[1.5]"></i>
+      <!-- Итоги -->
+      <div class="border-t border-[#E5E5E0] pt-6 space-y-4">
+        <div class="flex justify-between text-sm tracking-widest uppercase">
+          <span>Итого к оплате:</span>
+          <span id="cart-total" class="font-bold text-[#C5A880]">0 ₽</span>
         </div>
-        <div class="space-y-2">
-          <h3 class="serif-title text-2xl font-light tracking-wider">Запрос отправлен</h3>
-          <p class="text-sm text-[#7F7F7F] font-light leading-relaxed">Наш геммолог свяжется с вами по указанному телефону в течение 15 минут для подтверждения бронирования.</p>
+        
+        <!-- Форма заказа -->
+        <div id="order-form-container" class="space-y-3 hidden">
+          <input type="text" id="customer-name" placeholder="Ваше имя" class="w-full text-xs p-3 border border-[#E5E5E0] bg-[#FAF9F6] focus:outline-none focus:border-[#C5A880]">
+          <input type="tel" id="customer-phone" placeholder="Номер телефона" class="w-full text-xs p-3 border border-[#E5E5E0] bg-[#FAF9F6] focus:outline-none focus:border-[#C5A880]">
         </div>
-        <button onclick="closeSuccessModal()" class="w-full py-3 bg-[#1A1A1A] text-[#FAF9F6] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#C5A880] rounded transition-all duration-300">
-          Продолжить
+
+        <button id="btn-checkout" onclick="checkout()" class="w-full bg-[#1A1A1A] hover:bg-[#C5A880] text-white py-4 text-xs tracking-widest uppercase font-semibold transition-premium disabled:opacity-30 disabled:pointer-events-none">
+          Оформить заказ
         </button>
       </div>
     </div>
+  </div>
 
-  </main>
+  <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ПРОСМОТРА СЕРТИФИКАТОВ / КАРТИНОК -->
+  <div id="modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4 cursor-pointer" onclick="closeModal()">
+    <div class="relative max-w-3xl max-h-[90vh] bg-white p-2 border border-[#C5A880]" onclick="event.stopPropagation()">
+      <button onclick="closeModal()" class="absolute -top-10 right-0 text-white hover:text-[#C5A880] transition-premium flex items-center text-xs tracking-widest uppercase">
+        Закрыть <i data-lucide="x" class="w-5 h-5 ml-1"></i>
+      </button>
+      <img id="modal-img" src="" alt="Сертификат бриллианта" class="max-w-full max-h-[80vh] object-contain">
+    </div>
+  </div>
 
-  <!-- Подвал сайта (Footer) -->
-  <footer class="border-t border-[#E5E5E0] bg-white py-12 mt-16">
-    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 items-center text-center md:text-left">
+  <!-- ФУТЕР -->
+  <footer class="bg-[#1A1A1A] text-[#FAF9F6] py-12 border-t border-[#E5E5E0]/10">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
       <div>
-        <span class="text-lg font-light tracking-[0.25em] text-[#1A1A1A] serif-title">citygems</span>
-        <p class="text-[10px] text-[#7F7F7F] font-light uppercase tracking-widest mt-2">&copy; 2026. Все права защищены</p>
+        <h4 class="text-lg font-light tracking-[0.25em] mb-4">citygems</h4>
+        <p class="text-xs text-[#7F7F7F] font-light leading-relaxed">
+          Лабораторные бриллианты высочайшей пробы. Мы ценим чистоту происхождения камней и предлагаем непревзойденное качество.
+        </p>
       </div>
-      <div class="flex justify-center space-x-8 text-xs uppercase tracking-widest font-medium text-[#7F7F7F]">
-        <a href="#" onclick="switchTab('about')" class="hover:text-[#1A1A1A] transition-colors duration-300">О камнях</a>
-        <a href="#" onclick="switchTab('catalog')" class="hover:text-[#1A1A1A] transition-colors duration-300">Каталог</a>
+      <div>
+        <h4 class="text-xs tracking-widest uppercase font-bold text-[#C5A880] mb-4">Навигация</h4>
+        <ul class="text-xs space-y-2 text-[#7F7F7F] font-light">
+          <li><a href="#" onclick="switchTab('about')" class="hover:text-[#FAF9F6] transition-premium">О нас</a></li>
+          <li><a href="#" onclick="switchTab('catalog')" class="hover:text-[#FAF9F6] transition-premium">Каталог</a></li>
+        </ul>
       </div>
-      <div class="text-xs text-[#7F7F7F] font-light md:text-right">
-        <span>Эксклюзивные лабораторные бриллианты</span>
+      <div>
+        <h4 class="text-xs tracking-widest uppercase font-bold text-[#C5A880] mb-4">Контакты</h4>
+        <p class="text-xs text-[#7F7F7F] font-light leading-relaxed">
+          г. Москва, Ювелирный проезд, 12<br>
+          <span class="text-[#FAF9F6] font-medium">info@citygems.ru</span>
+        </p>
       </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-6 mt-12 pt-6 border-t border-[#E5E5E0]/10 text-center text-[10px] text-[#7F7F7F] tracking-wider uppercase">
+      © 2026 citygems. Все права защищены.
     </div>
   </footer>
 
-  <!-- Скрипт Логики Магазина -->
+  <!-- СЦЕНАРИИ КАТАЛОГА -->
   <script>
-    // Инициализация внутреннего реактивного стейта приложения
-    const state = {
-      activeTab: 'about',
-      cart: [],
-      filters: {
-        exact: {},
-        ranges: {}
-      },
-      sortBy: 'price_asc', // Дефолтная сортировка: цена по возрастанию
-      page: 0,
-      limit: 20
+    const state = { 
+      activeTab: 'about', 
+      cart: [], 
+      filters: { 
+        exact: {}, 
+        ranges: {} 
+      }, 
+      sortBy: 'price_asc', 
+      page: 0, 
+      limit: 9, 
+      totalCount: 0 
     };
 
-    // Слушатель загрузки DOM
     window.addEventListener('DOMContentLoaded', async () => {
-      // Инициализируем иконки Lucide
       lucide.createIcons();
-
+      
       try {
-        // Дожидаемся загрузки и пересчета данных из каталога gems.js
         await Gems.initPromise;
+        document.getElementById('loader').classList.add('hidden');
         
-        // Переопределяем метод фильтрации и добавляем сквозную сортировку до разбиения на страницы
-        injectSortingHelper();
-
-        // Скрываем прелоадер
-        const loader = document.getElementById('loader');
-        loader.classList.add('opacity-0');
-        setTimeout(() => loader.style.display = 'none', 500);
-
-        // Динамически строим форму фильтров в нужном порядке
+        initRangeBoundaries();
         buildDynamicFilters();
-
-        // Загружаем сохраненную корзину
-        loadCart();
-
-        // Рендерим витрину
         renderCatalog();
-
-      } catch (err) {
-        console.error("Ошибка при инициализации интерфейса каталога:", err);
-        const loader = document.getElementById('loader');
-        loader.innerHTML = `
-          <div class="text-center p-6 max-w-md space-y-4">
-            <i data-lucide="alert-triangle" class="w-12 h-12 text-[#C5A880] mx-auto"></i>
-            <h3 class="serif-title text-2xl font-light">Ошибка загрузки каталога</h3>
-            <p class="text-sm text-[#7F7F7F] font-light">Не удалось связаться с базой данных бриллиантов. Пожалуйста, проверьте интернет-соединение.</p>
-          </div>
+      } catch (e) {
+        document.getElementById('loader').innerHTML = `
+          <p class="text-red-500 font-bold uppercase tracking-widest text-xs text-center">Ошибка инициализации каталога.<br>Попробуйте обновить страницу.</p>
         `;
-        lucide.createIcons();
       }
     });
 
-    /**
-     * Внедряем метод фильтрации и глобальной сортировки.
-     * Сортирует индексы строк по плоским массивам цен в памяти, гарантируя максимальную производительность.
-     */
-    function injectSortingHelper() {
-      Gems.filterAndSort = function(exact = {}, ranges = {}, sortBy = 'price_asc', limit = 20, offset = 0) {
-        const matchingIndices = [];
-
-        // 1. Проверяем все 16 000+ строк на совпадение условиям
-        for (let i = 0; i < this.RowsCount; i++) {
-          let matches = true;
-
-          // Проверка точных совпадений
-          for (const colName in exact) {
-            if (this.getValue(colName, i) !== exact[colName]) {
-              matches = false;
-              break;
-            }
-          }
-          if (!matches) continue;
-
-          // Проверка диапазонов
-          for (const colName in ranges) {
-            const val = this.getValue(colName, i);
-            if (typeof val === 'number') {
-              const { min, max } = ranges[colName];
-              if (min !== undefined && val < min) { matches = false; break; }
-              if (max !== undefined && val > max) { matches = false; break; }
-            }
-          }
-
-          if (matches) {
-            matchingIndices.push(i);
-          }
-        }
-
-        // 2. Сортируем отфильтрованные индексы по цене («Цена») в памяти
-        const priceCol = this.Columns['Цена'];
-        if (priceCol && Array.isArray(priceCol.Data)) {
-          if (sortBy === 'price_asc') {
-            matchingIndices.sort((a, b) => priceCol.Data[a] - priceCol.Data[b]);
-          } else if (sortBy === 'price_desc') {
-            matchingIndices.sort((a, b) => priceCol.Data[b] - priceCol.Data[a]);
-          }
-        }
-
-        // 3. Вырезаем кусок под пагинацию и только теперь собираем тяжёлые объекты для страницы
-        const sliced = matchingIndices.slice(offset, offset + limit);
-        const items = sliced.map(idx => this.getItem(idx));
-
-        return {
-          items,
-          total: matchingIndices.length
-        };
-      };
+    // Определение цен/весов из данных каталога и инициализация слайдеров
+    function initRangeBoundaries() {
+      const priceCol = Gems.Columns['Цена']?.Data || [];
+      const weightCol = Gems.Columns['Вес']?.Data || [];
+      
+      if (priceCol.length) {
+        const minPrice = Math.min(...priceCol);
+        const maxPrice = Math.max(...priceCol);
+        state.filters.ranges['Цена'] = { min: minPrice, max: maxPrice };
+        
+        document.getElementById('price-min-input').value = minPrice;
+        document.getElementById('price-max-input').value = maxPrice;
+        
+        const sliderMin = document.getElementById('price-min-range');
+        const sliderMax = document.getElementById('price-max-range');
+        
+        sliderMin.min = minPrice;
+        sliderMin.max = maxPrice;
+        sliderMin.value = minPrice;
+        
+        sliderMax.min = minPrice;
+        sliderMax.max = maxPrice;
+        sliderMax.value = maxPrice;
+        
+        document.getElementById('price-min-val').innerText = minPrice.toLocaleString();
+        document.getElementById('price-max-val').innerText = maxPrice.toLocaleString();
+      }
+      
+      if (weightCol.length) {
+        const minWeight = Math.min(...weightCol);
+        const maxWeight = Math.max(...weightCol);
+        state.filters.ranges['Вес'] = { min: minWeight, max: maxWeight };
+        
+        document.getElementById('weight-min-input').value = minWeight;
+        document.getElementById('weight-max-input').value = maxWeight;
+        
+        const sliderMin = document.getElementById('weight-min-range');
+        const sliderMax = document.getElementById('weight-max-range');
+        
+        sliderMin.min = minWeight;
+        sliderMin.max = maxWeight;
+        sliderMin.step = 0.01;
+        sliderMin.value = minWeight;
+        
+        sliderMax.min = minWeight;
+        sliderMax.max = maxWeight;
+        sliderMax.step = 0.01;
+        sliderMax.value = maxWeight;
+        
+        document.getElementById('weight-min-val').innerText = minWeight.toFixed(2);
+        document.getElementById('weight-max-val').innerText = maxWeight.toFixed(2);
+      }
     }
 
-    // Динамическая генерация фильтров в строго заданном порядке: Вес, Форма, Цвет, Чистота, Цена, Сертификат
-    // При этом параметры Размеры, Симметрия, Полировка, Огранка исключены из генерации
+    // Рендер фильтров кнопками в ряд
     function buildDynamicFilters() {
       const container = document.getElementById('filters-container');
       container.innerHTML = '';
-
-      // Заданный строгий порядок отображения параметров
-      const order = ['Вес', 'Форма', 'Цвет', 'Чистота', 'Цена', 'Сертификат'];
-
-      order.forEach(colName => {
-        const col = Gems.Columns[colName];
-        if (!col) return; // Пропускаем, если колонки нет в текущей схеме базы данных
-
-        // 1. Если колонка категориальная (Enum)
-        if (col.Enum && Array.isArray(col.Enum)) {
-          const section = document.createElement('div');
-          section.className = 'space-y-3';
+      
+      ['Форма', 'Цвет', 'Чистота', 'Сертификат'].forEach(name => {
+        const col = Gems.Columns[name];
+        if (col?.Enum) {
+          state.filters.exact[name] = [];
           
-          section.innerHTML = `
-            <label class="block text-xs uppercase tracking-widest font-semibold text-[#1A1A1A]">${colName}</label>
-            <div class="flex flex-wrap gap-2" id="filter-group-${colName}">
-              <button onclick="setExactFilter('${colName}', '')" id="btn-exact-${colName}-any" class="filter-btn-exact px-3 py-1.5 text-xs rounded border border-[#C5A880] bg-[#C5A880] text-white font-medium transition-all duration-300">Все</button>
-              ${col.Enum.map(val => {
-                // Если сертификат пустой "", заменяем текст кнопки на "нет"
-                const displayVal = (colName === 'Сертификат' && val === '') ? 'нет' : val;
-                // Создаем безопасный ID для кнопок, заменяя спецсимволы
-                const btnId = `btn-exact-${colName}-${val.replace(/[^a-zA-Z0-9а-яА-Я]/g, '_')}`;
+          const div = document.createElement('div');
+          div.className = 'border-b border-[#FAF9F6] pb-4 last:border-0';
+          div.innerHTML = `
+            <label class="block text-xs font-bold uppercase mb-2 tracking-wider text-[#1A1A1A]">${name}</label>
+            <div class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto custom-scrollbar">
+              ${col.Enum.map((v) => {
                 return `
-                  <button onclick="setExactFilter('${colName}', '${val}')" id="${btnId}" class="filter-btn-exact px-3 py-1.5 text-xs rounded border border-[#E5E5E0] bg-white hover:border-[#C5A880] transition-all duration-300">${displayVal}</button>
+                  <button type="button" onclick="toggleFilter('${name}', '${v}', this)" class="px-2.5 py-1 text-[11px] border tracking-wider uppercase transition-premium font-medium bg-transparent text-[#7F7F7F] border-[#E5E5E0] hover:text-[#1A1A1A] hover:border-[#1A1A1A]">
+                    ${v}
+                  </button>
                 `;
               }).join('')}
             </div>
           `;
-          container.appendChild(section);
-        }
-        
-        // 2. Если колонка числовая (Цена, Вес)
-        else if (col.Data && col.Data.length > 0) {
-          const numbers = col.Data.filter(v => typeof v === 'number');
-          if (numbers.length === 0) return;
-          
-          const minVal = Math.min(...numbers);
-          const maxVal = Math.max(...numbers);
-
-          // Записываем дефолты диапазонов в стейт
-          if (!state.filters.ranges[colName]) {
-            state.filters.ranges[colName] = { min: minVal, max: maxVal };
-          }
-
-          const section = document.createElement('div');
-          section.className = 'space-y-3';
-          section.innerHTML = `
-            <label class="block text-xs uppercase tracking-widest font-semibold text-[#1A1A1A]">${colName}</label>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <span class="text-[10px] text-[#7F7F7F] uppercase tracking-wider block mb-1">От</span>
-                <input type="number" step="any" id="input-range-min-${colName}" min="${minVal}" max="${maxVal}" value="${state.filters.ranges[colName].min}" onchange="setRangeFilter('${colName}', 'min', this.value)" class="w-full px-2 py-1.5 text-xs bg-white border border-[#E5E5E0] rounded outline-none text-center focus:border-[#C5A880] font-medium">
-              </div>
-              <div>
-                <span class="text-[10px] text-[#7F7F7F] uppercase tracking-wider block mb-1">До</span>
-                <input type="number" step="any" id="input-range-max-${colName}" min="${minVal}" max="${maxVal}" value="${state.filters.ranges[colName].max}" onchange="setRangeFilter('${colName}', 'max', this.value)" class="w-full px-2 py-1.5 text-xs bg-white border border-[#E5E5E0] rounded outline-none text-center focus:border-[#C5A880] font-medium">
-              </div>
-            </div>
-          `;
-          container.appendChild(section);
+          container.appendChild(div);
         }
       });
     }
 
-    // Установка точного фильтра по категории
-    function setExactFilter(colName, value) {
-      if (value === '') {
-        delete state.filters.exact[colName];
+    // Клик по кнопке фильтра
+    function toggleFilter(col, val, btn) {
+      const list = state.filters.exact[col];
+      const idx = list.indexOf(val);
+      if (idx > -1) {
+        list.splice(idx, 1);
+        btn.classList.remove('bg-[#1A1A1A]', 'text-[#FAF9F6]', 'border-[#1A1A1A]');
+        btn.classList.add('bg-transparent', 'text-[#7F7F7F]', 'border-[#E5E5E0]');
       } else {
-        state.filters.exact[colName] = value;
+        list.push(val);
+        btn.classList.add('bg-[#1A1A1A]', 'text-[#FAF9F6]', 'border-[#1A1A1A]');
+        btn.classList.remove('bg-transparent', 'text-[#7F7F7F]', 'border-[#E5E5E0]');
       }
-
-      // Переключаем визуальное состояние кнопок в этой группе
-      const group = document.getElementById(`filter-group-${colName}`);
-      const buttons = group.querySelectorAll('.filter-btn-exact');
-      buttons.forEach(btn => {
-        btn.classList.remove('bg-[#C5A880]', 'text-white', 'border-[#C5A880]');
-        btn.classList.add('bg-white', 'text-[#1A1A1A]', 'border-[#E5E5E0]');
-      });
-
-      const safeValueId = value.replace(/[^a-zA-Z0-9а-яА-Я]/g, '_');
-      const activeId = value === '' ? `btn-exact-${colName}-any` : `btn-exact-${colName}-${safeValueId}`;
-      const activeBtn = document.getElementById(activeId);
-      if (activeBtn) {
-        activeBtn.classList.remove('bg-white', 'text-[#1A1A1A]', 'border-[#E5E5E0]');
-        activeBtn.classList.add('bg-[#C5A880]', 'text-white', 'border-[#C5A880]');
-      }
-
-      state.page = 0; // Сбрасываем на первую страницу
+      state.page = 0;
       renderCatalog();
     }
 
-    // Установка фильтра по диапазону чисел
-    function setRangeFilter(colName, border, value) {
-      const numVal = parseFloat(value);
-      if (isNaN(numVal)) return;
-
+    // Обработка ручного ввода числовых диапазонов
+    function handleRangeInputChange(colName, limitType, value) {
+      const numVal = value !== '' ? parseFloat(value) : undefined;
+      
       if (!state.filters.ranges[colName]) {
         state.filters.ranges[colName] = {};
       }
-      state.filters.ranges[colName][border] = numVal;
-
-      state.page = 0; // Сбрасываем на первую страницу
-      renderCatalog();
-    }
-
-    // Обработчик изменения типа сортировки
-    function handleSortChange(value) {
-      state.sortBy = value;
-      state.page = 0; // Сбрасываем на первую страницу
-      renderCatalog();
-    }
-
-    // Полный сброс всех фильтров
-    function resetFilters() {
-      state.filters.exact = {};
-      state.filters.ranges = {}; // Сбрасываем к исходным диапазонам
       
-      // Сбрасываем сортировку на дефолтную
-      state.sortBy = 'price_asc';
-      const sortSelect = document.getElementById('sort-select');
-      if (sortSelect) sortSelect.value = 'price_asc';
-
-      // Перегенерируем фильтры для сброса полей ввода диапазонов
-      buildDynamicFilters();
+      if (numVal === undefined) {
+        delete state.filters.ranges[colName][limitType];
+      } else {
+        state.filters.ranges[colName][limitType] = numVal;
+        
+        // Синхронизация с бегунками
+        if (colName === 'Цена') {
+          const slider = document.getElementById(limitType === 'min' ? 'price-min-range' : 'price-max-range');
+          if (slider) {
+            slider.value = numVal;
+            document.getElementById(limitType === 'min' ? 'price-min-val' : 'price-max-val').innerText = Math.round(numVal).toLocaleString();
+          }
+        } else {
+          const slider = document.getElementById(limitType === 'min' ? 'weight-min-range' : 'weight-max-range');
+          if (slider) {
+            slider.value = numVal;
+            document.getElementById(limitType === 'min' ? 'weight-min-val' : 'weight-max-val').innerText = numVal.toFixed(2);
+          }
+        }
+      }
       
       state.page = 0;
       renderCatalog();
     }
 
-    // Переключение между вкладками сайта
-    function switchTab(tabId) {
-      state.activeTab = tabId;
-
-      // Скрываем все вкладки
-      document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.add('hidden');
-      });
-
-      // Показываем активную вкладку
-      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-
-      // Обновляем состояние меню в шапке
-      document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('text-[#C5A880]');
-        link.classList.add('text-[#7F7F7F]');
-      });
-
-      const activeLink = document.getElementById(`nav-${tabId}`);
-      if (activeLink) {
-        activeLink.classList.remove('text-[#7F7F7F]');
-        activeLink.classList.add('text-[#C5A880]');
+    // Обработка перемещения бегунков
+    function handleRangeSliderChange(colName, limitType, value) {
+      const numVal = parseFloat(value);
+      
+      // Защита от перекрестного пересечения ползунков (мин не может быть больше макс)
+      if (limitType === 'min') {
+        const currentMax = state.filters.ranges[colName].max;
+        if (numVal > currentMax) {
+          const slider = document.getElementById(colName === 'Цена' ? 'price-min-range' : 'weight-min-range');
+          slider.value = currentMax;
+          return;
+        }
+      } else {
+        const currentMin = state.filters.ranges[colName].min;
+        if (numVal < currentMin) {
+          const slider = document.getElementById(colName === 'Цена' ? 'price-max-range' : 'weight-max-range');
+          slider.value = currentMin;
+          return;
+        }
       }
 
-      // Скролл вверх при смене вкладки
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-
-      // Отрисовка корзины при переходе в неё
-      if (tabId === 'cart') {
-        renderCart();
+      state.filters.ranges[colName][limitType] = numVal;
+      
+      // Синхронизация с числовыми полями ввода и текстом
+      if (colName === 'Цена') {
+        document.getElementById(limitType === 'min' ? 'price-min-input' : 'price-max-input').value = Math.round(numVal);
+        document.getElementById(limitType === 'min' ? 'price-min-val' : 'price-max-val').innerText = Math.round(numVal).toLocaleString();
+      } else {
+        document.getElementById(limitType === 'min' ? 'weight-min-input' : 'weight-max-input').value = numVal.toFixed(2);
+        document.getElementById(limitType === 'min' ? 'weight-min-val' : 'weight-max-val').innerText = numVal.toFixed(2);
       }
+      
+      state.page = 0;
+      renderCatalog();
     }
 
-    // Рендер витрины каталога
+    function resetFilters() {
+      for (const colName in state.filters.exact) {
+        state.filters.exact[colName] = [];
+      }
+      
+      // Сбрасываем кнопочные стили
+      document.querySelectorAll('#filters-container button').forEach(btn => {
+        btn.classList.remove('bg-[#1A1A1A]', 'text-[#FAF9F6]', 'border-[#1A1A1A]');
+        btn.classList.add('bg-transparent', 'text-[#7F7F7F]', 'border-[#E5E5E0]');
+      });
+      
+      document.getElementById('price-min-input').value = '';
+      document.getElementById('price-max-input').value = '';
+      document.getElementById('weight-min-input').value = '';
+      document.getElementById('weight-max-input').value = '';
+      
+      initRangeBoundaries();
+      state.page = 0;
+      renderCatalog();
+    }
+
+    function handleSortChange(value) {
+      state.sortBy = value;
+      state.page = 0;
+      renderCatalog();
+    }
+
+    // Рендеринг карточек
     function renderCatalog() {
       const grid = document.getElementById('gems-grid');
-      const emptyState = document.getElementById('empty-state');
-      const offset = state.page * state.limit;
-
-      // Получаем отсортированные и отфильтрованные данные
-      const { items, total } = Gems.filterAndSort(state.filters.exact, state.filters.ranges, state.sortBy, state.limit, offset);
-
-      document.getElementById('total-count').innerText = total;
-
-      // Если ничего не найдено
-      if (items.length === 0) {
-        grid.innerHTML = '';
-        emptyState.classList.remove('hidden');
-        document.getElementById('pagination').classList.add('hidden');
+      const currentOffset = state.page * state.limit;
+      
+      const result = Gems.filter(
+        state.filters.exact, 
+        state.filters.ranges, 
+        state.sortBy, 
+        state.limit, 
+        currentOffset
+      );
+      
+      const items = result?.items || [];
+      state.totalCount = result?.total || 0;
+      
+      document.getElementById('total-count').innerText = state.totalCount;
+      
+      if (!items.length) {
+        grid.innerHTML = `
+          <div class="col-span-full py-16 text-center space-y-3">
+            <i data-lucide="search-slash" class="w-10 h-10 text-[#7F7F7F] mx-auto opacity-55"></i>
+            <p class="text-sm tracking-wider uppercase text-[#7F7F7F]">Камней с такими характеристиками не найдено.</p>
+          </div>
+        `;
+        updatePaginationUI(0);
+        lucide.createIcons();
         return;
       }
 
-      emptyState.classList.add('hidden');
-      document.getElementById('pagination').classList.remove('hidden');
       grid.innerHTML = '';
-
-      // Строим карточки
+      
       items.forEach(gem => {
-        const shape = gem['Форма'] || '';
-        const weight = gem['Вес'] || gem['Карат'] || 0;
-        const color = gem['Цвет'] || '';
-        const clarity = gem['Чистота'] || '';
-        const price = gem['Цена'] || 0;
+        const card = document.createElement('div');
+        card.className = 'bg-white border border-[#E5E5E0] hover:border-[#C5A880] p-5 flex flex-col justify-between transition-premium relative group';
+        
+        const shape = gem['Форма'] || 'Круглый';
+        const weight = gem['Вес'] ? `${gem['Вес'].toFixed(2)} ct` : '—';
+        const price = gem['Цена'] ? `${gem['Цена'].toLocaleString('ru-RU')} ₽` : 'По запросу';
+        const color = gem['Цвет'] || '—';
+        const clarity = gem['Чистота'] || '—';
+        const cert = gem['Сертификат'] || '';
 
-        // Расчет отображения огранки (Огранка / Полировка / Симметрия)
-        const cut = gem['Огранка'];
+        const cut = gem['Огранка'] || '—';
         const polish = gem['Полировка'] || '—';
         const symmetry = gem['Симметрия'] || '—';
+        const fullCutString = `${cut}/${polish}/${symmetry}`;
 
-        let cutDisplay = '';
-        if (cut && cut !== '*' && cut !== '—') {
-          cutDisplay = `${cut}/${polish}/${symmetry}`;
-        } else {
-          // Если огранка отсутствует или равна "*", убираем ее и первый слэш
-          cutDisplay = `${polish}/${symmetry}`;
-        }
+        // Статичный логотип сертификата сверху слева (скрывается, если пустой)
+        const logoHtml = gem.lab
+          ? `<div class="absolute top-4 left-4 z-10 bg-[#FAF9F6] border border-[#E5E5E0] p-1 shadow-sm flex items-center justify-center h-8 w-12">
+               <img src="${gem.lab}" alt="Сертификат ${cert}" class="max-h-full max-w-full object-contain" onerror="this.parentNode.style.display='none'">
+             </div>`
+          : ``;
 
-        const card = document.createElement('div');
-        card.className = 'bg-white border border-[#E5E5E0] rounded-lg overflow-hidden flex flex-col justify-between transition-all duration-500 hover:shadow-lg hover:border-[#C5A880] group';
-        
         card.innerHTML = `
-          <div class="relative bg-white aspect-[4/3] flex items-center justify-center p-6 border-b border-[#FAF9F6] overflow-hidden">
-            <!-- Элегантный фон карточки с эффектом стекла -->
-            <div class="absolute inset-0 bg-gradient-to-tr from-[#FAF9F6] to-white opacity-40"></div>
-            
-            <!-- Логотип сертификата в левом верхнем углу (если lab не пустой) -->
-            ${gem.lab ? `
-              <div class="absolute top-4 left-4 h-6 flex items-center bg-white/80 backdrop-blur-md border border-[#E5E5E0] px-2 py-0.5 rounded">
-                <img src="${gem.lab}" alt="Sert Logo" class="h-full object-contain max-w-[50px]">
-              </div>
-            ` : ''}
+          <div class="relative">
+            <!-- Изображение сертификата сверху слева -->
+            ${logoHtml}
 
-            <!-- Изображение огранки (со встроенным фолбеком на заглушку) -->
-            <img src="${gem.image}" alt="${shape}" class="relative w-3/5 h-3/5 object-contain transition-transform duration-700 group-hover:scale-110" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23C5A880%22 stroke-width=%221%22><polygon points=%2212,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5%22/></svg>'">
-            
-            <div class="absolute top-4 right-4 bg-white/80 backdrop-blur-md border border-[#E5E5E0] text-[10px] uppercase tracking-widest px-2 py-1 rounded font-medium">
-              ${shape}
+            <!-- Контейнер для фото огранки -->
+            <div class="aspect-square bg-[#FAF9F6]/50 border border-[#FAF9F6] py-2 flex items-center justify-center mb-4 relative overflow-hidden">
+              <img src="${gem.image || 'https://citygems.ru/db/круглый.png'}" alt="${shape}" class="w-32 h-32 object-contain transition-premium group-hover:scale-110" onerror="this.src='https://citygems.ru/db/круглый.png'">
+            </div>
+
+            <!-- Блок описания -->
+            <div class="space-y-4">
+              <!-- Форма (слева), Вес (по центру) и Цена (справа) строго на одной линии -->
+              <div class="grid grid-cols-3 items-baseline border-b border-[#E5E5E0]/40 pb-3 gap-2">
+                <div class="text-left">
+                  <h4 class="serif-title text-base font-semibold tracking-wide text-[#1A1A1A]">${shape}</h4>
+                </div>
+                <div class="text-center">
+                  <span class="text-lg font-bold text-[#C5A880] tracking-wider">${weight}</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-sm font-bold tracking-wide text-[#1A1A1A]">${price}</span>
+                </div>
+              </div>
+
+              <!-- Таблица параметров (цвет, чистота, огранка) -->
+              <div class="flex justify-between items-center text-xs text-[#1A1A1A] pt-1 gap-4">
+                <div class="text-left">
+                  <span class="text-[9px] tracking-widest uppercase text-[#7F7F7F] block mb-0.5">цвет</span>
+                  <strong class="font-semibold text-xs text-[#1A1A1A]">${color}</strong>
+                </div>
+                <div class="text-center">
+                  <span class="text-[9px] tracking-widest uppercase text-[#7F7F7F] block mb-0.5">чистота</span>
+                  <strong class="font-semibold text-xs text-[#1A1A1A]">${clarity}</strong>
+                </div>
+                <div class="text-right">
+                  <span class="text-[9px] tracking-widest uppercase text-[#7F7F7F] block mb-0.5">огранка</span>
+                  <strong class="font-semibold text-xs text-[#1A1A1A] whitespace-nowrap">${fullCutString}</strong>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="p-6 space-y-4">
-            <div class="flex items-baseline justify-between">
-              <span class="serif-title text-2xl font-light">${weight.toFixed(2)} <span class="text-xs uppercase tracking-widest text-[#7F7F7F] font-sans">Carat</span></span>
-              <span class="text-lg font-medium text-[#C5A880]">${price.toLocaleString('ru-RU')} ₽</span>
-            </div>
-
-            <!-- Характеристики камня -->
-            <div class="grid grid-cols-3 gap-2 py-3 border-y border-[#E5E5E0] text-center">
-              <div>
-                <span class="text-[9px] uppercase tracking-widest text-[#7F7F7F] block">Цвет</span>
-                <span class="text-xs font-semibold text-[#1A1A1A]">${color}</span>
-              </div>
-              <div class="border-x border-[#E5E5E0]">
-                <span class="text-[9px] uppercase tracking-widest text-[#7F7F7F] block">Чистота</span>
-                <span class="text-xs font-semibold text-[#1A1A1A]">${clarity}</span>
-              </div>
-              <div>
-                <span class="text-[9px] uppercase tracking-widest text-[#7F7F7F] block">Огранка</span>
-                <span class="text-xs font-semibold text-[#1A1A1A]">${cutDisplay}</span>
-              </div>
-            </div>
-
-            <!-- Кнопка корзины -->
-            <button onclick="addToCart(${gem._index})" class="w-full py-3 bg-[#1A1A1A] text-[#FAF9F6] text-[10px] uppercase tracking-[0.2em] font-medium rounded hover:bg-[#C5A880] hover:text-[#FAF9F6] transition-all duration-300 flex items-center justify-center space-x-2">
-              <i data-lucide="shopping-bag" class="w-4 h-4 stroke-[1.5]"></i>
-              <span>В корзину</span>
+          <!-- Нижняя кнопка добавления в корзину -->
+          <div class="pt-4 mt-4 border-t border-[#E5E5E0]/50">
+            <button onclick="addToCart(${gem._index})" class="w-full bg-[#1A1A1A] hover:bg-[#C5A880] text-white py-2.5 text-xs tracking-widest uppercase font-semibold transition-premium flex items-center justify-center gap-2">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i> В корзину
             </button>
           </div>
         `;
-
         grid.appendChild(card);
       });
-
-      // Перестраиваем иконки для динамических элементов витрины
+      
       lucide.createIcons();
-
-      // Настройка пагинации
-      updatePaginationControls(total);
+      updatePaginationUI(state.totalCount);
     }
 
-    // Обновление кнопок пагинации
-    function updatePaginationControls(totalItems) {
-      const maxPage = Math.ceil(totalItems / state.limit) - 1;
+    function changePage(dir) {
+      const maxPages = Math.ceil(state.totalCount / state.limit);
+      const targetPage = state.page + dir;
+      
+      if (targetPage >= 0 && targetPage < maxPages) {
+        state.page = targetPage;
+        renderCatalog();
+        document.getElementById('tab-catalog').scrollIntoView({ behavior: 'smooth' });
+      }
+    }
 
-      document.getElementById('page-info').innerText = `Страница ${state.page + 1} из ${Math.max(1, maxPage + 1)}`;
+    function updatePaginationUI(total) {
+      const maxPages = Math.ceil(total / state.limit) || 1;
+      const displayCurrentPage = state.page + 1;
+      
+      document.getElementById('page-info').innerText = `Страница ${displayCurrentPage} из ${maxPages}`;
       
       document.getElementById('btn-prev').disabled = state.page === 0;
-      document.getElementById('btn-next').disabled = state.page >= maxPage;
+      document.getElementById('btn-next').disabled = displayCurrentPage >= maxPages;
     }
 
-    // Листание страниц
-    function changePage(direction) {
-      state.page += direction;
-      renderCatalog();
-      window.scrollTo({ top: document.getElementById('tab-catalog').offsetTop - 40, behavior: 'smooth' });
-    }
+    function switchTab(id) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById('tab-' + id).classList.remove('hidden');
 
-    // --- КОРЗИНА И ЗАКАЗ ---
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('text-[#1A1A1A]', 'border-[#C5A880]');
+        link.classList.add('text-[#7F7F7F]', 'border-transparent');
+      });
 
-    // Сохранить корзину в LocalStorage
-    function saveCart() {
-      localStorage.setItem('citygems_cart', JSON.stringify(state.cart));
-      updateCartBadge();
-    }
-
-    // Загрузить корзину из LocalStorage
-    function loadCart() {
-      const saved = localStorage.getItem('citygems_cart');
-      if (saved) {
-        try {
-          state.cart = JSON.parse(saved);
-        } catch (e) {
-          state.cart = [];
-        }
+      const activeNav = document.getElementById('nav-' + id);
+      if (activeNav) {
+        activeNav.classList.remove('text-[#7F7F7F]', 'border-transparent');
+        activeNav.classList.add('text-[#1A1A1A]', 'border-[#C5A880]');
       }
-      updateCartBadge();
+      state.activeTab = id;
     }
 
-    // Добавление камня в корзину
+    /* КОРЗИНА */
+    function toggleCart(show) {
+      const overlay = document.getElementById('cart-overlay');
+      if (show) {
+        overlay.classList.remove('hidden');
+        setTimeout(() => {
+          overlay.classList.remove('opacity-0');
+        }, 10);
+      } else {
+        overlay.classList.add('opacity-0');
+        setTimeout(() => {
+          overlay.classList.add('hidden');
+        }, 300);
+      }
+    }
+
     function addToCart(rowIndex) {
-      const existing = state.cart.find(item => item.index === rowIndex);
+      const alreadyInCart = state.cart.some(item => item._index === rowIndex);
       
-      if (existing) {
-        existing.qty++;
-      } else {
-        state.cart.push({ index: rowIndex, qty: 1 });
+      if (!alreadyInCart) {
+        const gem = Gems.getItem(rowIndex);
+        state.cart.push(gem);
+        updateCartUI();
+        
+        const badge = document.getElementById('cart-badge');
+        badge.classList.remove('scale-100');
+        badge.classList.add('scale-150');
+        setTimeout(() => badge.classList.remove('scale-150'), 300);
       }
-
-      saveCart();
-
-      // Визуальный эффект добавления в иконку шапки
-      const badge = document.getElementById('cart-badge');
-      badge.classList.add('scale-125', 'bg-[#1A1A1A]');
-      setTimeout(() => {
-        badge.classList.remove('scale-125', 'bg-[#1A1A1A]');
-      }, 300);
+      
+      toggleCart(true);
     }
 
-    // Обновление бейджа корзины
-    function updateCartBadge() {
-      const badge = document.getElementById('cart-badge');
-      const totalQty = state.cart.reduce((sum, item) => sum + item.qty, 0);
+    function removeFromCart(rowIndex) {
+      state.cart = state.cart.filter(item => item._index !== rowIndex);
+      updateCartUI();
+    }
 
-      if (totalQty > 0) {
-        badge.innerText = totalQty;
+    function updateCartUI() {
+      const container = document.getElementById('cart-items');
+      const totalEl = document.getElementById('cart-total');
+      const badge = document.getElementById('cart-badge');
+      const btnCheckout = document.getElementById('btn-checkout');
+      const formContainer = document.getElementById('order-form-container');
+
+      if (state.cart.length > 0) {
+        badge.innerText = state.cart.length;
         badge.classList.remove('opacity-0');
-        badge.classList.add('opacity-100');
+        btnCheckout.disabled = false;
+        formContainer.classList.remove('hidden');
       } else {
-        badge.classList.remove('opacity-100');
         badge.classList.add('opacity-0');
+        btnCheckout.disabled = true;
+        formContainer.classList.add('hidden');
       }
-    }
 
-    // Изменение количества товара в корзине
-    function updateCartItemQty(indexInCart, direction) {
-      const item = state.cart[indexInCart];
-      if (!item) return;
+      container.innerHTML = '';
+      let sum = 0;
 
-      item.qty += direction;
-      if (item.qty <= 0) {
-        state.cart.splice(indexInCart, 1);
-      }
-      saveCart();
-      renderCart();
-    }
-
-    // Удаление товара из корзины полностью
-    function removeCartItem(indexInCart) {
-      state.cart.splice(indexInCart, 1);
-      saveCart();
-      renderCart();
-    }
-
-    // Отрисовка страницы корзины
-    function renderCart() {
-      const listContainer = document.getElementById('cart-list');
-      const cartSummary = document.getElementById('cart-summary');
-      const cartEmpty = document.getElementById('cart-empty');
-
-      if (state.cart.length === 0) {
-        listContainer.innerHTML = '';
-        cartSummary.classList.add('hidden');
-        cartEmpty.classList.remove('hidden');
+      if (!state.cart.length) {
+        container.innerHTML = `
+          <div class="py-12 text-center text-[#7F7F7F] space-y-3">
+            <i data-lucide="shopping-bag" class="w-8 h-8 mx-auto opacity-50"></i>
+            <p class="text-xs uppercase tracking-widest font-medium">Ваша корзина пуста</p>
+          </div>
+        `;
+        totalEl.innerText = `0 ₽`;
+        lucide.createIcons();
         return;
       }
 
-      cartEmpty.classList.add('hidden');
-      cartSummary.classList.remove('hidden');
-      listContainer.innerHTML = '';
-
-      let totalSum = 0;
-      let totalQty = 0;
-
-      state.cart.forEach((cartItem, idx) => {
-        const gem = Gems.getItem(cartItem.index);
-        if (!gem) return;
-
-        const weight = gem['Вес'] || gem['Карат'] || 0;
-        const shape = gem['Форма'] || '';
-        const color = gem['Цвет'] || '';
-        const clarity = gem['Чистота'] || '';
+      state.cart.forEach(gem => {
         const price = gem['Цена'] || 0;
-        const itemTotal = price * cartItem.qty;
-
-        totalSum += itemTotal;
-        totalQty += cartItem.qty;
-
-        const row = document.createElement('div');
-        row.className = 'flex flex-col sm:flex-row items-center justify-between p-6 bg-white border border-[#E5E5E0] rounded-lg gap-6';
-        row.innerHTML = `
-          <div class="flex items-center space-x-6 w-full sm:w-auto">
-            <!-- Элегантный предпросмотр огранки -->
-            <div class="w-20 h-20 bg-[#FAF9F6] border border-[#E5E5E0] rounded flex items-center justify-center shrink-0 p-2">
-              <img src="${gem.image}" alt="${shape}" class="w-full h-full object-contain" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23C5A880%22 stroke-width=%221%22><polygon points=%2212,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5%22/></svg>'">
-            </div>
-            
-            <!-- Описание -->
-            <div class="space-y-1">
-              <h4 class="serif-title text-xl font-light">${weight.toFixed(2)} Carat <span class="text-xs text-[#7F7F7F] uppercase tracking-widest font-sans">${shape}</span></h4>
-              <p class="text-xs text-[#7F7F7F] font-light">
-                Цвет: <span class="text-[#1A1A1A] font-semibold">${color}</span> &bull; 
-                Чистота: <span class="text-[#1A1A1A] font-semibold">${clarity}</span>
-              </p>
+        sum += price;
+        
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between p-4 bg-white border border-[#E5E5E0]';
+        item.innerHTML = `
+          <div class="flex items-center space-x-3">
+            <img src="${gem.image || 'https://citygems.ru/db/круглый.png'}" alt="Форма" class="w-10 h-10 object-contain" onerror="this.src='https://citygems.ru/db/круглый.png'">
+            <div>
+              <p class="text-xs font-bold uppercase tracking-wide">${gem['Форма'] || 'Круглый'} (${gem['Вес'] ? gem['Вес'].toFixed(2) : '—'} ct)</p>
+              <p class="text-[10px] text-[#7F7F7F] uppercase">${gem['Цвет']}/${gem['Чистота']} · ${gem['Сертификат'] || 'IGI'}</p>
             </div>
           </div>
-
-          <!-- Управление количеством и цена -->
-          <div class="flex items-center justify-between sm:justify-end gap-8 w-full sm:w-auto">
-            <div class="flex items-center border border-[#E5E5E0] rounded bg-white">
-              <button onclick="updateCartItemQty(${idx}, -1)" class="px-3 py-1.5 hover:text-[#C5A880] transition-colors font-medium text-sm border-r border-[#E5E5E0]">-</button>
-              <span class="px-4 text-xs font-semibold text-[#1A1A1A]">${cartItem.qty}</span>
-              <button onclick="updateCartItemQty(${idx}, 1)" class="px-3 py-1.5 hover:text-[#C5A880] transition-colors font-medium text-sm border-l border-[#E5E5E0]">+</button>
-            </div>
-
-            <!-- Общая стоимость за позицию -->
-            <div class="text-right shrink-0">
-              <p class="text-lg font-medium text-[#C5A880]">${itemTotal.toLocaleString('ru-RU')} ₽</p>
-              <button onclick="removeCartItem(${idx})" class="text-[10px] text-[#7F7F7F] hover:text-red-500 uppercase tracking-wider transition-colors duration-300 mt-1">Удалить</button>
-            </div>
+          <div class="flex items-center space-x-4">
+            <span class="text-xs font-bold text-[#1A1A1A]">${price.toLocaleString('ru-RU')} ₽</span>
+            <button onclick="removeFromCart(${gem._index})" class="text-[#7F7F7F] hover:text-red-500 transition-premium">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
           </div>
         `;
-
-        listContainer.appendChild(row);
+        container.appendChild(item);
       });
 
-      // Обновляем сводку
-      document.getElementById('summary-qty').innerText = totalQty;
-      document.getElementById('summary-total').innerText = `${totalSum.toLocaleString('ru-RU')} ₽`;
+      totalEl.innerText = `${sum.toLocaleString('ru-RU')} ₽`;
+      lucide.createIcons();
     }
 
-    // Отправка формы бронирования (Checkout)
-    function handleCheckout(event) {
-      event.preventDefault();
+    function checkout() {
+      const name = document.getElementById('customer-name').value.trim();
+      const phone = document.getElementById('customer-phone').value.trim();
 
-      const name = document.getElementById('order-name').value;
-      const phone = document.getElementById('order-phone').value;
-      const comment = document.getElementById('order-comment').value;
+      if (!name || !phone) {
+        alertModal("Пожалуйста, заполните поля с именем и телефоном для связи.");
+        return;
+      }
 
-      // Формируем сводку заказа в консоль
-      const orderSummary = state.cart.map(item => {
-        const gem = Gems.getItem(item.index);
-        return `${gem['Форма']} ${gem['Вес']}ct (Цвет:${gem['Цвет']}, Чистота:${gem['Чистота']}) x${item.qty}`;
-      });
-
-      console.log(`[citygems] Оформлен запрос на бронирование!`, {
-        Клиент: name,
-        Телефон: phone,
-        Комментарий: comment,
-        Товары: orderSummary
-      });
-
-      // Показываем окно успеха
-      document.getElementById('success-modal').classList.remove('hidden');
-    }
-
-    // Закрытие модального окна успеха и очистка корзины
-    function closeSuccessModal() {
-      document.getElementById('success-modal').classList.add('hidden');
-      
-      // Очищаем форму и корзину
-      document.getElementById('order-form').reset();
+      alertModal(`Благодарим за заказ, ${name}! Менеджер свяжется с вами по номеру ${phone} для подтверждения бронирования выбранных камней.`);
       state.cart = [];
-      saveCart();
+      document.getElementById('customer-name').value = '';
+      document.getElementById('customer-phone').value = '';
+      updateCartUI();
+      toggleCart(false);
+    }
 
-      // Возвращаем на главную
-      switchTab('about');
+    /* МОДАЛЬНЫЕ ОКНА */
+    function openImageModal(src) {
+      const modal = document.getElementById('modal');
+      const img = document.getElementById('modal-img');
+      img.src = src;
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
+    function alertModal(text) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'fixed bottom-10 left-1/2 -translate-x-1/2 bg-[#1A1A1A] text-[#FAF9F6] text-xs font-semibold tracking-wider uppercase px-8 py-5 shadow-2xl z-50 transition-premium border border-[#C5A880] text-center max-w-md';
+      alertDiv.innerText = text;
+      document.body.appendChild(alertDiv);
+      setTimeout(() => {
+        alertDiv.classList.add('opacity-0');
+        setTimeout(() => alertDiv.remove(), 400);
+      }, 5000);
     }
   </script>
 </body>
