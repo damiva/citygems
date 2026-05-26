@@ -109,7 +109,7 @@
       border: none;
     }
 
-    /* Дополнительный медиа-запрос для совсем узких экранов (смартфоны в портретном режиме) */
+    /* Дополнительный медиа-запрос для совсем узких экранов */
     @media (max-width: 420px) {
       .xs-hidden {
         display: none !important;
@@ -132,10 +132,8 @@
             <div class="absolute inset-1.5 border border-[#C5A880] -rotate-12 logo-spin" style="animation-direction: reverse; animation-duration: 10s;"></div>
             <i data-lucide="gem" class="w-4 h-4 text-[#C5A880] absolute"></i>
           </div>
-          <!-- Надпись citygems скрывается на экранах менее 420px -->
           <span class="text-xl sm:text-2xl font-light tracking-[0.2em] sm:tracking-[0.25em] text-[#1A1A1A] transition-premium hover:text-[#C5A880] xs-hidden">citygems</span>
         </a>
-        <!-- Подсказка «О нас» -->
         <div class="absolute top-full left-1/2 -translate-x-1/2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[#1A1A1A] text-[#FAF9F6] text-[10px] tracking-wider uppercase px-2.5 py-1.5 border border-[#C5A880]/30 pointer-events-none whitespace-nowrap z-50 shadow-lg">
           О нас
         </div>
@@ -145,7 +143,6 @@
       <nav class="flex space-x-4 sm:space-x-10 text-xs tracking-widest uppercase font-semibold">
         <div class="relative group">
           <a href="#" id="nav-catalog" onclick="switchTab('catalog')" class="nav-link py-2 border-b-2 border-transparent text-[#7F7F7F] hover:text-[#1A1A1A] transition-premium">Каталог</a>
-          <!-- Подсказка «Наш каталог камней» -->
           <div class="absolute top-full left-1/2 -translate-x-1/2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[#1A1A1A] text-[#FAF9F6] text-[10px] tracking-wider uppercase px-2.5 py-1.5 border border-[#C5A880]/30 pointer-events-none whitespace-nowrap z-50 shadow-lg">
             Наш каталог камней
           </div>
@@ -159,7 +156,6 @@
             <i data-lucide="shopping-bag" class="w-6 h-6"></i>
             <span id="cart-badge" class="absolute top-1 right-1 bg-[#C5A880] text-[#FAF9F6] text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold opacity-0 transition-all duration-300">0</span>
           </button>
-          <!-- Подсказка «Ваша корзина» -->
           <div class="absolute top-full right-0 mt-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[#1A1A1A] text-[#FAF9F6] text-[10px] tracking-wider uppercase px-2.5 py-1.5 border border-[#C5A880]/30 pointer-events-none whitespace-nowrap z-50 shadow-lg">
             Ваша корзина
           </div>
@@ -180,8 +176,6 @@
     
     <!-- ТАБ: О НАC -->
     <section id="tab-about" class="tab-content py-16 md:py-24 max-w-5xl mx-auto px-6 space-y-24">
-      
-      <!-- Приветствие и Наша философия -->
       <div class="text-center max-w-3xl mx-auto space-y-6">
         <span class="text-xs tracking-widest uppercase text-[#C5A880] font-semibold">Эстетика и совершенство технологий</span>
         <h1 class="serif-title text-4xl md:text-5xl text-[#1A1A1A] leading-tight">Роскошь нового поколения</h1>
@@ -190,9 +184,7 @@
         </p>
       </div>
 
-      <!-- Две стороны коллекции: Бриллианты и Полудрагоценные камни -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-12 pt-8">
-        <!-- Блок 1: Лабораторные бриллианты -->
         <div class="border border-[#E5E5E0] bg-white p-8 space-y-6 transition-premium hover:border-[#C5A880] flex flex-col justify-between">
           <div class="space-y-4">
             <div class="w-12 h-12 bg-[#FAF9F6] flex items-center justify-center border border-[#E5E5E0]">
@@ -208,7 +200,6 @@
           </div>
         </div>
 
-        <!-- Блок 2: Полудрагоценные камни -->
         <div class="border border-[#E5E5E0] bg-white p-8 space-y-6 transition-premium hover:border-[#C5A880] flex flex-col justify-between">
           <div class="space-y-4">
             <div class="w-12 h-12 bg-[#FAF9F6] flex items-center justify-center border border-[#E5E5E0]">
@@ -225,7 +216,6 @@
         </div>
       </div>
 
-      <!-- Детальный разбор: Почему Lab-Grown бриллианты — это превосходный выбор -->
       <div class="bg-white border border-[#E5E5E0] p-10 md:p-14 space-y-12">
         <div class="text-center max-w-2xl mx-auto space-y-3">
           <h3 class="serif-title text-3xl">Новый взгляд на вечные ценности</h3>
@@ -233,7 +223,6 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <!-- Преимущество 1 -->
           <div class="space-y-3 text-center md:text-left">
             <span class="text-xs font-bold text-[#C5A880] tracking-widest block">01 / ИДЕНТИЧНОСТЬ</span>
             <h4 class="font-semibold text-sm uppercase">Физика и Химия</h4>
@@ -241,8 +230,6 @@
               Лабораторный кристалл имеет ту же твердость (10 по шкале Мооса), показатель преломления света (2.42) и дисперсию, что и добытый в шахте. Даже опытный геммолог не найдет оптических различий.
             </p>
           </div>
-
-          <!-- Преимущество 2 -->
           <div class="space-y-3 text-center md:text-left">
             <span class="text-xs font-bold text-[#C5A880] tracking-widest block">02 / ЭТИЧНОСТЬ</span>
             <h4 class="font-semibold text-sm uppercase">Чистая совесть</h4>
@@ -250,8 +237,6 @@
               Выращивание алмазов в лаборатории не нарушает экосистемы регионов, не требует разрушения ландшафтов, исключает "кровавые" цепочки поставок и гарантирует 100% гуманное и прозрачное происхождение.
             </p>
           </div>
-
-          <!-- Преимущество 3 -->
           <div class="space-y-3 text-center md:text-left">
             <span class="text-xs font-bold text-[#C5A880] tracking-widest block">03 / ДОСТУПНОСТЬ</span>
             <h4 class="font-semibold text-sm uppercase">Разумные инвестиции</h4>
@@ -267,13 +252,11 @@
           </button>
         </div>
       </div>
-
     </section>
 
     <!-- ТАБ: КАТАЛОГ -->
     <section id="tab-catalog" class="tab-content hidden py-10 max-w-7xl mx-auto px-4 sm:px-6">
       
-      <!-- Структура родительского флекс-контейнера полностью управляется динамически через JS -->
       <div id="catalog-main-layout" class="flex flex-col gap-6 items-start">
         
         <!-- ФИЛЬТРЫ -->
@@ -285,7 +268,7 @@
             </div>
             
             <div id="filters-container" class="space-y-5">
-              <!-- Сюда динамически рендерятся кнопочные фильтры (БЕЗ Сертификата) -->
+              <!-- Сюда динамически рендерятся кнопочные фильтры -->
             </div>
 
             <!-- Слайдер цен -->
@@ -295,8 +278,6 @@
                 <input type="number" id="price-min-input" oninput="handleDoubleSliderInput('Цена', 'min', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="от">
                 <input type="number" id="price-max-input" oninput="handleDoubleSliderInput('Цена', 'max', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="до">
               </div>
-              
-              <!-- Контейнер для двух бегунков на одной линии -->
               <div class="slider-container">
                 <div class="slider-track"></div>
                 <div id="price-range-highlight" class="slider-range-highlight"></div>
@@ -312,8 +293,6 @@
                 <input type="number" id="weight-min-input" step="0.01" oninput="handleDoubleSliderInput('Вес', 'min', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="от">
                 <input type="number" id="weight-max-input" step="0.01" oninput="handleDoubleSliderInput('Вес', 'max', this.value)" class="border border-[#E5E5E0] p-1.5 text-xs text-center focus:outline-none focus:border-[#C5A880]" placeholder="до">
               </div>
-              
-              <!-- Контейнер для двух бегунков на одной линии -->
               <div class="slider-container">
                 <div class="slider-track"></div>
                 <div id="weight-range-highlight" class="slider-range-highlight"></div>
@@ -325,15 +304,12 @@
           </div>
         </aside>
 
-        <!-- КОЛОНКА С КАРТОЧКАМИ (Справа от фильтра) -->
+        <!-- КОЛОНКА С КАРТОЧКАМИ -->
         <div class="flex-grow w-full space-y-8">
-          <!-- Найдено и Сортировка на одной горизонтальной линии. Сделано компактным и не разъезжается! -->
           <div class="flex justify-between items-center pb-5 border-b border-[#E5E5E0] gap-4 w-full">
             <p class="text-xs uppercase tracking-widest text-[#7F7F7F] font-bold">
               Найдено: <span id="total-count" class="text-[#1A1A1A]">0</span>
             </p>
-            
-            <!-- Оптимизированный компактный блок сортировки со значком -->
             <div class="flex items-center space-x-2 cursor-pointer">
               <i data-lucide="arrow-up-down" class="w-4 h-4 text-[#7F7F7F]" title="Сортировка"></i>
               <select id="sort-select" onchange="handleSortChange(this.value)" class="bg-[#FAF9F6] border border-[#E5E5E0] px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:border-[#C5A880] transition-premium cursor-pointer rounded-none">
@@ -343,7 +319,6 @@
             </div>
           </div>
 
-          <!-- СЕТКА КАРТОЧЕК (Классы колонок полностью управляются через JS в updateLimitByBreakpoint) -->
           <div id="gems-grid" class="grid gap-6">
             <!-- Динамические карточки товаров -->
           </div>
@@ -369,11 +344,8 @@
     <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-[#FAF9F6] shadow-2xl p-6 flex flex-col justify-between" onclick="event.stopPropagation()">
       <div>
         <div class="flex items-center justify-between pb-4 border-b border-[#E5E5E0]">
-          <!-- Название корзины в едином гармоничном шрифте Montserrat -->
           <h3 class="text-xl font-semibold tracking-wider uppercase">Ваша корзина</h3>
-          
           <div class="flex items-center space-x-4">
-            <!-- Кнопка очистки корзины на одной линии справа -->
             <button id="btn-clear-cart" onclick="confirmClearCart()" class="text-xs font-semibold tracking-widest uppercase text-red-500 hover:text-red-700 transition-premium opacity-0 pointer-events-none">
               Очистить
             </button>
@@ -382,8 +354,6 @@
             </button>
           </div>
         </div>
-        
-        <!-- Список товаров в корзине -->
         <div id="cart-items" class="mt-6 space-y-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
           <!-- Динамические элементы корзины -->
         </div>
@@ -395,13 +365,10 @@
           <span>Итого к оплате:</span>
           <span id="cart-total" class="font-bold text-[#C5A880]">0 ₽</span>
         </div>
-        
-        <!-- Форма заказа -->
         <div id="order-form-container" class="space-y-3 hidden">
           <input type="text" id="customer-name" placeholder="Ваше имя" class="w-full text-xs p-3 border border-[#E5E5E0] bg-[#FAF9F6] focus:outline-none focus:border-[#C5A880]">
           <input type="tel" id="customer-phone" placeholder="Номер телефона" class="w-full text-xs p-3 border border-[#E5E5E0] bg-[#FAF9F6] focus:outline-none focus:border-[#C5A880]">
         </div>
-
         <button id="btn-checkout" onclick="checkout()" class="w-full bg-[#1A1A1A] hover:bg-[#C5A880] text-white py-4 text-xs tracking-widest uppercase font-semibold transition-premium disabled:opacity-30 disabled:pointer-events-none">
           Оформить заказ
         </button>
@@ -448,7 +415,7 @@
     </div>
   </footer>
 
-  <!-- КАСОМНОЕ ПОДТВЕРЖДЕНИЕ ОЧИСТКИ КОРЗИНЫ -->
+  <!-- КАСТОМНОЕ ПОДТВЕРЖДЕНИЕ ОЧИСТКИ КОРЗИНЫ -->
   <div id="confirm-modal" class="fixed inset-0 bg-black/60 z-[100] hidden flex items-center justify-center p-4">
     <div class="bg-[#FAF9F6] border border-[#C5A880] p-8 max-w-sm w-full text-center space-y-6 shadow-2xl">
       <h4 class="text-sm font-bold uppercase tracking-wider text-[#1A1A1A]">Очистка корзины</h4>
@@ -470,55 +437,62 @@
   <script>
     const state = { 
       activeTab: 'about', 
-      cart: [], // Содержит объекты вида { gem: Object, count: Number }
-      filters: { 
-        exact: {}, 
-        ranges: {} 
-      }, 
+      cart: [],
+      filters: { exact: {}, ranges: {} }, 
       sortBy: 'price_asc', 
       page: 0, 
-      limit: 30, // Будет динамически переопределяться
+      limit: 30,
       totalCount: 0,
-      limits: {
-        Price: { min: 0, max: 1000000 }
-      }
+      limits: { Price: { min: 0, max: 1000000 } }
     };
 
-    // ФУНКЦИЯ ДИНАМИЧЕСКОЙ НАСТРОЙКИ ПАГИНАЦИИ И БРЕЙКПОИНТОВ (МАТЕМАТИЧЕСКИ ПРАВИЛЬНЫЙ РАСЧЕТ ИЗ ВАШЕГО ТЗ)
+    // --- ОПТИМИЗАЦИЯ ПРОИЗВОДИТЕЛЬНОСТИ: Функция Debounce ---
+    // Предотвращает множественные вызовы функций при ресайзе окна или движении ползунка
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
+    }
+
+    // ДИНАМИЧЕСКИЕ ПОРОГИ АДАПТИВНОСТИ
     function updateLimitByBreakpoint() {
       const width = window.innerWidth;
       const grid = document.getElementById('gems-grid');
       const layout = document.getElementById('catalog-main-layout');
       const aside = document.getElementById('catalog-aside');
       
-      // Свободно настраиваемые пороги адаптивности под ваши новые значения (виртуальные CSS-пиксели)
-      const B_SM = 640;  // Порог sm возвращен к классическому значению 640px
-      const B_MD = 900;  // Компактные ноутбуки и планшеты
-      const B_LG = 1300; // Широкоформатные мониторы
+      const B_SM = 640;  
+      const B_MD = 900;  
+      const B_LG = 1300; 
 
       if (width < B_SM) { 
-        // 1. До B_SM (640px): фильтр сверху, 1 колонка снизу (10 штук на странице)
+        // 1. До 640px: фильтр сверху, 1 колонка снизу (10 штук)
         state.limit = 10;
-        if (grid) grid.className = "grid grid-cols-1 gap-6";
+        if (grid) grid.className = "grid grid-cols-1 gap-6 w-full";
         if (layout) layout.className = "flex flex-col gap-6 items-start w-full";
         if (aside) aside.className = "w-full shrink-0 space-y-6";
       } else if (width < B_MD) { 
-        // 2. От B_SM до B_MD (640px - 900px): фильтр слева, 1 колонка справа (10 штук на странице)
-        // Фильтр зафиксирован на ширине w-64 (не сужается)
+        // 2. От 640px до 900px: фильтр слева (стандартный), 1 колонка справа (10 штук)
         state.limit = 10;
         if (grid) grid.className = "grid grid-cols-1 gap-6 w-full";
         if (layout) layout.className = "flex flex-row gap-6 lg:gap-10 items-start w-full";
         if (aside) aside.className = "w-64 shrink-0 space-y-6";
       } else if (width < B_LG) { 
-        // 3. От B_MD до B_LG (900px - 1300px): фильтр слева, 2 колонки справа (20 штук на странице)
+        // 3. От 900px до 1300px: фильтр слева, 2 колонки справа (20 штук)
         state.limit = 20;
-        if (grid) grid.className = "grid grid-cols-1 md:grid-cols-2 gap-6 w-full";
+        if (grid) grid.className = "grid grid-cols-2 gap-6 w-full";
         if (layout) layout.className = "flex flex-row gap-6 lg:gap-10 items-start w-full";
         if (aside) aside.className = "w-64 shrink-0 space-y-6";
       } else { 
-        // 4. От B_LG (>=1300px): фильтр слева, карточки в 3 ряда (30 штук на странице)
+        // 4. От 1300px: фильтр слева, 3 колонки справа (30 штук)
         state.limit = 30;
-        if (grid) grid.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full";
+        if (grid) grid.className = "grid grid-cols-3 gap-6 w-full";
         if (layout) layout.className = "flex flex-row gap-6 lg:gap-10 items-start w-full";
         if (aside) aside.className = "w-72 shrink-0 space-y-6";
       }
@@ -526,7 +500,15 @@
       renderCatalog();
     }
 
-    window.addEventListener('resize', updateLimitByBreakpoint);
+    // Оптимизированный слушатель ресайза
+    const debouncedUpdateLimit = debounce(updateLimitByBreakpoint, 150);
+    window.addEventListener('resize', debouncedUpdateLimit);
+
+    // Оптимизированная отложенная фильтрация для ползунков
+    const debouncedFilterAndRender = debounce(() => {
+      state.page = 0;
+      renderCatalog();
+    }, 250);
 
     window.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
@@ -535,12 +517,10 @@
         await Gems.initPromise;
         document.getElementById('loader').classList.add('hidden');
         
-        // Сначала загружаем сохраненную корзину из localStorage
         loadCartFromStorage();
-        
         initRangeBoundaries();
         buildDynamicFilters();
-        updateLimitByBreakpoint(); // Первый запуск с расчетом лимита
+        updateLimitByBreakpoint(); 
       } catch (e) {
         document.getElementById('loader').innerHTML = `
           <p class="text-red-500 font-bold uppercase tracking-widest text-xs text-center">Ошибка инициализации каталога.<br>Попробуйте обновить страницу.</p>
@@ -548,7 +528,6 @@
       }
     });
 
-    // Загрузка корзины из памяти браузера
     function loadCartFromStorage() {
       const stored = localStorage.getItem('citygems_cart_v2');
       if (stored) {
@@ -561,15 +540,12 @@
       }
     }
 
-    // Сохранение состояния корзины в память браузера
     function saveCartToStorage() {
       localStorage.setItem('citygems_cart_v2', JSON.stringify(state.cart));
     }
 
-    // Определение цен из данных каталога и инициализация двойных слайдеров
     function initRangeBoundaries() {
       const priceCol = Gems.Columns['Цена']?.Data || [];
-      
       if (priceCol.length) {
         const minPrice = Math.min(...priceCol);
         const maxPrice = Math.max(...priceCol);
@@ -595,7 +571,7 @@
       }
     }
 
-    // Отрисовка цветного золотистого промежутка между бегунками
+    // ОПТИМИЗАЦИЯ: Добавлена защита от деления на ноль (totalRange === 0)
     function drawDoubleSliderTrack(colName) {
       const minSlider = document.getElementById('price-min-range');
       const maxSlider = document.getElementById('price-max-range');
@@ -606,6 +582,12 @@
       const limits = state.limits.Price;
       const totalRange = limits.max - limits.min;
       
+      if (totalRange === 0) {
+        highlight.style.left = '0%';
+        highlight.style.width = '100%';
+        return;
+      }
+      
       const minPercent = ((minSlider.value - limits.min) / totalRange) * 100;
       const maxPercent = ((maxSlider.value - limits.min) / totalRange) * 100;
       
@@ -613,7 +595,6 @@
       highlight.style.width = (maxPercent - minPercent) + '%';
     }
 
-    // Рендер фильтров кнопками в ряд (БЕЗ Сертификата)
     function buildDynamicFilters() {
       const container = document.getElementById('filters-container');
       container.innerHTML = '';
@@ -642,7 +623,6 @@
       });
     }
 
-    // Клик по кнопке фильтра
     function toggleFilter(col, val, btn) {
       const list = state.filters.exact[col];
       const idx = list.indexOf(val);
@@ -659,10 +639,8 @@
       renderCatalog();
     }
 
-    // Обработка ручного ввода числовых диапазонов в инпуты
     function handleDoubleSliderInput(colName, limitType, value) {
       const numVal = value !== '' ? parseFloat(value) : undefined;
-      const isPrice = colName === 'Цена';
       
       if (!state.filters.ranges[colName]) {
         state.filters.ranges[colName] = {};
@@ -671,34 +649,24 @@
       if (numVal === undefined) {
         delete state.filters.ranges[colName][limitType];
       } else {
-        // Ограничиваем ввод рамками максимумов/минимумов
         const limits = state.limits.Price;
         const boundedVal = Math.max(limits.min, Math.min(limits.max, numVal));
-        
         state.filters.ranges[colName][limitType] = boundedVal;
         
-        // Синхронизируем положение соответствующего бегунка
         const slider = document.getElementById(limitType === 'min' ? 'price-min-range' : 'price-max-range');
-        if (slider) {
-          slider.value = boundedVal;
-        }
+        if (slider) slider.value = boundedVal;
       }
       
       drawDoubleSliderTrack(colName);
-      state.page = 0;
-      renderCatalog();
+      debouncedFilterAndRender();
     }
 
-    // Изменение значений при перемещении двойного бегунка пальцем/мышкой
+    // Обработка слайдера с использованием Debounce
     function updateDoubleSliderValues(colName, limitType, value) {
       const numVal = parseFloat(value);
-      const isPrice = colName === 'Цена';
       
-      if (!state.filters.ranges[colName]) {
-        state.filters.ranges[colName] = {};
-      }
+      if (!state.filters.ranges[colName]) state.filters.ranges[colName] = {};
       
-      // Защита от перекрестного заезда ползунков друг за друга
       if (limitType === 'min') {
         const sliderMaxVal = parseFloat(document.getElementById('price-max-range').value);
         if (numVal > sliderMaxVal) {
@@ -706,6 +674,7 @@
           state.filters.ranges[colName].min = sliderMaxVal;
           document.getElementById('price-min-input').value = Math.round(sliderMaxVal);
           drawDoubleSliderTrack(colName);
+          debouncedFilterAndRender();
           return;
         }
       } else {
@@ -715,37 +684,22 @@
           state.filters.ranges[colName].max = sliderMinVal;
           document.getElementById('price-max-input').value = Math.round(sliderMinVal);
           drawDoubleSliderTrack(colName);
+          debouncedFilterAndRender();
           return;
         }
       }
       
       state.filters.ranges[colName][limitType] = numVal;
       
-      // Синхронизируем текстовое поле ввода
       const input = document.getElementById(limitType === 'min' ? 'price-min-input' : 'price-max-input');
-      if (input) {
-        input.value = Math.round(numVal);
-      }
+      if (input) input.value = Math.round(numVal);
       
       drawDoubleSliderTrack(colName);
-      state.page = 0;
-      renderCatalog();
+      debouncedFilterAndRender();
     }
 
     function resetFilters() {
-      for (const colName in state.filters.exact) {
-        state.filters.exact[colName] = [];
-      }
-      
-      // Сбрасываем кнопочные стили
-      document.querySelectorAll('#filters-container button').forEach(btn => {
-        btn.classList.remove('bg-[#1A1A1A]', 'text-[#FAF9F6]', 'border-[#1A1A1A]');
-        btn.classList.add('bg-transparent', 'text-[#7F7F7F]', 'border-[#E5E5E0]');
-      });
-      
-      initRangeBoundaries();
-      state.page = 0;
-      renderCatalog();
+      location.reload();
     }
 
     function handleSortChange(value) {
@@ -754,13 +708,12 @@
       renderCatalog();
     }
 
-    // Вспомогательный метод для получения количества камня в корзине
     function getGemCartCount(rowIndex) {
       const entry = state.cart.find(item => item.gem._index === rowIndex);
       return entry ? entry.count : 0;
     }
 
-    // Рендеринг карточек
+    // ОПТИМИЗАЦИЯ: Использование DocumentFragment для мгновенного рендера DOM
     function renderCatalog() {
       const grid = document.getElementById('gems-grid');
       const currentOffset = state.page * state.limit;
@@ -777,6 +730,7 @@
       state.totalCount = result?.total || 0;
       
       document.getElementById('total-count').innerText = state.totalCount;
+      grid.innerHTML = '';
       
       if (!items.length) {
         grid.innerHTML = `
@@ -785,18 +739,17 @@
             <p class="text-sm tracking-wider uppercase text-[#7F7F7F]">Камней с такими характеристиками не найдено.</p>
           </div>
         `;
-        updatePaginationUI(0);
+        updatePaginationUI();
         lucide.createIcons();
         return;
       }
 
-      grid.innerHTML = '';
+      const fragment = document.createDocumentFragment();
       
       items.forEach(gem => {
         const card = document.createElement('div');
         const cartCount = getGemCartCount(gem._index);
         
-        // Если камень уже есть в корзине — выделяем золотистой рамкой
         const borderClass = cartCount > 0 ? 'border-[#C5A880] shadow-sm' : 'border-[#E5E5E0]';
         card.className = `bg-white border p-4 flex flex-col justify-between transition-premium relative group ${borderClass}`;
         
@@ -806,20 +759,17 @@
         const color = gem['Цвет'] || '—';
         const clarity = gem['Чистота'] || '—';
         const cert = gem['Сертификат'] || '';
-
         const cut = gem['Огранка'] || '—';
         const polish = gem['Полировка'] || '—';
         const symmetry = gem['Симметрия'] || '—';
         const fullCutString = `${cut}/${polish}/${symmetry}`;
 
-        // Статичный прозрачный логотип сертификата сверху слева
         const logoHtml = gem.lab
           ? `<div class="absolute top-3 left-3 z-10 flex items-center justify-start h-4 w-12 bg-transparent pointer-events-none">
                <img src="${gem.lab}" alt="Сертификат ${cert}" class="max-h-full max-w-full object-contain object-left" onerror="this.style.display='none'">
              </div>`
           : ``;
 
-        // Создаем интерактивный блок управления покупкой (Кнопка «В корзину» ИЛИ Селектор «- 1 +»)
         let actionButtonHtml = '';
         if (cartCount > 0) {
           actionButtonHtml = `
@@ -843,60 +793,27 @@
 
         card.innerHTML = `
           <div class="relative">
-            <!-- Прямоугольный компактный контейнер (ширина ВСЕГДА w-full на всю ширину карточки) -->
             <div class="aspect-[4/3] w-full max-h-[180px] lg:max-h-[220px] bg-[#FAF9F6]/50 border border-[#FAF9F6] flex items-center justify-center mb-2 relative overflow-hidden">
-              
-              <!-- Изображение сертификата сверху слева (строго top-3 left-3) -->
               ${logoHtml}
-
-              <!-- Название формы сверху справа (строго top-3 right-3, leading-none) -->
-              <span class="absolute top-3 right-3 text-xs font-semibold tracking-wider text-[#1A1A1A] uppercase z-10 select-none leading-none">
-                ${shape}
-              </span>
-
-              <!-- Изображение огранки (бриллиант по центру) -->
+              <span class="absolute top-3 right-3 text-xs font-semibold tracking-wider text-[#1A1A1A] uppercase z-10 select-none leading-none">${shape}</span>
               <img src="${gem.image || 'https://citygems.ru/db/круглый.png'}" alt="${shape}" class="w-24 h-24 object-contain transition-premium group-hover:scale-110" onerror="this.src='https://citygems.ru/db/круглый.png'">
-
-              <!-- Вес снизу слева (строго bottom-3 left-3, leading-none) -->
-              <span class="absolute bottom-3 left-3 text-lg font-bold text-[#C5A880] tracking-wider z-10 select-none leading-none">
-                ${weight}
-              </span>
-
-              <!-- Цена снизу справа (строго bottom-3 right-3, leading-none) -->
-              <span class="absolute bottom-3 right-3 text-sm font-bold text-[#1A1A1A] tracking-wide z-10 select-none leading-none">
-                ${price}
-              </span>
-
+              <span class="absolute bottom-3 left-3 text-lg font-bold text-[#C5A880] tracking-wider z-10 select-none leading-none">${weight}</span>
+              <span class="absolute bottom-3 right-3 text-sm font-bold text-[#1A1A1A] tracking-wide z-10 select-none leading-none">${price}</span>
             </div>
-
-            <!-- Блок характеристик под фотографией (воздух сокращен, mt-1.5) -->
             <div class="mt-1.5">
-              <!-- Таблица параметров (цвет, чистота, огранка) -->
               <div class="flex justify-between items-center text-xs text-[#1A1A1A] gap-4">
-                <div class="text-left">
-                  <span class="text-[9px] tracking-widest uppercase text-[#7F7F7F] block mb-0.5">цвет</span>
-                  <strong class="font-semibold text-xs text-[#1A1A1A]">${color}</strong>
-                </div>
-                <div class="text-center">
-                  <span class="text-[9px] tracking-widest uppercase text-[#7F7F7F] block mb-0.5">чистота</span>
-                  <strong class="font-semibold text-xs text-[#1A1A1A]">${clarity}</strong>
-                </div>
-                <div class="text-right">
-                  <span class="text-[9px] tracking-widest uppercase text-[#7F7F7F] block mb-0.5">огранка</span>
-                  <strong class="font-semibold text-xs text-[#1A1A1A] whitespace-nowrap">${fullCutString}</strong>
-                </div>
+                <div class="text-left"><span class="text-[9px] tracking-widest uppercase text-[#7F7F7F] block mb-0.5">цвет</span><strong class="font-semibold text-xs text-[#1A1A1A]">${color}</strong></div>
+                <div class="text-center"><span class="text-[9px] tracking-widest uppercase text-[#7F7F7F] block mb-0.5">чистота</span><strong class="font-semibold text-xs text-[#1A1A1A]">${clarity}</strong></div>
+                <div class="text-right"><span class="text-[9px] tracking-widest uppercase text-[#7F7F7F] block mb-0.5">огранка</span><strong class="font-semibold text-xs text-[#1A1A1A] whitespace-nowrap">${fullCutString}</strong></div>
               </div>
             </div>
           </div>
-
-          <!-- Нижняя кнопка добавления в корзину (воздух сокращен, pt-1.5 mt-1.5) -->
-          <div class="pt-1.5 mt-1.5 border-t border-[#E5E5E0]/50">
-            ${actionButtonHtml}
-          </div>
+          <div class="pt-1.5 mt-1.5 border-t border-[#E5E5E0]/50">${actionButtonHtml}</div>
         `;
-        grid.appendChild(card);
+        fragment.appendChild(card);
       });
       
+      grid.appendChild(fragment);
       lucide.createIcons();
       updatePaginationUI();
     }
@@ -941,81 +858,63 @@
       const overlay = document.getElementById('cart-overlay');
       if (show) {
         overlay.classList.remove('hidden');
-        setTimeout(() => {
-          overlay.classList.remove('opacity-0');
-        }, 10);
+        setTimeout(() => { overlay.classList.remove('opacity-0'); }, 10);
       } else {
         overlay.classList.add('opacity-0');
-        setTimeout(() => {
-          overlay.classList.add('hidden');
-        }, 300);
+        setTimeout(() => { overlay.classList.add('hidden'); }, 300);
       }
     }
 
-    // Инициализация добавления
     function addToCart(rowIndex) {
-      const alreadyInCart = state.cart.some(item => item.gem._index === rowIndex);
-      
-      if (!alreadyInCart) {
-        const gemObj = Gems.getItem(rowIndex);
-        state.cart.push({ gem: gemObj, count: 1 });
-        saveCartToStorage(); // Сохранение в localStorage
+      if (!state.cart.some(item => item.gem._index === rowIndex)) {
+        state.cart.push({ gem: Gems.getItem(rowIndex), count: 1 });
+        saveCartToStorage();
         updateCartUI();
-        renderCatalog(); // Перерисовываем каталог, чтобы обновить кнопку на селектор
+        renderCatalog();
         
-        // Анимация бейджа корзины в шапке
         const badge = document.getElementById('cart-badge');
         badge.classList.remove('scale-100');
         badge.classList.add('scale-150');
         setTimeout(() => badge.classList.remove('scale-150'), 300);
       }
-      
       toggleCart(true);
     }
 
-    // Универсальное изменение количества камня в корзине (-1 или +1)
     function updateCartItemCount(rowIndex, dir) {
       const entry = state.cart.find(item => item.gem._index === rowIndex);
       if (!entry) return;
-
       entry.count += dir;
+      if (entry.count <= 0) state.cart = state.cart.filter(item => item.gem._index !== rowIndex);
       
-      // Если количество падает до 0 — камень удаляется из корзины полностью
-      if (entry.count <= 0) {
-        state.cart = state.cart.filter(item => item.gem._index !== rowIndex);
-      }
-
       saveCartToStorage();
       updateCartUI();
-      renderCatalog(); // Мгновенно обновляем интерфейс каталога
+      renderCatalog();
     }
 
-    // Удаление из корзины по иконке мусорного ведра
     function removeFromCart(rowIndex) {
       state.cart = state.cart.filter(item => item.gem._index !== rowIndex);
-      saveCartToStorage(); // Сохранение в localStorage
+      saveCartToStorage();
       updateCartUI();
-      renderCatalog(); // Мгновенно обновляем состояние кнопок на сетке товаров
+      renderCatalog();
     }
 
-    // Открытие кастомного окна подтверждения очистки корзины
     function confirmClearCart() {
       if (state.cart.length === 0) return;
       document.getElementById('confirm-modal').classList.remove('hidden');
     }
 
-    // Обработка решения очистки корзины
     function clearCart(shouldClear) {
       document.getElementById('confirm-modal').classList.add('hidden');
       if (shouldClear) {
         state.cart = [];
         saveCartToStorage();
         updateCartUI();
-        renderCatalog(); // Сбрасываем выделение всех карточек на сетке
+        renderCatalog();
         alertModal("Корзина успешно очищена.");
       }
     }
 
+    // ОПТИМИЗАЦИЯ: DocumentFragment для рендера корзины
     function updateCartUI() {
       const container = document.getElementById('cart-items');
       const totalEl = document.getElementById('cart-total');
@@ -1024,7 +923,6 @@
       const formContainer = document.getElementById('order-form-container');
       const btnClearCart = document.getElementById('btn-clear-cart');
 
-      // Вычисляем общее число камней в корзине с учетом их штук
       const totalUnitsCount = state.cart.reduce((total, item) => total + item.count, 0);
 
       if (totalUnitsCount > 0) {
@@ -1032,15 +930,11 @@
         badge.classList.remove('opacity-0');
         btnCheckout.disabled = false;
         formContainer.classList.remove('hidden');
-        
-        // Показываем кнопку «Очистить»
         btnClearCart.classList.remove('opacity-0', 'pointer-events-none');
       } else {
         badge.classList.add('opacity-0');
         btnCheckout.disabled = true;
         formContainer.classList.add('hidden');
-        
-        // Скрываем кнопку «Очистить»
         btnClearCart.classList.add('opacity-0', 'pointer-events-none');
       }
 
@@ -1059,12 +953,12 @@
         return;
       }
 
+      const fragment = document.createDocumentFragment();
+
       state.cart.forEach(entry => {
         const gem = entry.gem;
         const count = entry.count;
         const price = gem['Цена'] || 0;
-        
-        // Суммируем с учетом количества
         sum += price * count;
         
         const item = document.createElement('div');
@@ -1077,29 +971,26 @@
               <p class="text-[10px] text-[#7F7F7F] uppercase">${gem['Цвет']}/${gem['Чистота']} · ${gem['Сертификат'] || 'IGI'}</p>
             </div>
           </div>
-          
           <div class="flex items-center space-x-4">
-            <!-- Селектор количества в самой корзине -->
             <div class="flex items-center border border-[#E5E5E0] h-7 bg-[#FAF9F6]">
-              <button onclick="updateCartItemCount(${gem._index}, -1)" class="px-2 h-full text-xs font-bold text-[#7F7F7F] hover:text-[#1A1A1A]" aria-label="Меньше">-</button>
+              <button onclick="updateCartItemCount(${gem._index}, -1)" class="px-2 h-full text-xs font-bold text-[#7F7F7F] hover:text-[#1A1A1A]">-</button>
               <span class="px-2 text-xs font-bold text-[#1A1A1A]">${count}</span>
-              <button onclick="updateCartItemCount(${gem._index}, 1)" class="px-2 h-full text-xs font-bold text-[#7F7F7F] hover:text-[#1A1A1A]" aria-label="Больше">+</button>
+              <button onclick="updateCartItemCount(${gem._index}, 1)" class="px-2 h-full text-xs font-bold text-[#7F7F7F] hover:text-[#1A1A1A]">+</button>
             </div>
-            
             <span class="text-xs font-bold text-[#1A1A1A]">${(price * count).toLocaleString('ru-RU')} ₽</span>
             <button onclick="removeFromCart(${gem._index})" class="text-[#7F7F7F] hover:text-red-500 transition-premium">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
         `;
-        container.appendChild(item);
+        fragment.appendChild(item);
       });
 
+      container.appendChild(fragment);
       totalEl.innerText = `${sum.toLocaleString('ru-RU')} ₽`;
       lucide.createIcons();
     }
 
-    // Процесс оформления заказа
     function checkout() {
       const name = document.getElementById('customer-name').value.trim();
       const phone = document.getElementById('customer-phone').value.trim();
@@ -1111,23 +1002,24 @@
 
       alertModal(`Благодарим за заказ, ${name}! Менеджер свяжется с вами по номеру ${phone} для подтверждения бронирования выбранных камней.`);
       state.cart = [];
-      saveCartToStorage(); // Стираем в localStorage при оформлении заказа
+      saveCartToStorage();
       document.getElementById('customer-name').value = '';
       document.getElementById('customer-phone').value = '';
       updateCartUI();
-      renderCatalog(); // Сбрасываем выделение всех карточек на сетке
+      renderCatalog();
       toggleCart(false);
     }
 
-    /* МОДАЛЬНЫЕ ОКНА */
     function openImageModal(src) {
       const modal = document.getElementById('modal');
-      const img = document.getElementById('modal-img');
-      img.src = src;
+      document.getElementById('modal-img').src = src;
       modal.classList.remove('hidden');
     }
 
-    // Инициализация кастомных оповещений
+    function closeModal() {
+      document.getElementById('modal').classList.add('hidden');
+    }
+
     function alertModal(text) {
       const alertDiv = document.createElement('div');
       alertDiv.className = 'fixed bottom-10 left-1/2 -translate-x-1/2 bg-[#1A1A1A] text-[#FAF9F6] text-xs font-semibold tracking-wider uppercase px-8 py-5 shadow-2xl z-[100] transition-premium border border-[#C5A880] text-center max-w-md';
@@ -1137,10 +1029,6 @@
         alertDiv.classList.add('opacity-0');
         setTimeout(() => alertDiv.remove(), 400);
       }, 5000);
-    }
-
-    function closeModal() {
-      document.getElementById('modal').classList.add('hidden');
     }
   </script>
 </body>
