@@ -1,4 +1,4 @@
-import gemsCatalogPromise from './gems.js';
+import gemsCatalogPromise from '../gems.js';
 
 const YANDEX_FORM_WISHLIST_BASE = "https://forms.yandex.ru/u/65b2bc4cd046881234567890/";
 
