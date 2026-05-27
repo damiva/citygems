@@ -1,506 +1,95 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CityGems — Эксклюзивные Бриллианты</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        /* Кастомные стили для ползунков (совместимость) */
-        input[type="range"]::-webkit-slider-thumb {
-            pointer-events: auto;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #000000;
-            cursor: pointer;
-            -webkit-appearance: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>citygems — Скоро открытие</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Центрируем всю заглушку ровно по центру экрана */
+    body {
+      background-color: #FAF9F6; /* Благородный светлый фон */
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      overflow: hidden;
+    }
+
+    /* Идеальный круглый контейнер-медальон */
+    .stub-card {
+      position: relative;
+      width: 100%;
+      max-width: 440px; /* Эквивалент max-w-md */
+      aspect-ratio: 1 / 1; /* Эквивалент aspect-square */
+      background-color: #FFFFFF;
+      border: 1px solid #E5E5E0;
+      border-radius: 50%; /* Идеальный круг */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px; /* Эквивалент p-8 */
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.02), 0 10px 30px rgba(0, 0, 0, 0.01);
+    }
+
+    .diamond-blueprint {
+      width: 80%; /* Эквивалент w-4/5 */
+      height: 80%; /* Эквивалент h-4/5 */
+      color: #C5A880; /* Матовое золото */
+      opacity: 0.85; /* Эквивалент opacity-90 */
+      animation: spin-slow 120s linear infinite; 
+    }
+
+    .stub-text-holder {
+      position: absolute;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .stub-title {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 2rem;
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      color: #1A1A1A;
+      white-space: nowrap;
+    }
+
+    @keyframes spin-slow {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased min-h-screen flex flex-col">
-
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 execution-header">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-            
-            <a href="#" class="flex items-center gap-2 group shrink-0">
-                <svg class="w-6 h-6 text-black transition-transform group-hover:rotate-12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M6 3h12l4 6-10 12L2 9z" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M11 3 8 9l4 12 4-12-3-6" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M2 9h20" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span class="text-lg font-semibold tracking-wider uppercase text-black hidden [@media(min-width:420px)]:block">citygems</span>
-            </a>
-
-            <nav class="flex items-center gap-6">
-                <a href="#catalog-section" class="text-sm font-medium text-black hover:opacity-70 transition-opacity flex items-center gap-1.5 py-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                    </svg>
-                    Каталог
-                </a>
-            </nav>
-
-            <div class="flex items-center shrink-0">
-                <button id="cart-btn" class="relative p-2 text-black hover:opacity-70 transition-opacity focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-                    </svg>
-                    <span id="cart-count" class="absolute -top-0.5 -right-0.5 bg-black text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center opacity-0 transition-opacity">0</span>
-                </button>
-            </div>
-
-        </div>
-    </header>
-
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8" id="catalog-section">
-        <div class="flex flex-col md:flex-row gap-8">
-            
-            <aside class="w-full md:w-64 shrink-0 bg-white border border-gray-100 rounded-xl p-5 h-fit sticky top-24">
-                <div class="flex items-center justify-between mb-5">
-                    <h2 class="text-sm font-semibold uppercase tracking-wider text-black">Фильтры</h2>
-                    <button id="reset-filters" class="text-xs text-gray-400 hover:text-black transition-colors hidden">Сбросить</button>
-                </div>
-                
-                <div class="space-y-6">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-2">Цена, ₽</label>
-                        <div class="flex items-center justify-between text-xs text-gray-900 mb-2 font-medium">
-                            <span id="price-min-lbl">0</span>
-                            <span id="price-max-lbl">0</span>
-                        </div>
-                        <div class="relative h-2 bg-gray-100 rounded-full flex items-center">
-                            <input type="range" id="price-slider" class="absolute w-full h-1 appearance-none bg-transparent pointer-events-none appearance-none" min="0" max="1000000" step="1000">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-2">Вес, Carat</label>
-                        <div class="flex items-center justify-between text-xs text-gray-900 mb-2 font-medium">
-                            <span id="carat-min-lbl">0</span>
-                            <span id="carat-max-lbl">0</span>
-                        </div>
-                        <div class="relative h-2 bg-gray-100 rounded-full flex items-center">
-                            <input type="range" id="carat-slider" class="absolute w-full h-1 appearance-none bg-transparent pointer-events-none appearance-none" min="0" max="10" stroke-width="0.1" step="0.01">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500 mb-2">Огранка</label>
-                        <select id="filter-shape" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-black transition-colors">
-                            <option value="">Все огранки</option>
-                        </select>
-                    </div>
-                </div>
-            </aside>
-
-            <section class="flex-grow">
-                <div id="catalog-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-                    </div>
-
-                <div class="mt-10 flex justify-center">
-                    <button id="load-more-btn" class="hidden px-6 py-2.5 border border-black text-xs font-medium uppercase tracking-wider hover:bg-black hover:text-white transition-all rounded-md">
-                        Показать еще
-                    </button>
-                </div>
-                
-                <div id="empty-state" class="hidden text-center py-20">
-                    <p class="text-sm text-gray-400">По вашему запросу камней не найдено.</p>
-                </div>
-            </section>
-
+<body>
+    <main class="stub-card">
+        <svg class="diamond-blueprint" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.5">
+            <circle cx="50" cy="50" r="48" stroke-dasharray="2 4" />
+            <polygon points="50,5 95,35 78,85 22,85 5,35" />
+            <polygon points="50,95 95,35 78,85 22,85 5,35" />
+            <line x1="50" y1="5" x2="50" y2="95" />
+            <line x1="5" y1="35" x2="95" y2="35" />
+            <line x1="22" y1="85" x2="78" y2="85" />
+            <polygon points="50,25 75,45 65,75 35,75 25,45" />
+            <line x1="50" y1="5" x2="50" y2="25" />
+            <line x1="5" y1="35" x2="25" y2="45" />
+            <line x1="95" y1="35" x2="75" y2="45" />
+            <line x1="22" y1="85" x2="35" y2="75" />
+            <line x1="78" y1="85" x2="65" y2="75" />
+        </svg>
+        <div class="stub-text-holder">
+            <h1 class="stub-title">СКОРО ОТКРЫТИЕ</h1>
         </div>
     </main>
-
-    <footer class="bg-white border-t border-gray-100 mt-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-400">
-            <div>&copy; 2026 CITYGEMS. Все права защищены.</div>
-            <div class="flex gap-6">
-                <a href="#" class="hover:text-black transition-colors">Конфиденциальность</a>
-                <a href="#" class="hover:text-black transition-colors">Условия использования</a>
-            </div>
-        </div>
-    </footer>
-
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 pointer-events-none"></div>
-
-    <script>
-        // Демонстрационная база данных (в реальности подключается через <script src="gems.js">)
-        const Gems = {
-            Date: "2026-05-26",
-            Data: []
-        };
-        
-        // Быстро сгенерируем тестовый массив на 200 позиций для проверки витрины
-        const shapes = ["Круг", "Принцесса", "Изумруд", "Овал", "Маркиз"];
-        for(let i = 1; i <= 200; i++) {
-            Gems.Data.push({
-                index: i,
-                shape: shapes[i % shapes.length],
-                carat: parseFloat((0.3 + (i * 0.047)).toFixed(2)),
-                color: `${(i % 5) + 1}`,
-                clarity: `${(i % 6) + i%2 + 1}`,
-                cut: i % 3 === 0 ? "Excellent" : (i % 3 === 1 ? "Very Good" : "Good"),
-                price: Math.floor(45000 + (i * 4350)),
-                img: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='%23e5e7eb'><polygon points='50,15 80,40 50,85 20,40'/></svg>",
-                cert: "GIA"
-            });
-        }
-    </script>
-
-    <script>
-        // Инициализация глобального состояния приложения
-        const CONFIG = {
-            itemsPerPage: 24
-        };
-
-        let state = {
-            filteredGems: [],
-            visibleCount: CONFIG.itemsPerPage,
-            cart: [],
-            filters: {
-                maxPrice: 0,
-                maxCarat: 0,
-                shape: ""
-            },
-            limits: {
-                minPrice: 0, maxPrice: 0,
-                minCarat: 0, maxCarat: 0
-            }
-        };
-
-        // DOM элементы
-        const dom = {
-            grid: document.getElementById('catalog-grid'),
-            loadMoreBtn: document.getElementById('load-more-btn'),
-            emptyState: document.getElementById('empty-state'),
-            cartCount: document.getElementById('cart-count'),
-            resetFilters: document.getElementById('reset-filters'),
-            filterShape: document.getElementById('filter-shape'),
-            priceSlider: document.getElementById('price-slider'),
-            caratSlider: document.getElementById('carat-slider'),
-            priceMinLbl: document.getElementById('price-min-lbl'),
-            priceMaxLbl: document.getElementById('price-max-lbl'),
-            caratMinLbl: document.getElementById('carat-min-lbl'),
-            caratMaxLbl: document.getElementById('carat-max-lbl'),
-            toastContainer: document.getElementById('toast-container')
-        };
-
-        // Инициализация системы при загрузке страницы
-        document.addEventListener('DOMContentLoaded', () => {
-            if (!window.Gems || !Gems.Data || Gems.Data.length === 0) {
-                showToast("Ошибка загрузки данных каталога", "error");
-                return;
-            }
-            
-            initLimits();
-            initFiltersUI();
-            initCart();
-            applyFilters();
-            
-            // Навешиваем Event Delegation на сетку каталога (вместо тысяч инлайн-слушателей)
-            dom.grid.addEventListener('click', handleGridClick);
-            
-            // Слушатели интерактивных фильтров
-            dom.filterShape.addEventListener('change', () => {
-                state.filters.shape = dom.filterShape.value;
-                checkResetVisibility();
-                applyFilters();
-            });
-            
-            // На ползунки вешаем Debounce-обработчик
-            dom.priceSlider.addEventListener('input', debounce(handlePriceSliderInput, 100));
-            dom.caratSlider.addEventListener('input', debounce(handleCaratSliderInput, 100));
-            
-            dom.loadMoreBtn.addEventListener('click', loadMoreItems);
-            dom.resetFilters.addEventListener('click', resetToDefaultFilters);
-        });
-
-        // Функция задержки (Debounce) — предотвращает фризы UI при перетаскивании ползунков
-        function debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
-            };
-        }
-
-        // Вычисление экстремумов цен и карат по исходному массиву
-        function initLimits() {
-            const prices = Gems.Data.map(g => g.price);
-            const carats = Gems.Data.map(g => g.carat);
-            
-            state.limits.minPrice = Math.min(...prices);
-            state.limits.maxPrice = Math.max(...prices);
-            state.limits.minCarat = Math.min(...carats);
-            state.limits.maxCarat = Math.max(...carats);
-            
-            // Выставляем фильтры по умолчанию на максимум
-            state.filters.maxPrice = state.limits.maxPrice;
-            state.filters.maxCarat = state.limits.maxCarat;
-        }
-
-        // Настройка элементов интерфейса фильтров
-        function initFiltersUI() {
-            // Заполнение выпадающего списка уникальными огранками
-            const shapes = [...new Set(Gems.Data.map(g => g.shape))].sort();
-            const fragment = document.createDocumentFragment();
-            shapes.forEach(shape => {
-                const opt = document.createElement('option');
-                opt.value = shape;
-                opt.textContent = shape;
-                fragment.appendChild(opt);
-            });
-            dom.filterShape.appendChild(fragment);
-
-            // Настройка ползунка цен
-            dom.priceSlider.min = state.limits.minPrice;
-            dom.priceSlider.max = state.limits.maxPrice;
-            dom.priceSlider.value = state.limits.maxPrice;
-            updatePriceLabels(state.limits.minPrice, state.limits.maxPrice);
-
-            // Настройка ползунка карат
-            dom.caratSlider.min = state.limits.minCarat;
-            dom.caratSlider.max = state.limits.maxCarat;
-            dom.caratSlider.value = state.limits.maxCarat;
-            updateCaratLabels(state.limits.minCarat, state.limits.maxCarat);
-        }
-
-        function updatePriceLabels(min, max) {
-            dom.priceMinLbl.textContent = min.toLocaleString('ru-RU');
-            dom.priceMaxLbl.textContent = max.toLocaleString('ru-RU');
-        }
-
-        function updateCaratLabels(min, max) {
-            dom.caratMinLbl.textContent = `${min.toFixed(2)} ct`;
-            dom.caratMaxLbl.textContent = `${max.toFixed(2)} ct`;
-        }
-
-        function handlePriceSliderInput(e) {
-            state.filters.maxPrice = parseInt(e.target.value, 10);
-            updatePriceLabels(state.limits.minPrice, state.filters.maxPrice);
-            checkResetVisibility();
-            applyFilters();
-        }
-
-        function handleCaratSliderInput(e) {
-            state.filters.maxCarat = parseFloat(e.target.value);
-            updateCaratLabels(state.limits.minCarat, state.filters.maxCarat);
-            checkResetVisibility();
-            applyFilters();
-        }
-
-        function checkResetVisibility() {
-            const isChanged = state.filters.shape !== "" || 
-                              state.filters.maxPrice !== state.limits.maxPrice || 
-                              state.filters.maxCarat !== state.limits.maxCarat;
-            dom.resetFilters.classList.toggle('hidden', !isChanged);
-        }
-
-        function resetToDefaultFilters() {
-            state.filters.shape = "";
-            state.filters.maxPrice = state.limits.maxPrice;
-            state.filters.maxCarat = state.limits.maxCarat;
-            
-            dom.filterShape.value = "";
-            dom.priceSlider.value = state.limits.maxPrice;
-            dom.caratSlider.value = state.limits.maxCarat;
-            
-            updatePriceLabels(state.limits.minPrice, state.limits.maxPrice);
-            updateCaratLabels(state.limits.minCarat, state.limits.maxCarat);
-            
-            dom.resetFilters.classList.add('hidden');
-            applyFilters();
-        }
-
-        // Основной движок фильтрации массива на клиенте
-        function applyFilters() {
-            state.filteredGems = Gems.Data.filter(gem => {
-                if (state.filters.shape && gem.shape !== state.filters.shape) return false;
-                if (gem.price > state.filters.maxPrice) return false;
-                if (gem.carat > state.filters.maxCarat) return false;
-                return true;
-            });
-            
-            state.visibleCount = CONFIG.itemsPerPage;
-            renderCatalog(true);
-        }
-
-        // Оптимизированный рендеринг карточек (clear DOM только при глубоком ресете фильтра)
-        function renderCatalog(clearContainer = false) {
-            if (clearContainer) {
-                dom.grid.innerHTML = '';
-            }
-            
-            const total = state.filteredGems.length;
-            
-            if (total === 0) {
-                dom.emptyState.classList.remove('hidden');
-                dom.loadMoreBtn.classList.add('hidden');
-                return;
-            }
-            dom.emptyState.classList.add('hidden');
-
-            const start = clearContainer ? 0 : dom.grid.children.length;
-            const end = Math.min(state.visibleCount, total);
-            
-            // Использование DocumentFragment снижает Reflow дерева рендеринга до 1 раза
-            const fragment = document.createDocumentFragment();
-            
-            for (let i = start; i < end; i++) {
-                const gem = state.filteredGems[i];
-                const card = document.createElement('div');
-                card.className = "bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-all flex flex-col group relative";
-                
-                // Проверяем, находится ли данный камень уже в корзине
-                const inCart = state.cart.includes(gem.index);
-                
-                card.innerHTML = `
-                    <div class="relative w-full aspect-square bg-gray-50 flex items-center justify-center p-6 overflow-hidden">
-                        <img src="${gem.img}" alt="${gem.shape}" class="w-40 h-40 object-contain transition-transform duration-500 group-hover:scale-105" loading="lazy">
-                        
-                        <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-xs text-[10px] font-semibold text-gray-900 px-2 py-0.5 rounded border border-gray-100 uppercase tracking-wider">${gem.cert}</span>
-                        
-                        <span class="absolute top-3 right-3 bg-black text-white text-[10px] font-medium px-2 py-0.5 rounded tracking-wide">${gem.carat.toFixed(2)} Ct</span>
-                    </div>
-
-                    <div class="p-4 flex flex-col flex-grow justify-between gap-3">
-                        <div>
-                            <div class="flex items-baseline justify-between gap-2">
-                                <h3 class="text-xs font-semibold text-black uppercase tracking-wide truncate">${gem.shape}</h3>
-                                <span class="text-sm font-bold text-black whitespace-nowrap">${gem.price.toLocaleString('ru-RU')} ₽</span>
-                            </div>
-                            
-                            <div class="grid grid-cols-3 border-y border-gray-100 my-2.5 py-2 text-center text-[10px] leading-none h-10 items-center">
-                                <div class="border-r border-gray-100">
-                                    <span class="block text-gray-400 mb-0.5">Цвет</span>
-                                    <span class="font-medium text-gray-900">${gem.color}</span>
-                                </div>
-                                <div class="border-r border-gray-100">
-                                    <span class="block text-gray-400 mb-0.5">Чист.</span>
-                                    <span class="font-medium text-gray-900">${gem.clarity}</span>
-                                </div>
-                                <div>
-                                    <span class="block text-gray-400 mb-0.5">Огр.</span>
-                                    <span class="font-medium text-gray-900 truncate block px-0.5">${gem.cut}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button data-id="${gem.index}" class="add-to-cart-btn w-full py-2 px-4 rounded-lg text-xs font-medium transition-all uppercase tracking-wider ${inCart ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-black text-white hover:opacity-80 active:scale-[0.98]'}" ${inCart ? 'disabled' : ''}>
-                            ${inCart ? 'В корзине' : 'Купить'}
-                        </button>
-                    </div>
-                `;
-                fragment.appendChild(card);
-            }
-            
-            dom.grid.appendChild(fragment);
-            
-            // Управление видимостью кнопки пагинации
-            dom.loadMoreBtn.classList.toggle('hidden', end >= total);
-        }
-
-        function loadMoreItems() {
-            state.visibleCount += CONFIG.itemsPerPage;
-            renderCatalog(false);
-        }
-
-        // Перехватчик кликов (Event Delegation) — обрабатывает всю сетку через одну точку входа
-        function handleGridClick(e) {
-            const btn = e.target.closest('.add-to-cart-btn');
-            if (!btn || btn.hasAttribute('disabled')) return;
-
-            const gemId = parseInt(btn.dataset.id, 10);
-            addToCart(gemId, btn);
-        }
-
-        /* УМНАЯ КОРЗИНА (ПАСПОРТ) 
-           Хранит только массив индексов выбранных строк и дату сборки каталога
-        */
-        function initCart() {
-            try {
-                const savedData = localStorage.getItem('cg_cart_passport');
-                if (savedData) {
-                    const passport = JSON.parse(savedData);
-                    
-                    // Сверка версий даты каталога
-                    if (passport.catalogDate === Gems.Date) {
-                        state.cart = passport.indexes || [];
-                    } else {
-                        // Если дата изменилась — деликатно очищаем корзину и информируем клиента
-                        localStorage.removeItem('cg_cart_passport');
-                        state.cart = [];
-                        showToast("Каталог был обновлен. Корзина актуализирована.", "info");
-                    }
-                }
-            } catch (e) {
-                state.cart = [];
-            }
-            updateCartUI();
-        }
-
-        function addToCart(id, buttonElement) {
-            if (state.cart.includes(id)) return;
-            
-            state.cart.push(id);
-            saveCartPassport();
-            
-            // Локальное обновление состояния кнопки без полной перерисовки каталога
-            if (buttonElement) {
-                buttonElement.textContent = "В корзине";
-                buttonElement.className = "add-to-cart-btn w-full py-2 px-4 rounded-lg text-xs font-medium transition-all uppercase tracking-wider bg-gray-100 text-gray-400 cursor-not-allowed";
-                buttonElement.disabled = true;
-            }
-            
-            updateCartUI();
-            showToast("Бриллиант добавлен в корзину");
-        }
-
-        function saveCartPassport() {
-            const passport = {
-                catalogDate: Gems.Date,
-                indexes: state.cart
-            };
-            localStorage.setItem('cg_cart_passport', JSON.stringify(passport));
-        }
-
-        function updateCartUI() {
-            const count = state.cart.length;
-            dom.cartCount.textContent = count;
-            dom.cartCount.classList.toggle('opacity-0', count === 0);
-            dom.cartCount.classList.toggle('opacity-100', count > 0);
-        }
-
-        // Премиальная система Toast-уведомлений
-        function showToast(message, type = "success") {
-            const toast = document.createElement('div');
-            toast.className = "transform translate-y-4 opacity-0 transition-all duration-300 pointer-events-auto min-w-[280px] bg-white text-black border border-gray-100 px-4 py-3 rounded-xl shadow-xl flex items-center gap-3 text-xs font-medium";
-            
-            const iconColor = type === 'success' ? 'text-green-500' : (type === 'error' ? 'text-red-500' : 'text-blue-500');
-            
-            toast.innerHTML = `
-                <span class="${iconColor} text-sm">●</span>
-                <span class="flex-grow">${message}</span>
-            `;
-            
-            dom.toastContainer.appendChild(toast);
-            
-            // Анимация появления
-            requestAnimationFrame(() => {
-                toast.classList.remove('translate-y-4', 'opacity-0');
-            });
-            
-            // Автоматическое удаление элемента через 3.5 секунды
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                toast.addEventListener('transitionend', () => toast.remove());
-            }, 3500);
-        }
-    </script>
 </body>
 </html>

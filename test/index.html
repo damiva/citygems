@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>citygems — Премиальные лабораторные бриллианты</title>
+  <link rel="stylesheet" href="style.css">
+  <script>loaded()=>{document.querySelectorAll("header,main,footer").forEach(e=>{e.hidden=false});document.getElementById("loading").hidden=true;}</script>
+</head>
+<body>
+    <h1 id="loading" style="text-align: center;">Loading</h1>
+    <header hidden>
+        <div class="header-container">
+            <a href="#" class="compressed" title="О нас">
+              <!-- Применили класс .header-icon -->
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#C5A880" stroke-width="1">
+                <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5" />
+                <polygon points="12,2 12,22" />
+                <polygon points="2,8.5 22,8.5" />
+                <polygon points="2,15.5 22,15.5" />
+                <polygon points="12,2 2,15.5" />
+                <polygon points="12,2 22,15.5" />
+                <polygon points="12,22 2,8.5" />
+                <polygon points="12,22 22,8.5" />
+              </svg>
+              citygems
+            </a>
+            <a href="#catalog" class="flex-center-absolute" title="Наш каталог">Каталог</a>            
+            <a href="#cart" class="cart-link" title="Ваша корзина">
+                <div class="cart-wrapper">
+                    <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="#C5A880" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M8 7V5a4 4 0 0 1 8 0v2" />
+                        <rect x="4" y="7" width="16" height="14" rx="1" />
+                    </svg>
+                    <span id="cart-count">0</span>
+                </div>
+            </a>
+        </div>
+    </header>
+
+    <main hidden>
+        <section id="about">
+            <h1>Технологичная роскошь</h1>
+        </section>
+        
+        <section id="catalog">
+            <h1>Наш каталог</h1>
+            <aside id="catalog-filter">
+                <!-- Сюда пойдут фильтры -->
+            </aside>
+            <!-- ИСПРАВЛЕНО: Добавлен класс .catalog-grid -->
+            <ul id="catalog-grid" class="catalog-grid">
+            </ul>
+        </section>
+        
+        <section id="cart">
+            <h1>Ваша корзина</h1>
+        </section>
+    </main>
+    
+    <footer hidden>
+    </footer>
+
+    <template id="catalog-card">
+        <li class="catalog-card">
+            <div class="card-info" onclick="showInfo(this.parent.id)">
+                <img src="" class="lab-logo">
+                <b class="gem-form"></b>
+                <img class="gem-photo" src="">
+                <b class="gem-weight"></b>
+                <b class="gem-price"></b>
+            </div>
+            <div class="card-params"></div>
+            <button class="btn-luxury" onclick="addCart(this.parent.id)">+ в корзину</button>
+        </li>
+    </template>
+    
+    <template id="cart-card">
+        <li class="cart-card"></li>
+    </template>
+    
+    <template id="info-card">
+        <div class="info-card"></div>
+    </template>
+
+    <!-- --- МОДАЛЬНЫЕ ОКНА --- -->    
+    <dialog id="info-dialog">
+        <button class="close-btn" onclick="this.parent.close()">&times;</button>
+        <div class="info-body"></div>
+    </dialog>
+    
+    <dialog id="ask-dialog">
+        <h2></h2>
+        <p></p>
+        <div class="buttons">
+            <button type="submit">Подтвердить</button>
+            <button type="button" onclick="this.parent.close()">Отменить</button>
+        </div>
+    </dialog>
+</body>
+</html>

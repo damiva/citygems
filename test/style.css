@@ -1,0 +1,199 @@
+    /* ИСПРАВЛЕНО: Правильный импорт премиальных шрифтов */
+    @import url('https://googleapis.com');
+
+    * {
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0;
+    }
+
+    body {
+      background-color: #FAF9F6;
+      font-family: 'Montserrat', sans-serif;
+      color: #1A1A1A;
+      font-size: calc(14px + 0.15vw); 
+      line-height: 1.6;
+    }
+
+    /* Ограничитель контента для главных секций */
+    main, footer {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* ИСПРАВЛЕНО: Шапка теперь растягивается на 100% ширины, имеет правильный relative-статус */
+    header {
+      background-color: #FFFFFF;
+      border-bottom: 1px solid #EAEAEA;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      width: 100%;
+    }
+
+    /* Внутренний контейнер шапки, который держит элементы в узде 1440px */
+    .header-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative; /* База для абсолютного центрирования каталога */
+    }
+
+    /* ИСПРАВЛЕНО: Наш универсальный утилитарный класс центрирования */
+    .flex-center-absolute {
+      position: absolute !important;
+      left: 50% !important;
+      top: 50% !important;
+      transform: translate(-50%, -50%) !important;
+    }
+
+    /* Стили ссылок навигации */
+    a {
+      color: #1A1A1A;
+      text-decoration: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: color 0.3s ease;
+    }
+
+    a:hover {
+      color: #C5A880;
+    }
+
+    /* Логотип */
+    .compressed {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Cormorant Garamond', serif !important;
+      font-size: 1.4rem !important;
+      text-transform: lowercase !important;
+      letter-spacing: 1px !important;
+    }
+
+    /* SVG Иконки внутри шапки */
+    .icon {
+      width: 28px;
+      height: 28px;
+      transition: transform 0.6s ease;
+    }
+    
+    a:hover .icon {
+      transform: rotate(180deg); /* Элегантный поворот при наведении */
+    }
+
+    /* Контейнер, который объединяет SVG и цифру */
+.cart-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Новые премиальные стили для счётчика внутри пакета */
+#cart-count {
+  position: absolute;
+  /* Смещаем строго в центр самого тела пакета (ниже ручки) */
+  bottom: 4px; 
+  left: 50%;
+  transform: translateX(-50%);
+  
+  /* Шрифты и цвета */
+  font-family: 'Montserrat', sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  color: #1A1A1A; /* Темный цвет цифры на белом/прозрачном фоне пакета */
+  
+  /* Отключаем выделение текста, чтобы клик всегда шел по ссылке */
+  pointer-events: none; 
+  user-select: none;
+  letter-spacing: 0;
+  line-height: 1;
+}
+
+/* Элегантный эффект: при наведении на корзину цифра тоже может слегка менять цвет */
+.cart-link:hover #cart-count {
+  color: #C5A880;
+}
+
+    /* --- ИСПРАВЛЕНО: Сетка каталога привязана к классу, а не общему тегу <ul> --- */
+    .catalog-grid {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 40px;
+      padding: 0;
+      margin-top: 30px;
+    }
+
+    /* --- ИСПРАВЛЕНО: Карточка привязана к классу, а не общему тегу <li> --- */
+    .catalog-card {
+      background: #FFFFFF;
+      border: 1px solid #EAEAEA;
+      padding: 40px 30px;
+      text-align: center;
+      transition: all 0.4s ease;
+      letter-spacing: 1px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .catalog-card:hover {
+      border-color: #C5A880; 
+      box-shadow: 0 20px 40px rgba(197, 168, 128, 0.04);
+    }
+
+    .collection-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #C5A880;
+      margin-bottom: 12px;
+    }
+
+    .product-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; 
+      font-weight: 400;
+      margin-bottom: 15px;
+      line-height: 1.2;
+    }
+
+    .price {
+      font-size: 1rem;
+      font-weight: 300;
+      color: #555555;
+      margin-bottom: 30px;
+    }
+
+    .btn-luxury {
+      display: inline-block;
+      padding: 14px 0;
+      width: 100%;
+      border: 1px solid #1A1A1A;
+      background: transparent;
+      color: #1A1A1A;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-luxury:hover {
+      background: #1A1A1A;
+      color: #FFFFFF;
+    }
+
+    /* Адаптивность для мобильных */
+    @media (max-width: 767px) {
+      .header-container { padding: 15px 20px; }
+      .compressed { font-size: 0 !important; } /* Скрывает текст логотипа, оставляя SVG */
+    }
