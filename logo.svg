@@ -1,3 +1,9 @@
-<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 24 24' fill='none' stroke='#666' stroke-width='1'>
-    <path d='M6 3h12l4 6-10 12L2 9z'/>
+<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none">
+  <style>
+    .diamond-path {stroke: #C5A880;}
+    @media (prefers-color-scheme: dark) {.diamond-path {stroke: #E2D1B9;}}
+  </style>
+  <path class="diamond-path" d="M6 3h12l4 6-10 12L2 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1">
+    <animate attributeName="stroke" values="#C5A880; #C5A880; #FFFFFF; #C5A880; #C5A880" keyTimes="0; 0.8; 0.85; 0.9; 1" dur="5s" repeatCount="indefinite" />
+  </path>
 </svg>

@@ -1,189 +1,140 @@
-const Gems = {
-  initPromise: null, // Promise для ожидания готовности во внешних скриптах
-  Columns: null,     // Колонки данных
-  RowsCount: 0,      // Общее количество записей
-  Currency: null,    // Информация о курсе валюты
-  Date: null,        // Дата обновления каталога
-  _uri: "",          // Базовый URL для относительных путей (картинок)
-  _ext: "png",       // Внутреннее расширение для всех файлов изображений (форм и сертификатов)
+class Gems {
+  #uri = {lab: "lab", img: "img"};
+  
+  constructor(db, uri, rate, date) {
+    Object.assign(this, db);
+    uri = uri || "";
+    this.#uri.lab = uri + this.#uri.lab;
+    this.#uri.img = uri + this.#uri.img;
+    
+    if (rate && date) {
+      const cleanDate = date.split("T")[0];
+      if (!this.date || cleanDate > this.date) {
+        const d = rate / (this.rate || 1);
+        const c = db.priceColumn && db.columns[db.priceColumn] || null;
+        
+        if (c && !c.enum && Array.isArray(c.data) && (d < 0.90 || d > 1.05)) {
+          for (let i = 0; i < c.data.length; i++) {
+            c.data[i] = Math.round(c.data[i] * d / 10) * 10;
+          }
+          this.rate = rate;
+          this.date = cleanDate;
+        }
+      }
+    }
+  }
 
-  async _init(url = 'https://citygems.ru/db/gems.json') {
+  static async load(url) {
     try {
-      const [db, cbr] = await Promise.all([
-        fetch(url).then(res => {
-          if (!res.ok) throw new Error(`Ошибка загрузки каталога: ${res.status}`);
-          return res.json();
-        }).catch(err => {
-          throw new Error(`Ошибка загрузки каталога: ${err.message}`);
+      const [db, br] = await Promise.all([
+        // Исправлено: добавлена валидация статуса ответа сервера d.ok
+        fetch(url).then(d => d.ok ? d.json() : Promise.reject(new Error(`Статус ${d.status}`))).catch(e => { 
+          throw new Error(`Ошибка загрузки каталога: ${e.message}`);
         }),
-        fetch('https://www.cbr-xml-daily.ru/daily_json.js')
-          .then(res => res.json())
-          .then(data => ({ rate: data.Valute.USD.Value, date: data.Date }))
-          .catch(err => {
-            console.warn('Не удалось загрузить курс ЦБ РФ. Используем базовый курс из каталога.', err);
-            return null;
-          })
+        // Исправлено: возвращаем пустой объект {}, чтобы br?.Valute не падал в случае ошибки сети
+        fetch('https://www.cbr-xml-daily.ru/daily_json.js').then(d => d.ok ? d.json() : {}).catch(e => {
+          console.warn("Ошибка загрузки курсов ЦБ РФ:", e);
+          return {};
+        })
       ]);
 
-      // Проверяем актуальность курса и необходимость пересчета
-      const currency = db.Currency;
-      if (currency && cbr && cbr.rate) {
-        // Безопасное сравнение дат через приведение к Timestamp
-        const cbrTime = Date.parse(cbr.date);
-        const dbTime = Date.parse(currency.Date);
-
-        if (!isNaN(cbrTime) && !isNaN(dbTime) && cbrTime > dbTime) {
-          const dif = cbr.rate / currency.Rate;
-          const col = db.Columns[currency.Column];
-          if (col && !col.Enum && (dif < 0.90 || dif > 1.05)) {
-            console.log(`[Gems] Курс изменился (x${dif.toFixed(2)}). Пересчитываем цены в рублях...`);
-            col.Data = col.Data.map(v => Math.round(v * dif / 10) * 10);
-            currency.Rate = cbr.rate;
-            currency.Date = cbr.date;
-          }
-        }
-      }
-
-      // Сохраняем состояние каталога
-      this.Columns = db.Columns;
-      this.RowsCount = db.RowsCount;
-      this.Currency = currency;
-      this.Date = db.Date || null;
-      
-      // Определяем базовый путь (папку) для картинок на основе URL каталога
-      this._uri = url.substring(0, url.lastIndexOf("/") + 1);
-      
-      console.log(`[Gems] Каталог готов: записей: ${this.RowsCount}, курс: ${this.Currency ? this.Currency.Rate : 'не указан'} руб.`);
-      return this;
+      // Исправлено: корректный поиск последнего слэша для формирования базового пути
+      const uri = url.substring(0, url.lastIndexOf("/") + 1);
+      return new Gems(db, uri, br?.Valute?.USD?.Value, br?.Date);
     } catch (e) {
-      console.error('Критическая ошибка при инициализации:', e);
+      console.error("[Gems] error:", e.message);
       throw e;
     }
-  },
-
-  /**
-   * Быстрое получение значения ячейки БЕЗ создания лишних объектов
-   */
-  getValue(colName, rowIndex) {
-    const col = this.Columns?.[colName];
-    if (!col || rowIndex < 0 || rowIndex >= this.RowsCount) return null; 
-    const rawValue = col.Data[rowIndex];
-    return (col.Enum && Array.isArray(col.Enum)) ? col.Enum[rawValue] : rawValue;
-  },
-
-  /**
-   * Получение сырого индекса Enum (полезно для быстрой числовой фильтрации)
-   */
-  getRawValue(colName, rowIndex) {
-    const col = this.Columns?.[colName];
-    if (!col || rowIndex < 0 || rowIndex >= this.RowsCount) return null;
-    return col.Data[rowIndex];
-  },
-
-  /**
-   * Ленивая сборка объекта только для одной строки на основе индекса.
-   */
-  getItem(rowIndex) {
-    if (rowIndex < 0 || rowIndex >= this.RowsCount) return null;
-    const item = { _index: rowIndex };
-    Object.keys(this.Columns).forEach(k => {
-      item[k] = this.getValue(k, rowIndex);
-    });
-    
-    // Экранируем спецсимволы и русские буквы для безопасных путей к файлам на сервере.
-    // Регистр букв (Большие/маленькие) сохраняется в точности как в базе данных gems.json!
-    const shapeVal = item['Форма'] ? encodeURIComponent(item['Форма']) : '';
-    const certVal = item['Сертификат'] ? encodeURIComponent(item['Сертификат']) : '';
-
-    item.lab = certVal ? `${this._uri}${certVal}.${this._ext}` : '';
-    item.image = shapeVal ? `${this._uri}${shapeVal}.${this._ext}` : '';
-    return item;
-  },
-
-  /**
-   * Мощный и быстрый метод фильтрации, поддерживающий мультивыбор и глобальную сортировку цен.
-   */
-  filter(exact = {}, ranges = {}, sortBy = 'price_asc', limit = 20, offset = 0) {
-    const matchingIndices = [];
-
-    // 1. Фильтруем все индексы строк по плоским массивам в памяти
-    for (let i = 0; i < this.RowsCount; i++) {
-      let matches = true;
-
-      // Проверка точных совпадений (поддерживает мультивыбор)
-      for (const colName in exact) {
-        const filterVal = exact[colName];
-        if (filterVal === undefined || filterVal === null || filterVal === '') continue;
-
-        const gemVal = this.getValue(colName, i);
-
-        if (Array.isArray(filterVal)) {
-          // Если передан пустой массив — игнорируем фильтр (показываем всё)
-          if (filterVal.length > 0 && !filterVal.includes(gemVal)) {
-            matches = false;
-            break;
-          }
-        } else {
-          // Иначе проверяем классическое одиночное совпадение
-          if (gemVal !== filterVal) {
-            matches = false;
-            break;
-          }
-        }
-      }
-      if (!matches) continue;
-
-      // Проверка числовых диапазонов с защитой от undefined свойств в объекте ranges
-      for (const colName in ranges) {
-        const rangeObj = ranges[colName];
-        if (!rangeObj) continue; // Защита от null/undefined диапазона
-
-        const val = this.getValue(colName, i);
-        if (typeof val === 'number') {
-          const { min, max } = rangeObj;
-          if (min !== undefined && min !== null && val < min) { matches = false; break; }
-          if (max !== undefined && max !== null && val > max) { matches = false; break; }
-        }
-      }
-
-      if (matches) {
-        matchingIndices.push(i);
-      }
-    }
-
-    // 2. Сортируем отфильтрованные индексы по цене
-    const priceCol = this.Columns['Цена'];
-    if (priceCol && Array.isArray(priceCol.Data)) {
-      if (sortBy === 'price_asc') {
-        matchingIndices.sort((a, b) => priceCol.Data[a] - priceCol.Data[b]);
-      } else if (sortBy === 'price_desc') {
-        matchingIndices.sort((a, b) => priceCol.Data[b] - priceCol.Data[a]);
-      }
-    }
-
-    // 3. Срезаем массив под пагинацию и превращаем в полноценные JS-объекты только нужные строки
-    const sliced = matchingIndices.slice(offset, offset + limit);
-    const items = sliced.map(idx => this.getItem(idx));
-
-    return {
-      items,
-      total: matchingIndices.length
-    };
-  },
-
-  /**
-   * Получить готовый список вариантов (Enum) для построения фильтров в UI.
-   */
-  getEnum(colName) {
-    const col = this.Columns?.[colName];
-    return (col && Array.isArray(col.Enum)) ? col.Enum : null;
   }
-};
 
-// Автоматический запуск при чтении скрипта
-Gems.initPromise = Gems._init();
+  // Приватный метод скрыт от внешнего кода сайта
+  #val(col, row, raw) {
+    return (!(col = this.columns?.[col]) || (row = col.data[row]) === null) ? null : (raw || !col.enum) ? row : col.enum[row];
+  }
 
-// Делаем объект глобально доступным
-if (typeof window !== 'undefined') {
-  window.Gems = Gems;
+  getValue(col, row, raw) { 
+    return (row < 0 || row >= this.rowsCount) ? null : this.#val(col, row, raw);
+  }
+
+  getItem(row) {
+    if (row < 0 || row >= this.rowsCount) return null;
+    const i = { _index: row };
+    for (const c in this.columns) i[c] = this.#val(c, row);
+    
+    if (i.lab = i['Сертификат'] || "") i.lab = `${this.#uri.lab}/${i.lab}.png`;
+    if (i.image = i['Форма'] || "") i.image = `${this.#uri.img}/${encodeURIComponent(i.image)}.png`;
+    return i;
+  }
+
+  getItems(rows) { 
+    return rows.map(r => this.getItem(r)); 
+  }
+
+  getEnum(col) { 
+    return (col = this.columns?.[col]) && col.enum || null; 
+  }
+
+  getIDs(...ids) {
+    const data = this.idColumn && this.columns[this.idColumn]?.data || null;
+    if (!data) return null;
+    const idSet = new Set(ids); // Используем уникальное имя, чтобы не затирать аргумент
+    const is = [];
+    for (let i = 0; i < data.length; i++) {
+      if (idSet.has(data[i])) {
+        is.push(i);
+        idSet.delete(data[i]);
+        if (idSet.size == 0) break;
+      }
+    }
+    return is;
+  }
+
+  filter(filterColumns, sortBy, desc) {
+    const matches = [];
+    const activeFilters = [];
+    
+    for (const colName in filterColumns) {
+      const targetVal = filterColumns[colName];
+      const colData = this.columns[colName]?.data;
+      if (!colData) continue;
+      
+      if (typeof targetVal === 'number') {
+        activeFilters.push({ data: colData, check: (val) => val === targetVal });
+      } else if (Array.isArray(targetVal)) {
+        const targetSet = new Set(targetVal); 
+        activeFilters.push({ data: colData, check: (val) => targetSet.has(val) });
+      } else if (targetVal && (typeof targetVal === 'object')) {
+        const min = typeof targetVal.min === 'number' ? targetVal.min : -Infinity;
+        const max = typeof targetVal.max === 'number' ? targetVal.max : Infinity;
+        activeFilters.push({ data: colData, check: (val) => val >= min && val <= max });
+      }
+    }
+    
+    const filtersCount = activeFilters.length;
+    
+    for (let i = 0; i < this.rowsCount; i++) {
+      let isMatch = true;
+      for (let f = 0; f < filtersCount; f++) {
+        const filter = activeFilters[f];
+        const cellVal = filter.data[i];
+        if (typeof cellVal !== 'number' || !filter.check(cellVal)) {
+          isMatch = false;
+          break; 
+        }
+      }
+      if (isMatch) matches.push(i);
+    }
+    
+    if (sortBy && matches.length > 1) {
+      const sortData = this.columns[sortBy]?.data;
+      if (sortData) {
+        if (desc) matches.sort((a, b) => sortData[b] - sortData[a]);
+        else matches.sort((a, b) => sortData[a] - sortData[b]);
+      }
+    }
+    return matches;
+  }
 }
+
+// Инициализация глобального промиса
+window.gemsPromise = Gems.load("https://citygems.ru/db/gems.json");

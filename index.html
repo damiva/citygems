@@ -3,93 +3,214 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>citygems — Скоро открытие</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+  <title>CityGems — Лабораторные бриллианты и природные камни</title>
+  <link rel="icon" type="image/svg+xml" href="logo.svg">
+  
+  <link rel="preconnect" href="https://googleapis.com">
+  <link rel="preconnect" href="https://gstatic.com" crossorigin>
+  <link href="https://googleapis.com/css2?family=Playfair+Display:wght@400&display=swap" rel="stylesheet">
 
-    /* Центрируем всю заглушку ровно по центру экрана */
+  <script src="city.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  
+  <script>
+    function show(n) {
+      const e = document.getElementById("qr");
+      const iconContainer = document.getElementById("qr-icon");
+      e.href = atob(somethingInteresting[n]);
+      // 1. Очищаем только сам QR-код, оставляя контейнер иконки на месте
+      const oldImg = e.querySelector("img") || e.querySelector("canvas");
+      if (oldImg) oldImg.remove();
+      iconContainer.innerHTML = ""; 
+
+      // 2. Генерируем новый QR-код
+      new QRCode(e, {
+        text: e.href,
+        width: 200,
+        height: 200,
+        colorDark : "#141414", 
+        colorLight : "#FFFFFF",
+        correctLevel : QRCode.CorrectLevel.H 
+      });
+      
+      // 3. Достаем нужную иконку из шаблона <template> по ID
+      const templateId = n === 0 ? "icon-tg" : "icon-mail";
+      const template = document.getElementById(templateId);
+      
+      // Клонируем SVG из шаблона и вставляем в готовый контейнер по центру
+      iconContainer.appendChild(template.content.cloneNode(true));
+
+      document.getElementById("contact").showModal();
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background-color: #FAF9F6; /* Благородный светлый фон */
+      background-color: #FAF9F6;
       min-height: 100vh;
       display: flex;
+      flex-direction: column;
+      justify-content: space-between;
       align-items: center;
-      justify-content: center;
-      padding: 20px;
-      overflow: hidden;
+      padding: 30px 20px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #1A1A1A;
+    }
+    
+    header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .logo-img { 
+      height: 50px;
+    }
+     
+    .subtitle {
+      font-size: 0.8rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      text-transform: uppercase; 
+      color: #7A7A75;
+      max-width: 420px;
+      line-height: 1.6;
     }
 
-    /* Идеальный круглый контейнер-медальон */
-    .stub-card {
+    main {
       position: relative;
       width: 100%;
-      max-width: 440px; /* Эквивалент max-w-md */
-      aspect-ratio: 1 / 1; /* Эквивалент aspect-square */
+      max-width: 400px;
+      aspect-ratio: 1 / 1;
       background-color: #FFFFFF;
       border: 1px solid #E5E5E0;
-      border-radius: 50%; /* Идеальный круг */
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 32px; /* Эквивалент p-8 */
+      padding: 32px;
       box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.02), 0 10px 30px rgba(0, 0, 0, 0.01);
+      margin: auto 0;
     }
-
-    .diamond-blueprint {
-      width: 80%; /* Эквивалент w-4/5 */
-      height: 80%; /* Эквивалент h-4/5 */
-      color: #C5A880; /* Матовое золото */
-      opacity: 0.85; /* Эквивалент opacity-90 */
-      animation: spin-slow 120s linear infinite; 
-    }
-
-    .stub-text-holder {
+    .gem-bg { width: 80%; height: 80%; opacity: 0.9; }
+    
+    .coming-soon {
       position: absolute;
       text-align: center;
       pointer-events: none;
-    }
-
-    .stub-title {
-      font-family: Arial, Helvetica, sans-serif;
-      font-size: 2rem;
-      font-weight: 300;
-      letter-spacing: 0.25em;
+      font-family: "Playfair Display", Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      letter-spacing: 0.3em;
       color: #1A1A1A;
       white-space: nowrap;
+      padding-left: 0.3em;
     }
 
-    @keyframes spin-slow {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
+    footer { display: flex; gap: 32px; margin-top: 20px; }
+    
+    .contact-btn {
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #1A1A1A;
+      text-decoration: none;
+      border-bottom: 1px solid #1A1A1A;
+      padding-bottom: 4px;
+      cursor: pointer;
+      background: none;
+      border-top: none; border-left: none; border-right: none;
+      transition: opacity 0.2s ease;
+    }
+    .contact-btn:hover { opacity: 0.5; }
+
+    dialog {
+      margin: auto;
+      background: #FFFFFF;
+      border: 1px solid #E5E5E0;
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.03);
+      max-width: 320px;
+      width: 100%;
+      position: relative;
+    }
+    
+    dialog::backdrop {
+      background-color: rgba(250, 249, 246, 0.92);
+      backdrop-filter: blur(4px);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 15px; right: 15px;
+      background: none; border: none;
+      font-size: 1.5rem; font-weight: 200;
+      cursor: pointer; color: #70706B;
+    }
+
+    #qr {
+      position: relative; /* Чтобы иконка позиционировалась строго по центру QR */
+      width: 200px;
+      height: 200px;
+      margin: 10px auto 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    #qr img {
+      display: block;
+    }
+    .qr-center-icon {
+      position: absolute;
+      width: 36px;
+      height: 36px;
+      background: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
-    <main class="stub-card">
-        <svg class="diamond-blueprint" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="0.5">
-            <circle cx="50" cy="50" r="48" stroke-dasharray="2 4" />
-            <polygon points="50,5 95,35 78,85 22,85 5,35" />
-            <polygon points="50,95 95,35 78,85 22,85 5,35" />
-            <line x1="50" y1="5" x2="50" y2="95" />
-            <line x1="5" y1="35" x2="95" y2="35" />
-            <line x1="22" y1="85" x2="78" y2="85" />
-            <polygon points="50,25 75,45 65,75 35,75 25,45" />
-            <line x1="50" y1="5" x2="50" y2="25" />
-            <line x1="5" y1="35" x2="25" y2="45" />
-            <line x1="95" y1="35" x2="75" y2="45" />
-            <line x1="22" y1="85" x2="35" y2="75" />
-            <line x1="78" y1="85" x2="65" y2="75" />
-        </svg>
-        <div class="stub-text-holder">
-            <h1 class="stub-title">СКОРО ОТКРЫТИЕ</h1>
-        </div>
-    </main>
+
+  <header>
+    <div class="logo-container">
+      <img src="img/cgb.png" alt="CityGems" class="logo-img">
+    </div>
+    <p class="subtitle">Магазин лабораторных бриллиантов и природных полудрагоценных камней</p>
+  </header>
+
+  <main>
+    <img src="img/crystal.svg" class="gem-bg" alt="Crystal">  
+    <span class="coming-soon">СКОРО ОТКРЫТИЕ</span>
+  </main>
+
+  <footer>
+    <button class="contact-btn" onclick="show(0)">Telegram</button>
+    <button class="contact-btn" onclick="show(1)">E-mail</button>
+  </footer>
+
+  <template id="icon-tg">
+    <svg viewBox="2 2 20 20" fill="#229ED9" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36 0-1.04-.2-1.55-.37-.63-.2-1.13-.31-1.09-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .33z"/></svg>
+  </template>
+
+  <template id="icon-mail">
+    <svg viewBox="1 2 22 20" fill="#C5A059" width="24" height="24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+  </template>
+
+  <dialog id="contact">
+    <button class="close-btn" onclick="this.parentElement.close()">&times;</button>
+    <a id="qr">
+      <div id="qr-icon" class="qr-center-icon"></div>
+    </a>
+  </dialog>
 </body>
 </html>
