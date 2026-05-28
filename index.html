@@ -5,24 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CityGems — Лабораторные бриллианты и природные камни</title>
   
-  <link rel="preconnect" href="https://googleapis.com">
-  <link rel="preconnect" href="https://gstatic.com" crossorigin>
-  <link href="https://googleapis.com/css2?family=Playfair+Display:wght@400&display=swap" rel="stylesheet">
+  <!-- ИСПРАВЛЕНО: Корректные ссылки preconnect для мгновенной загрузки люксового шрифта -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400&display=swap" rel="stylesheet">
 
+  <!-- ИСПРАВЛЕНО: Вернули подключение вашей скрытой подстановки base64 -->
   <script src="js/city.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   
   <script>
-    function show(n) {
+    function show(btn) {
       const e = document.getElementById("qr");
       const iconContainer = document.getElementById("qr-icon");
-      e.href = atob(somethingInteresting[n]);
-      // 1. Очищаем только сам QR-код, оставляя контейнер иконки на месте
+      
+      e.href = atob(btn.getAttribute("data-link"));
+      
       const oldImg = e.querySelector("img") || e.querySelector("canvas");
       if (oldImg) oldImg.remove();
       iconContainer.innerHTML = ""; 
 
-      // 2. Генерируем новый QR-код
       new QRCode(e, {
         text: e.href,
         width: 200,
@@ -32,12 +34,10 @@
         correctLevel : QRCode.CorrectLevel.H 
       });
       
-      // 3. Достаем нужную иконку из шаблона <template> по ID
-      const templateId = n === 0 ? "icon-tg" : "icon-mail";
-      const template = document.getElementById(templateId);
-      
-      // Клонируем SVG из шаблона и вставляем в готовый контейнер по центру
-      iconContainer.appendChild(template.content.cloneNode(true));
+      const btnSvg = btn.querySelector("svg");
+      if (btnSvg) {
+        iconContainer.appendChild(btnSvg.cloneNode(true));
+      }
 
       document.getElementById("contact").showModal();
     }
@@ -112,20 +112,22 @@
     footer { display: flex; gap: 32px; margin-top: 20px; }
     
     .contact-btn {
-      font-size: 0.85rem;
-      font-weight: 400;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: #1A1A1A;
-      text-decoration: none;
-      border-bottom: 1px solid #1A1A1A;
-      padding-bottom: 4px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: 1px solid #E5E5E0;
+      background-color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      background: none;
-      border-top: none; border-left: none; border-right: none;
-      transition: opacity 0.2s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.01);
+      transition: transform 0.2s ease, opacity 0.2s ease;
     }
-    .contact-btn:hover { opacity: 0.5; }
+    .contact-btn:hover { 
+      opacity: 0.7;
+      transform: translateY(-2px);
+    }
 
     dialog {
       margin: auto;
@@ -154,18 +156,20 @@
     }
 
     #qr {
-      position: relative; /* Чтобы иконка позиционировалась строго по центру QR */
+      position: relative; 
       width: 200px;
       height: 200px;
       margin: 10px auto 0 auto;
       display: flex;
       align-items: center;
       justify-content: center;
+      text-decoration: none;
     }
     
     #qr img {
       display: block;
     }
+    
     .qr-center-icon {
       position: absolute;
       width: 36px;
@@ -181,9 +185,7 @@
 <body>
 
   <header>
-    <div class="logo-container">
-      <img src="img/cgb.png" alt="CityGems" class="logo-img">
-    </div>
+    <img src="img/cgb.png" alt="CityGems" class="logo-img">
     <p class="subtitle">Магазин лабораторных бриллиантов и природных полудрагоценных камней</p>
   </header>
 
@@ -193,21 +195,19 @@
   </main>
 
   <footer>
-    <button class="contact-btn" onclick="show(0)">Telegram</button>
-    <button class="contact-btn" onclick="show(1)">E-mail</button>
+    <button id="tl" class="contact-btn" onclick="show(this)">
+      <svg viewBox="2 2 20 20" fill="#229ED9" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36 0-1.04-.2-1.55-.37-.63-.2-1.13-.31-1.09-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .33z"/></svg>
+    </button>
+    
+    <button id="ml" class="contact-btn" onclick="show(this)">
+      <svg viewBox="1 2 22 20" fill="#C5A059" width="24" height="24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+    </button>
   </footer>
-
-  <template id="icon-tg">
-    <svg viewBox="2 2 20 20" fill="#229ED9" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36 0-1.04-.2-1.55-.37-.63-.2-1.13-.31-1.09-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .33z"/></svg>
-  </template>
-
-  <template id="icon-mail">
-    <svg viewBox="1 2 22 20" fill="#C5A059" width="24" height="24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
-  </template>
 
   <dialog id="contact">
     <button class="close-btn" onclick="this.parentElement.close()">&times;</button>
-    <a id="qr">
+    <!-- ИСПРАВЛЕНО: Добавлен дефолтный href, чтобы тег <a> валидировался корректно -->
+    <a id="qr" href="#" target="_blank">
       <div id="qr-icon" class="qr-center-icon"></div>
     </a>
   </dialog>
