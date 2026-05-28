@@ -3,271 +3,300 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CityGems — Лабораторные бриллианты и природные камни</title>
+  <title>CityGems — Лабораторные бриллианты</title>
   
-  <link rel="preconnect" href="https://googleapis.com">
-  <link rel="preconnect" href="https://gstatic.com" crossorigin>
-  <link href="https://googleapis.com/css2?family=Playfair+Display:wght@400&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
 
-  <script src="js/city.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" xintegrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>  
   
   <script>
+    // Показываем диалог с генерацией QR-кода
     function show(btn) {
-      const e = document.getElementById("qr");
-      const iconContainer = document.getElementById("qr-icon");
       const dialog = document.getElementById("contact");
+      const qrContainer = document.getElementById("qr-code");
       
-      e.href = atob(btn.getAttribute("data-link"));
+      // Декодируем ссылку напрямую из атрибута value кнопки
+      const link = atob(btn.value);
+      qrContainer.href = link;
       
-      e.replaceChildren(iconContainer);
-      iconContainer.innerHTML = ""; 
-
-      new QRCode(e, {
-        text: e.href,
+      // Очищаем и создаем контейнер для иконки внутри QR
+      qrContainer.innerHTML = '<div id="qr-icon"></div>';
+      
+      new QRCode(qrContainer, {
+        text: link,
         width: 200,
         height: 200,
-        colorDark : "#141414", 
-        colorLight : "#FFFFFF",
-        correctLevel : QRCode.CorrectLevel.H 
+        colorDark: "#141414",
+        colorLight: "#FFFFFF",
+        correctLevel: QRCode.CorrectLevel.H 
       });
-      
-      const btnSvg = btn.querySelector("svg");
-      if (btnSvg) {
-        iconContainer.appendChild(btnSvg.cloneNode(true));
-      }
+
+      // Клонируем SVG-иконку из нажатой кнопки в центр QR-кода
+      const svg = btn.querySelector("svg").cloneNode(true);
+      qrContainer.querySelector("#qr-icon").appendChild(svg);
 
       dialog.classList.remove("closing");
       dialog.showModal();
       document.body.classList.add("dialog-blur");
     }
 
-    // ИСПРАВЛЕНО: Функция для красивого обратного эффекта "джинн" при закрытии
+    // Закрываем диалог с плавной анимацией
     function hideDialog() {
       const dialog = document.getElementById("contact");
-      
-      // Запускаем анимацию улетания в лампу
       dialog.classList.add("closing");
-      // Выключаем блюр фона синхронно с окном
       document.body.classList.remove("dialog-blur");
 
-      // Ждем 350мс, пока отработает CSS-анимация, и только тогда закрываем тег
       setTimeout(() => {
         dialog.close();
         dialog.classList.remove("closing");
-      }, 350);
+      }, 400); // Синхронизировано с CSS-анимацией (0.4s)
     }
 
+    // Закрытие при клике по бэкдропу
     window.addEventListener('DOMContentLoaded', () => {
       const dialog = document.getElementById("contact");
-      // Закрытие при клике по заблюренному фону вокруг окна
-      dialog.addEventListener('click', (event) => {
-        if (event.target === dialog) hideDialog();
-      });
-      // Перехватываем кнопку Escape на клавиатуре, чтобы тоже был обратный джинн
-      dialog.addEventListener('cancel', (event) => {
-        event.preventDefault();
-        hideDialog();
-      });
+      dialog.addEventListener('click', (e) => e.target === dialog && hideDialog());
+      dialog.addEventListener('cancel', (e) => { e.preventDefault(); hideDialog(); });
     });
   </script>
+
   <style>
+    :root {
+      --bg-color: #FAF9F6;
+      --accent-color: #1A1A1A;
+      --border-color: #E5E5E0;
+      --text-secondary: #7A7A75;
+      --transition-speed: 0.4s;
+    }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
-    /* ИСПРАВЛЕНО: Стабильное и супер-плавное размытие всего контента сайта */
     body {
-      background-color: #FAF9F6;
+      background-color: var(--bg-color);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      padding: 30px 20px;
+      padding: 40px 20px;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      color: #1A1A1A;
-      transition: background-color 0.4s ease;
+      color: var(--accent-color);
+      overflow: hidden;
     }
     
-    /* Когда окно открыто, размываем шапку, круг и подвал вместе */
-    body.dialog-blur header, 
-    body.dialog-blur main, 
-    body.dialog-blur footer {
-      filter: blur(5px);
-      transition: filter 0.4s ease;
+    /* Деликатный эффект размытия контента при открытии модального окна */
+    body.dialog-blur header, body.dialog-blur main, body.dialog-blur footer { 
+      filter: blur(4px); /* Мягкое размытие */
+      opacity: 0.85;     /* Задний план остается хорошо видимым */
     }
-    header, main, footer {
-      transition: filter 0.35s ease;
-    }
+    header, main, footer { transition: all var(--transition-speed) ease-in-out; }
 
-    header {
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-    .logo-img { height: 50px; }
-    .subtitle {
-      font-size: 0.8rem;
-      font-weight: 300;
-      letter-spacing: 0.12em;
-      text-transform: uppercase; 
-      color: #7A7A75;
-      max-width: 420px;
-      line-height: 1.6;
-    }
+    header img { height: 40px; margin-bottom: 10px; }
 
+    /* Центральный круг */
     main {
       position: relative;
       width: 100%;
       max-width: 400px;
-      aspect-ratio: 1 / 1;
-      background-color: #FFFFFF;
-      border: 1px solid #E5E5E0;
+      aspect-ratio: 1;
+      background: #FFF;
+      border: 1px solid var(--border-color);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0;
-      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.02), 0 10px 30px rgba(0, 0, 0, 0.01);
-      margin: auto 0;
+      box-shadow: 0 15px 50px rgba(0,0,0,0.02);
+      padding: 30px;
+      overflow: hidden;
     }
-    .gem-bg { width: 80%; height: 80%; opacity: 0.9; }
-    .coming-soon {
+
+    /* Фоновый вращающийся кристалл */
+    main > img { 
       position: absolute;
-      text-align: center;
+      top: 10%; left: 10%;
+      width: 80%; height: 80%; 
+      z-index: 1;
       pointer-events: none;
-      font-family: "Playfair Display", Georgia, serif;
-      font-size: 1.5rem;
-      font-weight: 400;
-      letter-spacing: 0.3em;
-      color: #1A1A1A;
-      white-space: nowrap;
-      padding-left: 0.3em;
+      animation: rotateGem 30s linear infinite;
     }
 
-    footer { display: flex; gap: 32px; margin-top: 20px; }
-    .contact-btn {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      border: 1px solid #E5E5E0;
-      background-color: #FFFFFF;
+    @keyframes rotateGem {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Текст поверх кристалла */
+    main div {
+      position: relative;
+      z-index: 2;
+      text-align: center;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.01);
-      transition: transform 0.2s ease, opacity 0.2s ease;
+      width: 100%;
     }
-    .contact-btn:hover { 
-      opacity: 0.7;
-      transform: translateY(-2px);
+    
+    main h1 {
+      font-family: "Playfair Display", serif;
+      font-size: 1.5rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-weight: 400;
+      line-height: 1.1;
+      margin-bottom: 6px; /* Минимальный отступ для сближения надписей */
+      white-space: nowrap;
+      text-shadow: 
+        0 0 15px rgba(255, 255, 255, 0.95),
+        0 0 5px rgba(255, 255, 255, 0.8);
     }
 
-    /* СТИЛИ ДИАЛОГА */
+    main p {
+      font-size: 0.7rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      text-transform: uppercase; 
+      color: var(--text-secondary);
+      white-space: nowrap; /* Тоже строго в одну строку */
+      text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.95),
+        0 0 4px rgba(255, 255, 255, 0.8);
+    }
+
+    footer { display: flex; gap: 24px; }
+
+    /* Кнопки соцсетей */
+    footer button {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      border: 1px solid var(--border-color);
+      background: #FFF;
+      cursor: pointer;
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    footer button:hover { 
+      transform: translateY(-4px); 
+      border-color: var(--accent-color);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06); 
+    }
+
+    /* Модальное окно */
     dialog {
       margin: auto;
-      background: #FFFFFF;
-      border: 1px solid #E5E5E0;
-      padding: 45px 40px 40px 40px;
-      border-radius: 20px;
-      text-align: center;
-      box-shadow: 0 30px 70px rgba(0,0,0,0.05);
-      max-width: 320px;
-      width: 100%;
-      position: relative;
+      background: #FFF;
+      padding: 40px;
+      border-radius: 28px;
       border: none;
+      text-align: center;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.12);
+      max-width: 320px;
+      overflow: hidden;
     }
     
-    /* Делаем дефолтный фон прозрачным, так как мы заблюрили сам body */
-    dialog::backdrop {
-      background-color: rgba(250, 249, 246, 0.4);
-    }
+    dialog::backdrop { background: rgba(255, 255, 255, 0.25); }
 
-    /* ИСПРАВЛЕНО: Эффект Джинна ОНЛАЙН (вылет при открытии) */
-    dialog[open] {
-      animation: genieIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    }
-
-    /* ИСПРАВЛЕНО: Эффект Джинна НАЗАД (засасывание в лампу при закрытии) */
-    dialog.closing {
-      animation: genieOut 0.35s cubic-bezier(0.36, -0.4, 0.42, 1) forwards !important;
-    }
+    dialog[open] { animation: genieIn var(--transition-speed) cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+    dialog.closing { animation: genieOut var(--transition-speed) cubic-bezier(0.36, -0.4, 0.42, 1) forwards; }
 
     @keyframes genieIn {
-      0% { opacity: 0; transform: translateY(60vh) scale(0.2); filter: blur(4px); }
+      0% { opacity: 0; transform: translateY(100%) scale(0.1); filter: blur(10px); }
       100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
     }
-
     @keyframes genieOut {
       0% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-      100% { opacity: 0; transform: translateY(60vh) scale(0.1); filter: blur(8px); }
+      100% { opacity: 0; transform: translateY(100%) scale(0.1); filter: blur(10px); }
     }
 
-    .close-btn {
-      position: absolute;
-      top: 15px; right: 15px;
-      background: none; border: none;
-      font-size: 1.5rem; font-weight: 200;
-      cursor: pointer; color: #70706B;
+    /* Подзаголовок внутри диалога */
+    dialog p {
+      font-size: 0.65rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
     }
 
-    #qr {
-      position: relative; 
-      width: 200px;
-      height: 200px;
-      margin: 15px auto 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
+    #qr-code {
+      position: relative;
+      display: inline-block;
+      margin: 20px 0;
+      padding: 10px;
+      background: white;
+      border: 1px solid #F0F0EE;
+      border-radius: 12px;
     }
-    #qr img { display: block; }
-    
-    .qr-center-icon {
+
+    /* Иконка соцсети по центру QR кода */
+    #qr-icon {
       position: absolute;
-      width: 36px;
-      height: 36px;
-      background: #FFFFFF;
-      display: flex;
-      align-items: center;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 42px; height: 42px;
+      background: #FFF;
+      border-radius: 50%;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      display: flex; 
+      align-items: center; 
       justify-content: center;
-      pointer-events: none;
-      z-index: 2;
+      z-index: 10;
+    }
+
+    /* Кнопка Закрыть */
+    dialog button {
+      margin-top: 15px;
+      padding: 12px 36px;
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: 30px;
+      color: var(--text-secondary);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    dialog button:hover { 
+      border-color: var(--accent-color); 
+      color: var(--accent-color); 
+      background: #FAF9F6; 
     }
   </style>
 </head>
 <body>
 
   <header>
-    <img src="img/cgb.png" alt="CityGems" class="logo-img">
-    <p class="subtitle">Магазин лабораторных бриллиантов и природных полудрагоценных камней</p>
+    <img src="img/cgb.png" alt="CityGems">
   </header>
 
   <main>
-    <img src="img/crystal.svg" class="gem-bg" alt="Crystal">  
-    <span class="coming-soon">СКОРО ОТКРЫТИЕ</span>
+    <img src="img/crystal.svg" alt="Вращающийся кристалл">  
+    <div>
+      <h1>Скоро открытие</h1>
+      <p>Магазин лабораторных бриллиантов</p>
+    </div>
   </main>
 
   <footer>
-    <button id="tl" class="contact-btn" onclick="show(this)">
-      <svg viewBox="2 2 20 20" fill="#229ED9" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36 0-1.04-.2-1.55-.37-.63-.2-1.13-.31-1.09-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .33z"/></svg>
+    <button value="dGc6Ly9yZXNvbHZlP2RvbWFpbj1jaXR5Z2Vtcw==" onclick="show(this)" aria-label="Написать в Telegram">
+      <svg viewBox="2 2 20 20" fill="#229ED9" width="26" height="26"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-1-.65-.35-1 .22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 0 0-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36 0-1.04-.2-1.55-.37-.63-.2-1.13-.31-1.09-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .33z"/></svg>
     </button>
     
-    <button id="ml" class="contact-btn" onclick="show(this)">
-      <svg viewBox="1 2 22 20" fill="#C5A059" width="24" height="24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+    <button value="bWFpbHRvOmluZm9AY2l0eWdlbXMucnU=" onclick="show(this)" aria-label="Написать на Email">
+      <svg viewBox="1 2 22 20" fill="#C5A059" width="26" height="26"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
     </button>
   </footer>
 
   <dialog id="contact">
-    <!-- ИСПРАВЛЕНО: Кнопка закрытия вызывает функцию hideDialog() с обратной анимацией -->
-    <button class="close-btn" onclick="hideDialog()">&times;</button>
-    <span class="subtitle" style="font-size: 0.75rem;">Отсканируй или нажми:</span>
-    <a id="qr" href="#" target="_blank">
-      <div id="qr-icon" class="qr-center-icon"></div>
-    </a>
+    <p>Нажми или отсканируй:</p>
+    <a id="qr-code" href="#" target="_blank"></a>
+    <br>
+    <button onclick="hideDialog()">Закрыть</button>
   </dialog>
+
 </body>
 </html>
