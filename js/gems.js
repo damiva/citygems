@@ -1,17 +1,15 @@
 /**
- * Класс для эффективной работы с Column-oriented базой данных драгоценных камней.
- * Оптимизирован под обработку массивов данных свыше 20 000 записей.
+ * Gems — основной класс для управления каталогом.
+ * Использует поколоночное хранение (column-oriented) для мгновенной обработки тысяч записей.
  */
 class Gems {
-  // Пути к папкам с сертификатами (lab) и изображениями огранок (img)
   #uri = { lab: "lab", img: "img" };
   
   /**
-   * Конструктор инициализирует базу и автоматически пересчитывает цены по курсу ЦБ РФ.
-   * @param {Object} db - Исходный JSON-объект базы данных.
-   * @param {string} uri - Базовый URL-адрес каталога.
-   * @param {number} [rate] - Текущий курс доллара от ЦБ РФ.
-   * @param {string} [date] - Дата обновления курса ЦБ РФ.
+   * @param {Object} db - Данные из JSON.
+   * @param {string} uri - Базовый путь к медиа-файлам.
+   * @param {number} [rate] - Актуальный курс USD.
+   * @param {string} [date] - Дата курса.
    */
   constructor(db, uri, rate, date) {
     Object.assign(this, db);
@@ -19,12 +17,12 @@ class Gems {
       this.#uri.lab = uri + this.#uri.lab;
       this.#uri.img = uri + this.#uri.img;
     }
+    // Пересчет цен, если курс в базе устарел
     if (rate && date) {
       const cleanDate = date.split("T")[0];
       if (!this.date || cleanDate > this.date) {
         const d = rate / (this.rate || 1);
         const c = this.columns?.price;
-        // Если курс изменился более чем на 5%, пересчитываем столбец цен
         if (c && !c.enum && Array.isArray(c.rows) && (d < 0.90 || d > 1.05)) {
           for (let i = 0; i < this.rowsCount; i++) {
             c.rows[i] = Math.round(c.rows[i] * d / 10) * 10;
@@ -36,197 +34,150 @@ class Gems {
     }
   }
 
-  /**
-   * Статический метод для асинхронной загрузки базы данных и актуального курса валют.
-   * @param {string} url - Ссылка на JSON-файл каталога.
-   * @returns {Promise<Gems>} Возвращает готовый и заполненный экземпляр класса Gems.
-   */
+  /** Статический метод для загрузки базы и данных ЦБ РФ */
   static async load(url) {
     try {
       const [db, br] = await Promise.all([
-        fetch(url).then(d => d.ok ? d.json() : Promise.reject(new Error(`Статус ${d.status}`))).catch(e => { 
-          throw new Error(`Ошибка загрузки каталога: ${e.message}`);
-        }),
-        fetch('https://www.cbr-xml-daily.ru/daily_json.js').then(d => d.ok ? d.json() : {}).catch(e => {
-          console.warn("Ошибка загрузки курсов ЦБ РФ:", e);
-          return {};
-        })
+        fetch(url).then(d => d.ok ? d.json() : Promise.reject(new Error(`Ошибка ${d.status}`))),
+        fetch('https://www.cbr-xml-daily.ru/daily_json.js').then(d => d.ok ? d.json() : {}).catch(() => ({}))
       ]);
-
       const uri = url.substring(0, url.lastIndexOf("/") + 1);
       return new Gems(db, uri, br?.Valute?.USD?.Value, br?.Date);
     } catch (e) {
-      console.error("[Gems] error:", e.message);
-      throw e;
+      throw new Error(`Ошибка загрузки: ${e.message}`);
     }
   }
 
-  /**
-   * Внутренний приватный метод получения сырого или расшифрованного значения ячейки.
-   * @private
-   */
-  #val(col, row, raw) {
-    return (!(col = this.columns?.[col]) || (row = col.rows[row]) === null) ? null : (raw || !col.enum) ? row : col.enum[row];
-  }
+  /** Возвращает массив названий для колонок-перечислений (например, формы огранки) */
+  getEnum(col) { return (this.columns?.[col])?.enum || null; }
 
-  /**
-   * Возвращает понятное человеческое название (заголовок) указанной колонки.
-   * @param {string} col - Название колонки (например, 'price', 'form').
-   * @returns {string} Русский или английский заголовок колонки.
-   */
-  getTitle(col) {
-    return this.columns[col]?.title || "";
-  }
-
-  /**
-   * Возвращает справочник (массив перечислений/enum) для указанной колонки.
-   * @param {string} col - Название колонки.
-   * @returns {Array|null} Массив текстовых значений или null, если колонка числовая.
-   */
-  getEnum(col) { 
-    return (col = this.columns?.[col]) && col.enum || null; 
-  }
-
-  /**
-   * Быстрое получение значения конкретной ячейки по имени колонки и индексу строки.
-   * @param {string} col - Название колонки.
-   * @param {number} row - Порядковый индекс строки (от 0 до rowsCount).
-   * @param {boolean} [raw=false] - Если true, вернет ID из enum вместо текста.
-   * @returns {*} Значение ячейки (число, строка или null).
-   */
-  getValue(col, row, raw) { 
-    return (row < 0 || row >= this.rowsCount) ? null : this.#val(col, row, raw);
-  }
-
-  /**
-   * Собирает полноценный "тяжёлый" объект товара (камня) со всеми свойствами и путями к изображениям.
-   * @param {number} row - Порядковый индекс строки.
-   * @returns {Object|null} Объект камня со свойством `_index`, ссылками `labLogo` и `image`.
-   */
+  /** Собирает объект товара со всеми свойствами и путями к фото по индексу строки */
   getItem(row) {
     if (row < 0 || row >= this.rowsCount) return null;
     const i = { _index: row };
-    for (const c in this.columns) i[c] = this.#val(c, row);
-    
-    // Автоматическая сборка путей к картинкам
+    for (const c in this.columns) {
+      const col = this.columns[c];
+      const val = col.rows[row];
+      i[c] = (val === null || !col.enum) ? val : col.enum[val];
+    }
     i.labLogo = i.lab ? `${this.#uri.lab}/${i.lab}.png` : "";
     i.image = i.form ? `${this.#uri.img}/${encodeURIComponent(i.form)}.png` : "";
     return i;
   }
 
-  /**
-   * Массово превращает переданный список индексов строк в массив полноценных объектов товаров.
-   * @param {Array<number>} rows - Массив индексов строк (например, результат фильтрации).
-   * @returns {Array<Object>} Массив готовых объектов камней.
-   */
-  getItems(rows) { 
-    return rows.map(r => this.getItem(r)); 
-  }
-
-  /**
-   * Находит порядковые индексы строк в базе по их текстовым или числовым ID.
-   * @param {...(string|number)} ids - Перечень искомых уникальных идентификаторов.
-   * @returns {Array<number>|null} Массив найденных индексов строк.
-   */
+  /** Находит индексы строк по списку ID */
   getIDs(...ids) {
     const rows = this.columns?.id?.rows;
-    if (!rows) return null;
-    const idSet = new Set(ids); 
-    const is = [];
+    if (!rows) return [];
+    const idSet = new Set(ids);
+    const result = [];
     for (let i = 0; i < rows.length; i++) {
-      if (idSet.has(rows[i])) {
-        is.push(i);
-        idSet.delete(rows[i]);
-        if (idSet.size == 0) break;
-      }
+      if (idSet.has(rows[i])) { result.push(i); idSet.delete(rows[i]); }
     }
-    return is;
+    return result;
   }
 
+  /** Массовое получение объектов по списку индексов */
+  getItems(rows) { return rows.map(r => this.getItem(r)); }
+
   /**
-   * Высокопроизводительный фильтр базы данных. Сканирует колонки и сопоставляет условия.
-   * @param {Object} filterColumns - Объект с фильтрами вида: `{ имяКолонки: значение | [значения] | {min, max} }`
-   * @param {string} [sortBy] - Имя колонки, по которой нужно отсортировать результат.
-   * @param {boolean} [desc=false] - Сортировка по убыванию (true) или возрастанию (false).
-   * @returns {Array<number>} Массив индексов строк, прошедших условия фильтрации.
+   * Высокопроизводительный фильтр.
+   * @param {Object} filterColumns - Объект настроек фильтрации:
+   * - { weight: 1.5 } : Точное совпадение (вес строго 1.5).
+   * - { form: [0, 2] } : Множественный выбор (индексы из enum, например Круг ИЛИ Принцесса).
+   * - { price: { min: 100, max: 500 } } : Диапазон значений (от и до включительно).
+   * @param {string} [sortBy] - Имя колонки для сортировки.
+   * @param {boolean} [desc=false] - true для сортировки по убыванию.
+   * @returns {Pagenator} Объект для управления постраничным выводом.
    */
   filter(filterColumns, sortBy, desc) {
     const matches = [];
     const activeFilters = [];
-    
-    // Предварительная компиляция условий для исключения проверок типов внутри главного цикла
     for (const colName in filterColumns) {
       const targetVal = filterColumns[colName];
       const colRows = this.columns[colName]?.rows;
       if (!colRows) continue;
-      
-      if (typeof targetVal === 'number') {
-        activeFilters.push({ data: colRows, check: (val) => val === targetVal });
-      } else if (Array.isArray(targetVal)) {
-        const targetSet = new Set(targetVal); 
-        activeFilters.push({ data: colRows, check: (val) => targetSet.has(val) });
-      } else if (targetVal && (typeof targetVal === 'object')) {
-        const min = typeof targetVal.min === 'number' ? targetVal.min : -Infinity;
-        const max = typeof targetVal.max === 'number' ? targetVal.max : Infinity;
-        activeFilters.push({ data: colRows, check: (val) => val >= min && val <= max });
+      if (typeof targetVal === 'number') activeFilters.push({ data: colRows, check: (v) => v === targetVal });
+      else if (Array.isArray(targetVal)) {
+        const set = new Set(targetVal);
+        activeFilters.push({ data: colRows, check: (v) => set.has(v) });
+      } else if (targetVal && typeof targetVal === 'object') {
+        const min = targetVal.min ?? -Infinity, max = targetVal.max ?? Infinity;
+        activeFilters.push({ data: colRows, check: (v) => v >= min && v <= max });
       }
     }
-    
-    const filtersCount = activeFilters.length;
-    
-    // Быстрый линейный перебор строк
     for (let i = 0; i < this.rowsCount; i++) {
       let isMatch = true;
-      for (let f = 0; f < filtersCount; f++) {
-        const filter = activeFilters[f];
-        const cellVal = filter.data[i];
-        if (typeof cellVal !== 'number' || !filter.check(cellVal)) {
-          isMatch = false;
-          break; 
-        }
+      for (let f = 0; f < activeFilters.length; f++) {
+        if (!activeFilters[f].check(activeFilters[f].data[i])) { isMatch = false; break; }
       }
       if (isMatch) matches.push(i);
     }
-    
-    // Эффективная сортировка индексов по срезу данных указанной колонки
-    if (sortBy && matches.length > 1) {
-      const sortData = this.columns[sortBy]?.rows;
-      if (sortData) {
-        if (desc) matches.sort((a, b) => sortData[b] - sortData[a]);
-        else matches.sort((a, b) => sortData[a] - sortData[b]);
-      }
+    if (sortBy && this.columns[sortBy]) {
+      const d = this.columns[sortBy].rows;
+      matches.sort((a, b) => desc ? d[b] - d[a] : d[a] - d[b]);
     }
-    return matches;
-  }
-
-  /**
-   * Хелпер пагинации. Нарезает массив индексов и собирает объекты только для текущей страницы.
-   * Исключает повторные пересчеты тяжелых фильтров при переключении страниц.
-   * @param {Array<number>} filteredIndexes - Полный массив индексов, возвращенный методом `filter()`.
-   * @param {number} [page=1] - Номер запрашиваемой страницы (начиная с 1).
-   * @param {number} [pageSize=20] - Количество элементов на странице.
-   * @returns {Object} Объект с массивом готовых элементов `items` и метаданными страниц (`totalPages`, `totalCount`).
-   */
-  getPage(filteredIndexes, page = 1, pageSize = 20) {
-    if (!Array.isArray(filteredIndexes)) return { items: [], totalPages: 0, totalCount: 0 };
-
-    const totalCount = filteredIndexes.length;
-    const totalPages = Math.ceil(totalCount / pageSize);
-    const currentPage = Math.max(1, Math.min(page, totalPages || 1));
-    
-    const start = (currentPage - 1) * pageSize;
-    const end = start + pageSize;
-    
-    const pageIndexes = filteredIndexes.slice(start, end);
-    
-    return {
-      items: this.getItems(pageIndexes), 
-      totalCount,
-      totalPages,
-      currentPage
-    };
+    return new Pagenator(this, matches); // Возвращаем пагинатор
   }
 }
 
-// Инициализация глобального процесса загрузки базы данных
+/**
+ * Pagenator — управляет нарезкой результатов фильтрации на страницы.
+ */
+class Pagenator {
+  constructor(db, rows) {
+    this._db = db;
+    this.rows = rows || [];
+    this.offset = 12; // Количество товаров на странице
+    this.pages = Math.ceil(this.rows.length / this.offset);
+  }
+  /** Возвращает объекты товаров для указанной страницы */
+  get(page = 1) {
+    const total = this.rows.length;
+    if (total === 0) return [];
+    const currentPage = Math.max(1, Math.min(this.pages, page));
+    const start = (currentPage - 1) * this.offset;
+    return this._db.getItems(this.rows.slice(start, start + this.offset));
+  }
+}
+
+/**
+ * Cart — управление корзиной с привязкой к ID товаров и LocalStorage.
+ */
+class Cart {
+  #key = "citygems_cart";
+  constructor(db) {
+    this._db = db;
+    this.items = new Map(); // Храним как ID -> Количество
+    this._load();
+  }
+  _save() {
+    localStorage.setItem(this.#key, JSON.stringify(Array.from(this.items.entries())));
+  }
+  _load() {
+    try {
+      const raw = localStorage.getItem(this.#key);
+      if (raw) this.items = new Map(JSON.parse(raw));
+    } catch (e) { this.items = new Map(); }
+  }
+  /** Добавляет товар или обновляет его количество. При qty=0 удаляет */
+  set(itemIndex, qty = 1) {
+    const id = this._db.columns.id.rows[itemIndex];
+    if (qty > 0) this.items.set(id, qty);
+    else this.items.delete(id);
+    this._save();
+  }
+  /** Возвращает список полных объектов товаров в корзине */
+  list() {
+    const ids = Array.from(this.items.keys());
+    const rowIndexes = this._db.getIDs(...ids);
+    return rowIndexes.map(idx => {
+      const item = this._db.getItem(idx);
+      item.qty = this.items.get(item.id);
+      return item;
+    });
+  }
+  get count() { return this.items.size; }
+}
+
 window.gemsPromise = Gems.load("https://citygems.ru/db/gems.json");

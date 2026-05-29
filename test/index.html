@@ -1,101 +1,80 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+  <base href="https://cutygems.ru">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>citygems — Премиальные лабораторные бриллианты</title>
-  <link rel="stylesheet" href="style.css">
-  <script>loaded()=>{document.querySelectorAll("header,main,footer").forEach(e=>{e.hidden=false});document.getElementById("loading").hidden=true;}</script>
+  <title>CityGems — лабораторные бриллианты</title>
+  <link href="index.css" rel="stylesheet"> 
+  <style>.hidden{display: none !important}</style>
+  <script src="js/gems.js"></script>
+  <script src="js/index.js"></script>
 </head>
 <body>
-    <h1 id="loading" style="text-align: center;">Loading</h1>
-    <header hidden>
-        <div class="header-container">
-            <a href="#" class="compressed" title="О нас">
-              <!-- Применили класс .header-icon -->
-              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#C5A880" stroke-width="1">
-                <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5" />
-                <polygon points="12,2 12,22" />
-                <polygon points="2,8.5 22,8.5" />
-                <polygon points="2,15.5 22,15.5" />
-                <polygon points="12,2 2,15.5" />
-                <polygon points="12,2 22,15.5" />
-                <polygon points="12,22 2,8.5" />
-                <polygon points="12,22 22,8.5" />
-              </svg>
-              citygems
-            </a>
-            <a href="#catalog" class="flex-center-absolute" title="Наш каталог">Каталог</a>            
-            <a href="#cart" class="cart-link" title="Ваша корзина">
-                <div class="cart-wrapper">
-                    <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="#C5A880" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M8 7V5a4 4 0 0 1 8 0v2" />
-                        <rect x="4" y="7" width="16" height="14" rx="1" />
-                    </svg>
-                    <span id="cart-count">0</span>
-                </div>
-            </a>
-        </div>
-    </header>
-
-    <main hidden>
+    <header>
+        <a href="#about" title="О нас"><img src="cgb.png" alt="О нас"></a>
+        <a href="#catalog">Каталог</a>
+        <a href="#order">Корзина</a> </header>
+    <main>
         <section id="about">
-            <h1>Технологичная роскошь</h1>
+            <h1>Камни, которые рассказывают историю</h1>
+            <p>Тестовый текст...</p>
         </section>
-        
-        <section id="catalog">
-            <h1>Наш каталог</h1>
+        <section id="catalog" class="hidden">
+            <h1>
+                Наш каталог
+                <span id="catalog-count">0</span>
+                <select id="catalog-sort">
+                    <option>↑ Цена</option>
+                    <option>↓ Цена</option>
+                    <option>↑ Вес</option>
+                    <option>↓ Вес</option>
+                </select>
+            </h1>
             <aside id="catalog-filter">
-                <!-- Сюда пойдут фильтры -->
+                <h2>Фильтры <button>сбросить</button></h2>
+                <h1>Вес: <button>сбросить</button></h1>
+                <h1>Форма: <button>сбросить</button></h1>
+                <h1>Цвет: <button>сбросить</button></h1>
+                <h1>Чистота: <button>сбросить</button></h1>
+                <h1>Сертификат: <button>сбросить</button></h1>
+                <h1>Цена: <button>сбросить</button></h1>
             </aside>
-            <!-- ИСПРАВЛЕНО: Добавлен класс .catalog-grid -->
-            <ul id="catalog-grid" class="catalog-grid">
-            </ul>
-        </section>
-        
-        <section id="cart">
+            <ul id="catalog-list"></ul>
+        </section>        
+        <section id="order" class="hidden">
             <h1>Ваша корзина</h1>
+            <ul id="order-list"></ul>
         </section>
     </main>
     
-    <footer hidden>
-    </footer>
-
-    <template id="catalog-card">
-        <li class="catalog-card">
-            <div class="card-info" onclick="showInfo(this.parent.id)">
-                <img src="" class="lab-logo">
-                <b class="gem-form"></b>
-                <img class="gem-photo" src="">
-                <b class="gem-weight"></b>
-                <b class="gem-price"></b>
-            </div>
-            <div class="card-params"></div>
-            <button class="btn-luxury" onclick="addCart(this.parent.id)">+ в корзину</button>
-        </li>
-    </template>
-    
-    <template id="cart-card">
-        <li class="cart-card"></li>
-    </template>
-    
-    <template id="info-card">
-        <div class="info-card"></div>
-    </template>
-
-    <!-- --- МОДАЛЬНЫЕ ОКНА --- -->    
-    <dialog id="info-dialog">
-        <button class="close-btn" onclick="this.parent.close()">&times;</button>
-        <div class="info-body"></div>
-    </dialog>
-    
-    <dialog id="ask-dialog">
+    <template id="catalog-card"><li class="catalog-card"></li></template>
+    <template id="order-card"><li class="order-card"></li></template>
+    <dialog id="info-card"></dialog>
+    <dialog id="question">
         <h2></h2>
         <p></p>
         <div class="buttons">
             <button type="submit">Подтвердить</button>
-            <button type="button" onclick="this.parent.close()">Отменить</button>
+            <button type="button" onclick="this.closest('dialog').close()">Отменить</button>
         </div>
     </dialog>
+
+    <script>
+        const sectionRoute = () => {
+            const id = ["#catalog", "#order"].includes(location.hash) ? location.hash.slice(1) : "about"; 
+            document.querySelectorAll("main > section").forEach(s => { 
+                s.classList.toggle("hidden", s.id !== id); 
+            });
+        };
+        window.addEventListener("hashchange", sectionRoute);
+        window.gemsPromise.then(d => {
+            if (typeof appInit == "function") appInit();
+            sectionRoute(); 
+        }).catch(e => {
+            document.getElementById("catalog").innerHTML = `<h1>Ошибка загрузки!</h1><p>${e.message}</p>`;
+            sectionRoute();
+        });
+    </script>
 </body>
 </html>
