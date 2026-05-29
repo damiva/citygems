@@ -17,7 +17,6 @@ class Gems {
       this.#uri.lab = uri + this.#uri.lab;
       this.#uri.img = uri + this.#uri.img;
     }
-    // Пересчет цен, если курс в базе устарел
     if (rate && date) {
       const cleanDate = date.split("T")[0];
       if (!this.date || cleanDate > this.date) {
@@ -34,7 +33,7 @@ class Gems {
     }
   }
 
-  /** Статический метод для загрузки базы и данных ЦБ РФ */
+  /** Статический метод для параллельной загрузки базы и данных ЦБ РФ */
   static async load(url) {
     try {
       const [db, br] = await Promise.all([
@@ -46,6 +45,11 @@ class Gems {
     } catch (e) {
       throw new Error(`Ошибка загрузки: ${e.message}`);
     }
+  }
+
+  /** Получить значение конкретного столбца и строки */
+  getValue(col, row) {
+    return this.columns?.[col]?.rows?.[row] ?? null;
   }
 
   /** Возвращает массив названий для колонок-перечислений (например, формы огранки) */
@@ -65,30 +69,30 @@ class Gems {
     return i;
   }
 
-  /** Находит индексы строк по списку ID */
+  /** * Находит индексы строк по списку ID.
+   * Гарантирует сохранение порядка элементов и длины выходного массива.
+   * Если ID не найден, возвращает -1 на его позиции.
+   */
   getIDs(...ids) {
     const rows = this.columns?.id?.rows;
-    if (!rows) return [];
-    const idSet = new Set(ids);
-    const result = [];
+    if (!rows || ids.length === 0) return ids.map(() => -1);
+    const idToRowMap = new Map();
     for (let i = 0; i < rows.length; i++) {
-      if (idSet.has(rows[i])) { result.push(i); idSet.delete(rows[i]); }
+      idToRowMap.set(rows[i], i);
     }
-    return result;
+    return ids.map(id => idToRowMap.has(id) ? idToRowMap.get(id) : -1);
   }
 
   /** Массовое получение объектов по списку индексов */
-  getItems(rows) { return rows.map(r => this.getItem(r)); }
+  getItems(rows) { 
+    return rows.map(r => this.getItem(r)).filter(item => item !== null); 
+  }
 
   /**
    * Высокопроизводительный фильтр.
-   * @param {Object} filterColumns - Объект настроек фильтрации:
-   * - { weight: 1.5 } : Точное совпадение (вес строго 1.5).
-   * - { form: [0, 2] } : Множественный выбор (индексы из enum, например Круг ИЛИ Принцесса).
-   * - { price: { min: 100, max: 500 } } : Диапазон значений (от и до включительно).
+   * @param {Object} filterColumns - Объект настроек фильтрации.
    * @param {string} [sortBy] - Имя колонки для сортировки.
    * @param {boolean} [desc=false] - true для сортировки по убыванию.
-   * @returns {Pagenator} Объект для управления постраничным выводом.
    */
   filter(filterColumns, sortBy, desc) {
     const matches = [];
@@ -117,7 +121,7 @@ class Gems {
       const d = this.columns[sortBy].rows;
       matches.sort((a, b) => desc ? d[b] - d[a] : d[a] - d[b]);
     }
-    return new Pagenator(this, matches); // Возвращаем пагинатор
+    return new Pagenator(this, matches);
   }
 }
 
@@ -142,40 +146,92 @@ class Pagenator {
 }
 
 /**
- * Cart — управление корзиной с привязкой к ID товаров и LocalStorage.
+ * Cart — управление корзиной с привязкой к ID товаров, LocalStorage и автоматической фильтрацией проданных позиций.
  */
 class Cart {
-  #key = "citygems_cart";
+  #storKey = "citygems_cart";
   constructor(db) {
     this._db = db;
-    this.items = new Map(); // Храним как ID -> Количество
+    this.items = new Map(); // Храним в памяти Map: ID_камня (string) -> Количество (number)
     this._load();
   }
+
   _save() {
-    localStorage.setItem(this.#key, JSON.stringify(Array.from(this.items.entries())));
+    if (this.items.size < 1) {
+      localStorage.removeItem(this.#storKey);
+    } else {
+      const rawData = {
+        id: Array.from(this.items.keys()),
+        qt: Array.from(this.items.values()),
+        rt: this._db.rate,
+        dt: this._db.date
+      };
+      localStorage.setItem(this.#storKey, JSON.stringify(rawData));
+    }
   }
+
   _load() {
+    let dataStr = localStorage.getItem(this.#storKey);
+    this.items.clear();
+    if (!dataStr) return;
     try {
-      const raw = localStorage.getItem(this.#key);
-      if (raw) this.items = new Map(JSON.parse(raw));
-    } catch (e) { this.items = new Map(); }
+      const parsed = JSON.parse(dataStr);
+      if (parsed && Array.isArray(parsed.id) && Array.isArray(parsed.qt) && parsed.id.length === parsed.qt.length) {
+        const activeIndexes = this._db.getIDs(...parsed.id);        
+        parsed.id.forEach((id, index) => {
+          const dbIndex = activeIndexes[index];
+          if (dbIndex !== -1) {
+            this.items.set(id, parsed.qt[index]);
+          }
+        });
+        this._save();
+      } else {
+        localStorage.removeItem(this.#storKey);
+      }
+    } catch (e) {
+      localStorage.removeItem(this.#storKey);
+    }
   }
+
   /** Добавляет товар или обновляет его количество. При qty=0 удаляет */
   set(itemIndex, qty = 1) {
     const id = this._db.columns.id.rows[itemIndex];
-    if (qty > 0) this.items.set(id, qty);
-    else this.items.delete(id);
+    if (!id) return;
+    if (qty > 0) {
+      this.items.set(id, qty);
+    } else {
+      this.items.delete(id);
+    }
     this._save();
   }
+
   /** Возвращает список полных объектов товаров в корзине */
   list() {
     const ids = Array.from(this.items.keys());
-    const rowIndexes = this._db.getIDs(...ids);
+    const rowIndexes = this._db.getIDs(...ids).filter(idx => idx !== -1);
     return rowIndexes.map(idx => {
       const item = this._db.getItem(idx);
       item.qty = this.items.get(item.id);
       return item;
     });
+  }
+
+  /**
+   * Генерирует короткую закодированную строку параметров заказа для ссылки
+   * Кодирует параметры: Курс (Rate), Дата (Date), и массив ID:Количество в base36
+   * Формат на выходе: [Days_Epoch_36]_[Rate*100_36]-[ID36_Qty36]-[ID36_Qty36]-...
+  */
+  encode() {
+    if (this.items.size === 0) return "";
+    const rate = Math.round((this._db.rate || 1) * 100).toString(36);
+    const date = Math.floor((this._db.date ? new Date(this._db.date).getTime() : Date.now()) / 86400000).toString(36);
+    const items = [`${date}_${rate}`];
+    for (const [id, qty] of this.items.entries()) {
+      const i = isNaN(id) ? id : parseInt(id, 10).toString(36);
+      const q = qty.toString(36);
+      items.push(`${i}_${q}`);
+    }
+    return items.join("-");
   }
   get count() { return this.items.size; }
 }
