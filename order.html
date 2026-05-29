@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CityGems заказ</title>
+  <script src="js/gems.js"></script>
+  <script src="js/city.js"></script>
+  <style>
+    .user th { display: none; }
+    .mis > * { background-color: lightsalmon;}
+    table { width: 100%; border-collapse: collapse; font-family: Arial, Helvetica, sans-serif; }
+    td, th { border: 1px solid #ccc; padding: 5px; text-align: center; }
+    th, td:first-child, td:nth-last-child(1), td:nth-last-child(2) {text-align: right;}
+    caption { font-size: x-large; padding: 10px; text-align: left; }
+    tbody tr:nth-child(even) {background-color: #FAF9F5; }
+  </style>
+</head>
+<body>
+    <table class="user">
+        <caption>
+            <img src="favicon.ico" style="height:1lh;">
+            Заказ:
+        </caption>
+        <thead><tr></tr></thead>
+        <tbody></tbody>
+        <tfoot><tr></tr></tfoot>
+    </table>
+
+    <script type="module">        
+        function $(p, ...e) {
+            if (typeof p == "string") p = document.querySelector(p);
+            if (!e.length) return p;
+            let t = p.tagName.toLowerCase() === "tr" ? "td" : "tr";
+            let r = null;
+            e.forEach(v => {
+                if (typeof v == "boolean") t = v ? "th" : "td";
+                else {
+                    r = p.appendChild(document.createElement(t));
+                    if(v !== undefined && v !== null) r.innerHTML = v;
+                }
+            });
+            return r;
+        }
+
+        try {
+            const [gems, city] = await Promise.all([window.gemsPromise, window.cityPromise]);
+            
+            let cart = (location.hash || location.search).slice(1);
+            if (!cart) throw new Error("Данные заказа не найдены!");
+            if (!(cart = Cart.decode(cart))) throw new Error("Заказ поврежден!"); // Исправлена опечатка с cartStr
+
+            $("table").classList.toggle("user", !city.isAuthorized);
+            $("caption > img").addEventListener("dblclick", async () => { 
+                $("table").classList.toggle("user", !(await city.check())); 
+            });
+            
+            const cols = ["№", "id", "lab", "shape", "weight", "color", "clarity", "cut", "polysh", "symetry", "Размеры", "Количество", "price"];
+            $("thead > tr", ...cols.map(c => gems.columns[c]?.title || c), true, "Цена сегодня", "Разница" );
+
+            let cnt = 0, sum = 0, cur = 0;
+            const tbody = $("tbody");
+            
+            cart.items.forEach((itemInCart, n) => {
+                const dbIndex = gems.getIDs(itemInCart.id)[0];
+                const r = $(tbody, null); 
+                $(r, n + 1);                
+                if (dbIndex < 0 || dbIndex === undefined) {
+                    $(r, itemInCart.id, `Камень не найден в базе`).colSpan = cols.length - 4;
+                    $(r, itemInCart.qt, "-", true, "-", "-")
+                    r.classList.add("mis");
+                    return;
+                }
+                const i = gems.getItem(dbIndex);
+                $(r, i.id, i.shape, i.weight, i.cut, i.polish, i.symmetry, `${i.size1}x${i.size2}x${i.size3}`, itemInCart.qt);
+                
+                const p = !cart.rate ? i.price : Math.round(cart.rate / gems.rate * i.price / 10) * 10;
+                $(r, p, true, i.price, p - i.price);
+                
+                cnt += itemInCart.qt;
+                sum += p * itemInCart.qt;
+                cur += i.price * itemInCart.qt;
+            });
+            
+            const f = $("tfoot > tr");
+            $(f, "Итого").colSpan = cols.length - 2;
+            $(f, cnt, sum, true, cur, sum - cur);
+
+        } catch(e) { 
+            document.body.innerHTML = `<h1 style="color:red">Ошибка: ${e.message}</h1>`; 
+        }
+    </script>
+</body>
+</html>

@@ -34,7 +34,7 @@ class Gems {
   }
 
   /** Статический метод для параллельной загрузки базы и данных ЦБ РФ */
-  static async load(url) {
+  static async _load(url) {
     try {
       const [db, br] = await Promise.all([
         fetch(url).then(d => d.ok ? d.json() : Promise.reject(new Error(`Ошибка ${d.status}`))),
@@ -43,7 +43,7 @@ class Gems {
       const uri = url.substring(0, url.lastIndexOf("/") + 1);
       return new Gems(db, uri, br?.Valute?.USD?.Value, br?.Date);
     } catch (e) {
-      throw new Error(`Ошибка загрузки: ${e.message}`);
+      throw new Error(`Ошибка загрузки каталога: ${e.message}`);
     }
   }
 
@@ -139,20 +139,26 @@ class Pagenator {
   get(page = 1) {
     const total = this.rows.length;
     if (total === 0) return [];
-    const currentPage = Math.max(1, Math.min(this.pages, page));
+    const currentPage = Math.max(1, Math.min(this.pages, Number(page) || 1));
     const start = (currentPage - 1) * this.offset;
     return this._db.getItems(this.rows.slice(start, start + this.offset));
   }
 }
 
 /**
- * Cart — управление корзиной с привязкой к ID товаров, LocalStorage и автоматической фильтрацией проданных позиций.
+ * Cart — управление корзиной с привязкой к ID товаров и LocalStorage.
  */
 class Cart {
   #storKey = "citygems_cart";
-  constructor(db) {
+  
+  /**
+   * @param {Gems} db - Экземпляр базы данных
+   * @param {Function} [onChange] - Функция обратного вызова, вызывается при любом изменении корзины
+   */
+  constructor(db, onChange = null) {
     this._db = db;
-    this.items = new Map(); // Храним в памяти Map: ID_камня (string) -> Количество (number)
+    this.onChange = onChange; // Сохраняем коллбэк
+    this.items = new Map();
     this._load();
   }
 
@@ -203,10 +209,16 @@ class Cart {
       this.items.delete(id);
     }
     this._save();
+    if (typeof this.onChange === "function") {
+      this.onChange(this.count);
+    }
   }
 
-  /** Возвращает список полных объектов товаров в корзине */
-  list() {
+  /** Получить количество конкретного товара в корзине */
+  get(id) { return this.items.get(id) || 0 }
+  
+  /** Возвращает список полных объектов товаров в корзине (теперь как геттер) */
+  get list() {
     const ids = Array.from(this.items.keys());
     const rowIndexes = this._db.getIDs(...ids).filter(idx => idx !== -1);
     return rowIndexes.map(idx => {
@@ -217,13 +229,13 @@ class Cart {
   }
 
   /**
-   * Генерирует короткую закодированную строку параметров заказа для ссылки
+   * Генерирует короткую закодированную строку параметров заказа для ссылки (теперь как геттер)
    * Кодирует параметры: Курс (Rate), Дата (Date), и массив ID:Количество в base36
    * Формат на выходе: [Days_Epoch_36]_[Rate*100_36]-[ID36_Qty36]-[ID36_Qty36]-...
   */
-  encode() {
+  get encoded() {
     if (this.items.size === 0) return "";
-    const rate = Math.round((this._db.rate || 1) * 100).toString(36);
+    const rate = Math.round((this._db.rate || 1) * 10000).toString(36);
     const date = Math.floor((this._db.date ? new Date(this._db.date).getTime() : Date.now()) / 86400000).toString(36);
     const items = [`${date}_${rate}`];
     for (const [id, qty] of this.items.entries()) {
@@ -233,7 +245,23 @@ class Cart {
     }
     return items.join("-");
   }
+  
+  /** Возвращает общее количество уникальных позиций в корзине */
   get count() { return this.items.size; }
+  
+  /** чтение закодированной строки */
+  static decode(txt){
+    let c = txt.split("-").map(s => {
+      s = s.split("_").map(v => parseInt(v, 36) || 0);
+      return {id: s[0], qt: s[1]}
+    });
+    if (c.length < 2) return null;
+    return {
+      date: new Date(c[0].id * 86400000)?.toISOString()?.split("T")[0] || "",
+      rate: c[0].qt / 10000, 
+      items: c.slice(1).filter(v => v.id != 0 && v.qt > 0)
+    };
+  }
 }
 
-window.gemsPromise = Gems.load("https://citygems.ru/db/gems.json");
+window.gemsPromise = Gems._load("https://citygems.ru/db/gems.json");

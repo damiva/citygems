@@ -50,6 +50,13 @@
     
     <template id="catalog-card"><li class="catalog-card"></li></template>
     <template id="order-card"><li class="order-card"></li></template>
+    <template id="filter-range">
+        <label></label><button>сбросить</button>
+        
+    </template>
+    <template id="filter-set">
+
+    </template>
     <dialog id="info-card"></dialog>
     <dialog id="question">
         <h2></h2>
@@ -69,7 +76,8 @@
         };
         window.addEventListener("hashchange", sectionRoute);
         window.gemsPromise.then(d => {
-            if (typeof appInit == "function") appInit();
+            if (typeof initGems == "function") initGems(d);
+            if (typeof initCart == "function") initCart(new Cart(d));
             sectionRoute(); 
         }).catch(e => {
             document.getElementById("catalog").innerHTML = `<h1>Ошибка загрузки!</h1><p>${e.message}</p>`;
