@@ -62,7 +62,7 @@
             $("#head").colSpan = cols.length - 1;
             $("thead > tr:first-child", true, "Дата:", new Date(cart.date).toLocaleDateString(), new Date(gems.date).toLocaleDateString());
             $("thead > tr:nth-child(2)", true, "Курс:", cart.rate, gems.rate, Math.round(((cart.rate || gems.rate) - gems.rate) * 10000) / 10000);
-            $("thead > tr:last-child", "№", ...cols.map(c => gems.columns[c]?.title || c), true, "Цена ₽", "Разница ₽", "Цена $");
+            $("thead > tr:last-child", "№", ...cols.map(c => gems.columns[c]?.title || c), true, "Цена ₽", "Δ ₽", "~ Цена $");
 
             let cnt = 0, sum = 0, rub = 0, usd = 0;
             let t = $("tbody");
@@ -72,7 +72,7 @@
                 $(r, ic + 1);                
                 if (ig < 0 || ig === undefined) {
                     $(r, cart.ids[ic], `Камень не найден в базе`).colSpan = cols.length - 3;
-                    $(r, q, "-", true, "-", "-")
+                    $(r, q, "-", true, "-", "-", "-")
                     r.classList.add("miss");
                 } else {
                     const i = gems.getItem(ig);
@@ -93,7 +93,7 @@
             
             t = $("tfoot > tr");
             $(t, "Итого:").colSpan = cols.length - 1;
-            $(t, cnt.toLocaleString(), sum.toLocaleString(), true, cur.toLocaleString(), (sum - cur).toLocaleString(), usd.toLocaleString());
+            $(t, cnt.toLocaleString(), sum.toLocaleString(), true, rub.toLocaleString(), (sum - rub).toLocaleString(), usd.toLocaleString());
 
         } catch(e) { 
             document.body.innerHTML = `<h1 style="color:red">Ошибка: ${e.message}</h1>`;
