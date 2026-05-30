@@ -62,9 +62,9 @@
             $("#head").colSpan = cols.length - 1;
             $("thead > tr:first-child", true, "Дата:", new Date(cart.date).toLocaleDateString(), new Date(gems.date).toLocaleDateString());
             $("thead > tr:nth-child(2)", true, "Курс:", cart.rate, gems.rate, Math.round(((cart.rate || gems.rate) - gems.rate) * 10000) / 10000);
-            $("thead > tr:last-child", "№", ...cols.map(c => gems.columns[c]?.title || c), true, "Цена", "Разница" );
+            $("thead > tr:last-child", "№", ...cols.map(c => gems.columns[c]?.title || c), true, "Цена ₽", "Разница ₽", "Цена $");
 
-            let cnt = 0, sum = 0, cur = 0;
+            let cnt = 0, sum = 0, rub = 0, usd = 0;
             let t = $("tbody");
             gems.getIDs(...cart.ids).forEach((ig, ic) => {
                 const r = $(t, null);
@@ -77,21 +77,23 @@
                 } else {
                     const i = gems.getItem(ig);
                     const p = cart.date && cart.rate && gems.rate && (Math.round(cart.rate / gems.rate * i.price / 10) * 10) || i.price;
+                    const d = Math.round(i.price / gems.rate)
                     $(r, ...cols.map(k => 
                         k == "Размеры" ? [i.size1, i.size2, i.size3].join(" &times; ") :
                         k == "Количество" ? q :
                         k == "price" ? p.toLocaleString() : 
                         i[k]
-                    ), true, i.price.toLocaleString(), (p - i.price).toLocaleString());
+                    ), true, i.price.toLocaleString(), (p - i.price).toLocaleString(), d.toLocaleString());
                     cnt += q;
                     sum += p * q;
-                    cur += i.price * q;
+                    rub += i.price * q;
+                    usd += d * q;
                 }
             });
             
             t = $("tfoot > tr");
             $(t, "Итого:").colSpan = cols.length - 1;
-            $(t, cnt.toLocaleString(), sum.toLocaleString(), true, cur.toLocaleString(), (sum - cur).toLocaleString());
+            $(t, cnt.toLocaleString(), sum.toLocaleString(), true, cur.toLocaleString(), (sum - cur).toLocaleString(), usd.toLocaleString());
 
         } catch(e) { 
             document.body.innerHTML = `<h1 style="color:red">Ошибка: ${e.message}</h1>`;
