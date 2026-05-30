@@ -1,5 +1,5 @@
 class City {
-    #g = true;
+    #g = false;
     #k = "citygems_me";
     constructor() {}
     static async _init() {
@@ -23,7 +23,7 @@ class City {
             }
             if (p) {
                 const h = await this._sha(p);
-                const e = await fetch(`/db/${hash}`, { method: "HEAD" }).then(r => !r.ok).catch(e => e.message);
+                const e = await fetch(`/db/${h}`, { method: "HEAD" }).then(r => !r.ok).catch(e => e.message);
                 if (typeof e === "string") {
                     if (!quite) alert(`Ошибка авторизации: ${e}`);
                     else console.warn(`Ошибка авторизации: ${e}`);
