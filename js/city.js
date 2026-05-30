@@ -1,5 +1,5 @@
 class City {
-    #g = false;
+    #g = true;
     #k = "citygems_me";
     constructor() {}
     static async _init() {

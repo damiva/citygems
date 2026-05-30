@@ -58,11 +58,11 @@
                 if (await city.check()) $("table").classList.toggle("user"); 
             });
             
-            const cols = ["id", "lab", "shape", "weight", "color", "clarity", "cut", "polish", "symmetry", "Размеры", "Количество", "price"];
+            const cols = ["lab", "shape", "weight", "color", "clarity", "cut", "polish", "symmetry", "Размеры", "Количество", "price"];
             $("#head").colSpan = cols.length - 1;
             $("thead > tr:first-child", true, "Дата:", new Date(cart.date).toLocaleDateString(), new Date(gems.date).toLocaleDateString());
             $("thead > tr:nth-child(2)", true, "Курс:", cart.rate, gems.rate, Math.round(((cart.rate || gems.rate) - gems.rate) * 10000) / 10000);
-            $("thead > tr:last-child", "№", ...cols.map(c => gems.columns[c]?.title || c), true, "Цена ₽", "Δ ₽", "~ Цена $");
+            $("thead > tr:last-child", "№", ...cols.map(c => gems.columns[c]?.title || c), true, "Цена ₽", "Δ ₽", "~ Цена $", "ReNo");
 
             let cnt = 0, sum = 0, rub = 0, usd = 0;
             let t = $("tbody");
@@ -71,8 +71,8 @@
                 const q = cart.qts[ic];
                 $(r, ic + 1);                
                 if (ig < 0 || ig === undefined) {
-                    $(r, cart.ids[ic], `Камень не найден в базе`).colSpan = cols.length - 3;
-                    $(r, q, "-", true, "-", "-", "-")
+                    $(r, `Камень не найден в базе`).colSpan = cols.length - 2;
+                    $(r, q, "-", true, "-", "-", "-", cart.ids[ic])
                     r.classList.add("miss");
                 } else {
                     const i = gems.getItem(ig);
@@ -83,7 +83,7 @@
                         k == "Количество" ? q :
                         k == "price" ? p.toLocaleString() : 
                         i[k]
-                    ), true, i.price.toLocaleString(), (p - i.price).toLocaleString(), d.toLocaleString());
+                    ), true, i.price.toLocaleString(), (p - i.price).toLocaleString(), d.toLocaleString(), i.id);
                     cnt += q;
                     sum += p * q;
                     rub += i.price * q;
@@ -93,7 +93,7 @@
             
             t = $("tfoot > tr");
             $(t, "Итого:").colSpan = cols.length - 1;
-            $(t, cnt.toLocaleString(), sum.toLocaleString(), true, rub.toLocaleString(), (sum - rub).toLocaleString(), usd.toLocaleString());
+            $(t, cnt.toLocaleString(), sum.toLocaleString(), true, rub.toLocaleString(), (sum - rub).toLocaleString(), usd.toLocaleString(), "");
 
         } catch(e) { 
             document.body.innerHTML = `<h1 style="color:red">Ошибка: ${e.message}</h1>`;
