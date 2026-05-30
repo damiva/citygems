@@ -58,7 +58,7 @@
                 if (await city.check()) $("table").classList.toggle("user"); 
             });
             
-            const cols = ["id", "lab", "shape", "weight", "color", "clarity", "cut", "polysh", "symetry", "Размеры", "Количество", "price"];
+            const cols = ["id", "lab", "shape", "weight", "color", "clarity", "cut", "polish", "symmetry", "Размеры", "Количество", "price"];
             $("#head").colSpan = cols.length - 1;
             $("thead > tr:first-child", true, "Дата:", new Date(cart.date).toLocaleDateString(), new Date(gems.date).toLocaleDateString());
             $("thead > tr:nth-child(2)", true, "Курс:", cart.rate, gems.rate, Math.round(((cart.rate || gems.rate) - gems.rate) * 10000) / 10000);
