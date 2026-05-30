@@ -8,21 +8,26 @@
   <script src="js/city.js"></script>
   <style>
     .user th { display: none; }
-    .mis > * { background-color: lightsalmon;}
-    table { width: 100%; border-collapse: collapse; font-family: Arial, Helvetica, sans-serif; }
-    td, th { border: 1px solid #ccc; padding: 5px; text-align: center; }
-    th, td:first-child, td:nth-last-child(1), td:nth-last-child(2) {text-align: right;}
-    caption { font-size: x-large; padding: 10px; text-align: left; }
-    tbody tr:nth-child(even) {background-color: #FAF9F5; }
+    .miss > * { background-color: lightpink;}
+    body { font-family: Arial, Helvetica, sans-serif; }
+    table { border-collapse: collapse; }
+    td, th { border: 1px dotted black; padding: 5px; text-align: center; }
+    th, td:first-child, td:last-of-type, td:nth-last-of-type(2) {text-align: right;}
+    th:first-of-type {border-left: double;}
+    thead > tr:not(:last-child) > * { border-top: none; border-left: none; border-bottom: none; }
+    thead > tr:last-child, tfoot { background-color: #C5A059;}
+    #head { font-size: xx-large; text-align: left; border: none; padding: 10px;}
+    tbody tr:nth-child(even) { background-color: #FAF9F5; }
+    tbody tr:hover { background-color: antiquewhite; }
   </style>
 </head>
 <body>
     <table class="user">
-        <caption>
-            <img src="favicon.ico" style="height:1lh;">
-            Заказ:
-        </caption>
-        <thead><tr></tr></thead>
+        <thead>
+            <tr><td rowspan="2" id="head"><img src="favicon.ico" style="height:1lh; vertical-align: bottom;"> Заказ:</td></tr>
+            <tr></tr>
+            <tr></tr>
+        </thead>
         <tbody></tbody>
         <tfoot><tr></tr></tfoot>
     </table>
@@ -45,49 +50,52 @@
 
         try {
             const [gems, city] = await Promise.all([window.gemsPromise, window.cityPromise]);
-            
-            let cart = (location.hash || location.search).slice(1);
-            if (!cart) throw new Error("Данные заказа не найдены!");
-            if (!(cart = Cart.decode(cart))) throw new Error("Заказ поврежден!"); // Исправлена опечатка с cartStr
+            const cart = Cart.parseURL(window.location.href);
+            if (!cart.ids.length) throw new Error("Заказ пустой!")
 
             $("table").classList.toggle("user", !city.isAuthorized);
-            $("caption > img").addEventListener("dblclick", async () => { 
-                $("table").classList.toggle("user", !(await city.check())); 
+            $("img").addEventListener("dblclick", async () => {
+                if (await city.check()) $("table").classList.toggle("user"); 
             });
             
-            const cols = ["№", "id", "lab", "shape", "weight", "color", "clarity", "cut", "polysh", "symetry", "Размеры", "Количество", "price"];
-            $("thead > tr", ...cols.map(c => gems.columns[c]?.title || c), true, "Цена сегодня", "Разница" );
+            const cols = ["id", "lab", "shape", "weight", "color", "clarity", "cut", "polysh", "symetry", "Размеры", "Количество", "price"];
+            $("#head").colSpan = cols.length - 1;
+            $("thead > tr:first-child", true, "Дата:", new Date(cart.date).toLocaleDateString(), new Date(gems.date).toLocaleDateString());
+            $("thead > tr:nth-child(2)", true, "Курс:", cart.rate, gems.rate, Math.round(((cart.rate || gems.rate) - gems.rate) * 10000) / 10000);
+            $("thead > tr:last-child", "№", ...cols.map(c => gems.columns[c]?.title || c), true, "Цена", "Разница" );
 
             let cnt = 0, sum = 0, cur = 0;
-            const tbody = $("tbody");
-            
-            cart.items.forEach((itemInCart, n) => {
-                const dbIndex = gems.getIDs(itemInCart.id)[0];
-                const r = $(tbody, null); 
-                $(r, n + 1);                
-                if (dbIndex < 0 || dbIndex === undefined) {
-                    $(r, itemInCart.id, `Камень не найден в базе`).colSpan = cols.length - 4;
-                    $(r, itemInCart.qt, "-", true, "-", "-")
-                    r.classList.add("mis");
-                    return;
+            let t = $("tbody");
+            gems.getIDs(...cart.ids).forEach((ig, ic) => {
+                const r = $(t, null);
+                const q = cart.qts[ic];
+                $(r, ic + 1);                
+                if (ig < 0 || ig === undefined) {
+                    $(r, cart.ids[ic], `Камень не найден в базе`).colSpan = cols.length - 3;
+                    $(r, q, "-", true, "-", "-")
+                    r.classList.add("miss");
+                } else {
+                    const i = gems.getItem(ig);
+                    const p = cart.date && cart.rate && gems.rate && (Math.round(cart.rate / gems.rate * i.price / 10) * 10) || i.price;
+                    $(r, ...cols.map(k => 
+                        k == "Размеры" ? [i.size1, i.size2, i.size3].join(" &times; ") :
+                        k == "Количество" ? q :
+                        k == "price" ? p.toLocaleString() : 
+                        i[k]
+                    ), true, i.price.toLocaleString(), (p - i.price).toLocaleString());
+                    cnt += q;
+                    sum += p * q;
+                    cur += i.price * q;
                 }
-                const i = gems.getItem(dbIndex);
-                $(r, i.id, i.shape, i.weight, i.cut, i.polish, i.symmetry, `${i.size1}x${i.size2}x${i.size3}`, itemInCart.qt);
-                
-                const p = !cart.rate ? i.price : Math.round(cart.rate / gems.rate * i.price / 10) * 10;
-                $(r, p, true, i.price, p - i.price);
-                
-                cnt += itemInCart.qt;
-                sum += p * itemInCart.qt;
-                cur += i.price * itemInCart.qt;
             });
             
-            const f = $("tfoot > tr");
-            $(f, "Итого").colSpan = cols.length - 2;
-            $(f, cnt, sum, true, cur, sum - cur);
+            t = $("tfoot > tr");
+            $(t, "Итого:").colSpan = cols.length - 1;
+            $(t, cnt.toLocaleString(), sum.toLocaleString(), true, cur.toLocaleString(), (sum - cur).toLocaleString());
 
         } catch(e) { 
-            document.body.innerHTML = `<h1 style="color:red">Ошибка: ${e.message}</h1>`; 
+            document.body.innerHTML = `<h1 style="color:red">Ошибка: ${e.message}</h1>`;
+            console.error(e);
         }
     </script>
 </body>

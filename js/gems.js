@@ -150,6 +150,7 @@ class Pagenator {
  */
 class Cart {
   #storKey = "citygems_cart";
+  #orderURL = "/order.html"
   
   /**
    * @param {Gems} db - Экземпляр базы данных
@@ -228,39 +229,29 @@ class Cart {
     });
   }
 
-  /**
-   * Генерирует короткую закодированную строку параметров заказа для ссылки (теперь как геттер)
-   * Кодирует параметры: Курс (Rate), Дата (Date), и массив ID:Количество в base36
-   * Формат на выходе: [Days_Epoch_36]_[Rate*100_36]-[ID36_Qty36]-[ID36_Qty36]-...
-  */
-  get encoded() {
-    if (this.items.size === 0) return "";
-    const rate = Math.round((this._db.rate || 1) * 10000).toString(36);
-    const date = Math.floor((this._db.date ? new Date(this._db.date).getTime() : Date.now()) / 86400000).toString(36);
-    const items = [`${date}_${rate}`];
-    for (const [id, qty] of this.items.entries()) {
-      const i = isNaN(id) ? id : parseInt(id, 10).toString(36);
-      const q = qty.toString(36);
-      items.push(`${i}_${q}`);
-    }
-    return items.join("-");
-  }
-  
   /** Возвращает общее количество уникальных позиций в корзине */
   get count() { return this.items.size; }
+
+  /** генерирование URL заказа */
+  get toURL() {
+    let q = [`on${Math.floor((this._db.date ? new Date(this._db.date).getTime() : Date.now()) / 86400000) - 20600}=${this._db.rate}`];
+    for (const [id, qt] of this.items.entries()) q.push(`${id}=${qt}`);
+    return `${this.#orderURL}?${q.join("&")}`;
+  }
   
-  /** чтение закодированной строки */
-  static decode(txt){
-    let c = txt.split("-").map(s => {
-      s = s.split("_").map(v => parseInt(v, 36) || 0);
-      return {id: s[0], qt: s[1]}
-    });
-    if (c.length < 2) return null;
-    return {
-      date: new Date(c[0].id * 86400000)?.toISOString()?.split("T")[0] || "",
-      rate: c[0].qt / 10000, 
-      items: c.slice(1).filter(v => v.id != 0 && v.qt > 0)
-    };
+  /** декодирование URL заказа */
+  static parseURL(url){
+    const r = {date: "", rate: 0, ids: [], qts: []};
+    const u = new URL(url);
+    for (const [k, v] of u.searchParams.entries())
+      if (k.indexOf("on") === 0) {
+        r.date = new Date(((k && parseInt(k) || 0) + 20600) * 86400000).toISOString().split("T")[0];
+        r.rate = parseFloat(v);
+      } else {
+        r.ids.push(parseInt(k) || 0);
+        r.qts.push(parseInt(v) || 0);
+      }
+    return r;
   }
 }
 
