@@ -329,7 +329,7 @@ class Cart {
   /**
    * Экспорт содержимого корзины в csv (что б в Excel: bom = true, что б в русский Excel: ru = true).
    */
-  toCSV(bom, ru) {
+  toCSV(title, bom, ru) {
     const cols = ["id", "lab", "shape", "weight", "color", "clarity", "cut", "polish", "simmetry", "sizes", "price"];
     const sep = ru ? ";" : ",";
     const ln = bom === undefined ? "\n" : "\r\n";
@@ -338,7 +338,7 @@ class Cart {
       return ru && !isNaN(v) && v !== '' ? v.toString().replace('.', ',') : sizes && !ru ? v.toString().replaceAll(',', '.') : v;
     };
     let sum = 0, qts = 0;
-    let csv = Array("п/п", ...cols.map(k => this.gems[k]?.title || k), "Кол-во", "Сумма").join(sep) + ln;
+    let csv = (title ? (title + ln) : "") + Array("п/п", ...cols.map(k => this.gems[k]?.title || k), "Кол-во", "Сумма").join(sep) + ln;
     cols.push("qty");
     csv += this.items.map((i, n) => {
       const p = i.qty * Number(i.price || 0);

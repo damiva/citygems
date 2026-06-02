@@ -18,7 +18,9 @@
     td          { text-align: right; }
     th          { font-weight: normal; }
     tfoot td    { border-top: 3px double black; font-weight: bold;}
-    img,svg     { height: 1em; }
+    img         { height: 1em; vertical-align: middle;}
+    a           { display: block; height: 1.1em; width: 1.1em; text-align: center;}
+    a:hover img { height: 1.1em; }
   </style>
 </head>
 <body>
@@ -26,18 +28,8 @@
     <table hidden>
         <caption>
             <img src="favicon.ico" alt="CityGems" onerror="this.style.display='none';" style="float: left;">
-            Заказ
-            <a id="csv" href="#" download="citygems_order.csv" title="Экспорт в Excel\n" style="float:right">
-                <svg viewBox="0 0 421 511.6" xmlns="http://www.w3.org/2000/svg">
-                    <path fill="#6DBF39" d="M95.7 0h199.1L421 136.5v317.6c0 31.5-26 57.5-57.5 57.5H95.7C64.2 511.6 38.2 485.7 38.2 454.1V57.5C38.2 25.9 64.1 0 95.7 0z"/>
-                    <path fill="#589B2E" d="M341 133.4h-.1L421 188.8v-52.1h-54.4c-9.4-.1-18-1.2-25.6-3.3z"/>
-                    <path fill="#DFFACD" d="M294.8 0L421 136.5v.2h-54.4c-45-.7-69.3-23.4-71.8-61.4V0z"/>
-                    <path fill="#4F8C29" d="M0 431.9V253.4l.1-1.3c.6-16.4 14.3-29.7 30.9-29.7h7.2v50.6H381.1c12.9 0 23.4 10.5 23.4 23.4v135.5c0 12.8-10.5 23.4-23.4 23.4H23.4C10.5 455.3 0 444.8 0 431.9z"/>
-                    <path fill="#4F8C29" d="M143.4 240.4a8.5 8.5 0 01-8.5-8.5 8.5 8.5 0 018.5-8.5h163.2a8.5 8.5 0 018.5 8.5 8.5 8.5 0 01-8.5 8.5H143.4zm0-59.2a8.5 8.5 0 010-17h172.3a8.5 8.5 0 110 17H143.4z"/>
-                    <path fill="#fff" d="M11.3 276.2V431c0 7.8 6.4 14.2 14.2 14.2h354.7c7.8 0 14.2-6.4 14.2-14.2V297.4c0-7.8-6.4-14.2-14.2-14.2H37.9c-12.6-.1-19.6-1.6-26.6-7z"/>
-                    <text x="51%" y="392" fill="#1A1A1A" font-family="Arial, Helvetica, sans-serif" font-size="115" font-weight="900" letter-spacing="4" text-anchor="middle">CSV</text>
-                </svg>
-            </a>
+            <span></span>
+            <a id="csv" href="#" download="citygems_order.csv" title="Экспорт в Excel" style="float:right"><img src="img/csv.svg" alt="CSV"></a>
         </caption>
         <thead><tr></tr></thead>
         <tbody></tbody>
@@ -61,10 +53,11 @@
         }
 
         function render(gems, cart) {
-            let sum = 0, qts = 0;
+            const title = "Заказ" + (gems.rate.date ? ` от ${gems.rate.date.toLocaleDateString()}` : "")
+            $("caption>span").innerText = title;
             $("thead>tr", "th", "п/п", ...cols.map(k => gems[k]?.title || k), "Кол-во", "Сумма");
             const tbody = $("tbody");
-            
+            let sum = 0, qts = 0;            
             cart.items.forEach((item, idx) => {
                 const rowSum = Number(item.price || 0) * item.qty;
                 sum += rowSum;
@@ -92,11 +85,7 @@
             const tFoot = $("tfoot>tr");
             $(tFoot, "th", ...cols.map(() => null));
             $(tFoot, "td", "Итого:", qts.toLocaleString("ru-RU"), sum.toLocaleString("ru-RU"));
-            const csv = `\uFEFF${$("caption").innerText}\r\n`
-            + Array(...document.querySelectorAll("tr")).map(
-                tr => Array(...tr.querySelectorAll("td,th")).map(t => t.innerText).join(";")
-            ).join("\r\n");
-            $("#csv").href = URL.createObjectURL(cart.toCSV(true));
+            $("#csv").href = URL.createObjectURL(cart.toCSV(title, true));
             $("table").hidden = !($("h1").hidden = true);
         }
 
