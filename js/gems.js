@@ -329,153 +329,28 @@ class Cart {
   }
 
   /**
-   * Экспорт содержимого корзины в Excel XML с ультра-оптимизированным выравниванием колонок.
+   * Экспорт содержимого корзины в csv (что б в Excel: bom = true, что б в русский Excel: ru = true).
    */
-  get xls() {
-    const title = "Заказ";
-    const cols = ["lab", "shape", "weight", "color", "clarity", "cut", "polish", "symmetry", "sizes", "price"];
-    const itemsList = this.items;
-
-    function escape(str) {
-      return String(str ?? "").replace(/[<>&'"]/g, c => {
-        switch (c) {
-          case '<': return '&lt;';
-          case '>': return '&gt;';
-          case '&': return '&amp;';
-          case '\'': return '&apos;';
-          case '"': return '&quot;';
-        }
-      });
-    }
-
-    // Находим ОДНО самое широкое текстовое значение среди всех ячеек и заголовков
-    let maxW = 12; // Минимальная базовая ширина (под длинные заголовки вроде "Количество")
-    
-    cols.forEach(c => {
-      const headerText = this.gems[c]?.title || c;
-      maxW = Math.max(maxW, headerText.length);
-    });
-
-    itemsList.forEach((item) => {
-      cols.forEach(c => {
-        const valStr = item[c] !== null && item[c] !== undefined ? item[c].toString() : "";
-        maxW = Math.max(maxW, valStr.length);
-      });
-      const rowSum = Number(item.price || 0) * item.qty;
-      maxW = Math.max(maxW, rowSum.toLocaleString().length);
-    });
-
-    // Вычисляем оптимальный размер в пунктах Excel (1 символ ≈ 7.2 пункта + отступ)
-    const colWidth = Math.max(60, maxW * 7.2 + 10);
-    // Применяем ширину ко всей таблице разом (с помощью ss:Span)
-    const xmlCols = `    <Column ss:Width="${colWidth}" ss:Span="${cols.length + 3}"/>`;
-    const mergeAcross = cols.length + 3;
-    const idTitle = this.gems.id.title || "ID";
-
-    let xml = `<?xml version="1.0" encoding="utf-8"?>
-<?mso-application progid="Excel.Sheet"?>
-<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40">
-  <Styles>
-    <Style ss:ID="sTitle">
-      <Font ss:Bold="1" ss:Size="14"/>
-      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
-    </Style>
-    <Style ss:ID="sHeaderCenter">
-      <Font ss:Italic="1"/>
-      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
-      <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
-    </Style>
-    <Style ss:ID="sHeaderRight">
-      <Font ss:Italic="1"/>
-      <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
-      <Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/></Borders>
-    </Style>
-    <Style ss:ID="sDataCenter">
-      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
-    </Style>
-    <Style ss:ID="sDataRight">
-      <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
-    </Style>
-    <Style ss:ID="sTotalCenter">
-      <Font ss:Bold="1"/>
-      <Alignment ss:Horizontal="Center" ss:Vertical="Center"/>
-      <Borders><Border ss:Position="Top" ss:LineStyle="Double" ss:Weight="3"/></Borders>
-    </Style>
-    <Style ss:ID="sTotalRight">
-      <Font ss:Bold="1"/>
-      <Alignment ss:Horizontal="Right" ss:Vertical="Center"/>
-      <Borders><Border ss:Position="Top" ss:LineStyle="Double" ss:Weight="3"/></Borders>
-    </Style>
-  </Styles>
-  <Worksheet ss:Name="Заказ">
-    <Table>
-${xmlCols}
-      <Row><Cell ss:MergeAcross="${mergeAcross}" ss:StyleID="sTitle"><Data ss:Type="String">${escape(title)}</Data></Cell></Row>
-      <Row>
-        <Cell ss:StyleID="sHeaderRight"><Data ss:Type="String">№</Data></Cell>
-        <Cell ss:StyleID="sHeaderCenter"><Data ss:Type="String">${escape(idTitle)}</Data></Cell>\n`;
-
-    cols.forEach(c => {
-      const isNum = this.gems[c]?.type === "number" || this.gems[c]?.type === "money";
-      const styleId = isNum ? "sHeaderRight" : "sHeaderCenter";
-      xml += `        <Cell ss:StyleID="${styleId}"><Data ss:Type="String">${escape(this.gems[c]?.title || c)}</Data></Cell>\n`;
-    });
-
-    xml += `        <Cell ss:StyleID="sHeaderRight"><Data ss:Type="String">Количество</Data></Cell>
-        <Cell ss:StyleID="sHeaderRight"><Data ss:Type="String">Сумма</Data></Cell>
-      </Row>\n`;
-
-    let totalQty = 0;
-    let totalSum = 0;
-
-    itemsList.forEach((item, idx) => {
-      const itemPrice = Number(item.price || 0);
-      const itemSum = itemPrice * item.qty;
-      totalQty += item.qty;
-      totalSum += itemSum;
-
-      xml += "      <Row>\n";
-      xml += `        <Cell ss:StyleID="sDataRight"><Data ss:Type="Number">${idx + 1}</Data></Cell>\n`;
-      xml += `        <Cell ss:StyleID="sDataCenter"><Data ss:Type="Number">${item.id}</Data></Cell>\n`;
-
-      cols.forEach(c => {
-        const cellValue = item[c];
-        const rawVal = cellValue;
-        const strVal = (cellValue !== null && cellValue !== undefined) ? cellValue.toString() : "-";
-
-        let type = "String";
-        let val = strVal;
-        
-        const isNumCol = this.gems[c]?.type === "number" || this.gems[c]?.type === "money";
-        const styleId = isNumCol ? "sDataRight" : "sDataCenter";
-
-        if (rawVal !== null && rawVal !== undefined && typeof rawVal !== 'boolean') {
-          const cleanStr = String(rawVal).replace(/[\s\u00A0\u202F\u2009]/g, "");
-          const normalized = cleanStr.replace(",", ".");
-          const num = Number(normalized);
-          if (!isNaN(num) && isFinite(num)) {
-            type = "Number";
-            val = normalized;
-          }
-        }
-        xml += `        <Cell ss:StyleID="${styleId}"><Data ss:Type="${type}">${escape(val)}</Data></Cell>\n`;
-      });
-
-      xml += `        <Cell ss:StyleID="sDataRight"><Data ss:Type="Number">${item.qty}</Data></Cell>\n`;
-      xml += `        <Cell ss:StyleID="sDataRight"><Data ss:Type="Number">${itemSum}</Data></Cell>\n`;
-      xml += "      </Row>\n";
-    });
-
-    xml += "      <Row>\n";
-    xml += `        <Cell ss:MergeAcross="${cols.length + 1}" ss:StyleID="sTotalCenter"><Data ss:Type="String">Итого:</Data></Cell>\n`;
-    xml += `        <Cell ss:StyleID="sTotalRight"><Data ss:Type="Number">${totalQty}</Data></Cell>\n`;
-    xml += `        <Cell ss:StyleID="sTotalRight"><Data ss:Type="Number">${totalSum}</Data></Cell>\n`;
-    xml += "      </Row>\n";
-
-    xml += `    </Table>
-  </Worksheet>
-</Workbook>`;
-
-    return new Blob([xml], { type: "application/vnd.ms-excel;charset=utf-8;" });
+  toCSV(bom, ru) {
+    const cols = ["id", "lab", "shape", "weight", "color", "clarity", "cut", "polish", "symmetry", "sizes", "price"];
+    const sep = ru ? ";" : ",";
+    const ln = bom === undefined ? "\n" : "\r\n";
+    const val = (v) => {
+      if (v === undefined || v === null) return '';
+      return ru && !isNaN(v) && v !== '' ? v.toString().replace('.', ',') : v;
+    };
+    let sum = 0, qts = 0;
+    let csv = Array("п/п", ...cols.map(k => this.gems[k]?.title || k), "Кол-во", "Сумма").join(sep) + ln;
+    cols.push("qty");
+    csv += this.items.map((i, n) => {
+      const p = i.qty * Number(i.price || 0);
+      sum += p;
+      qts += i.qty;
+      return Array(n + 1, ...cols.map(k => val(i[k])), val(p)).join(sep);
+    }).join(ln);
+    csv += `${ln}${sep.repeat(cols.length - 1)}Итого:${sep}${val(qts)}${sep}${val(sum)}${ln}`;
+    if (bom === undefined) return csv;
+    if (bom) csv = "\uFEFF" + csv;
+    return new Blob([csv], { type: 'text/csv;charset=utf-8;' }); // Исправлен баг с массивом [csv]
   }
 }

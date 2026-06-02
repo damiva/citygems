@@ -6,23 +6,23 @@
   <title>CityGems — Просмотр заказа</title>
   <script src="js/gems.js"></script>
   <style>
-    body    { font-family: Arial, Helvetica, sans-serif; margin: 10px; }
-    table   { border-collapse: collapse; width: 100%; max-width: 900px; margin: 0 auto; }
-    caption { font-size: x-large; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 10px; text-align: left; }
-    thead th{ font-weight: normal; font-style: italic; border-bottom: 1px solid black; }
-    th, td  { padding: 8px; }
-    tbody>* { border: 1px solid #ccc; }
-    td      { text-align: right; }
-    th      { font-weight: normal; text-align: center; }
-    tfoot th{ text-align: right; border-top: 1px double black; }
-    img,svg { height: 1em; vertical-align: middle; }
+    body        { font-family: Arial, Helvetica, sans-serif; margin: 10px; }
+    table       { border-collapse: collapse; margin: 0 auto; }
+    caption     { font-size: x-large; padding-bottom: 10px; margin-bottom: 10px; text-align: center; }
+    thead>tr>*  { font-style: italic; border-bottom: 1px solid black; }
+    th, td      { padding: 8px; }
+    tbody>tr>*  { border: 1px dashed #ccc; }
+    td          { text-align: right; }
+    th          { font-weight: normal; }
+    tfoot td    { border-top: 3px double black; font-weight: bold;}
+    img,svg     { height: 1em;}
   </style>
 </head>
 <body>
     <table>
         <caption>
-            <img src="favicon.ico" alt="CityGems" onerror="this.style.display='none';">
-            Заказ <span id="order-date"></span>
+            <img src="favicon.ico" alt="CityGems" onerror="this.style.display='none';" style="float: left;">
+            Заказ
             <a id="xls" href="#" download="citygems_order.xls" title="Экспорт в XLS" style="float:right">
                 <svg viewBox="0 0 421 511.6" xmlns="http://www.w3.org/2000/svg">
                     <path fill="#6DBF39" d="M95.7 0h199.1L421 136.5v317.6c0 31.5-26 57.5-57.5 57.5H95.7C64.2 511.6 38.2 485.7 38.2 454.1V57.5C38.2 25.9 64.1 0 95.7 0z"/>
@@ -41,7 +41,8 @@
     </table>
 
     <script>
-        const cols = ["id", "lab", "shape", "weight", "cut", "polish", "symmetry", "sizes", "price"];
+        const cols = ["id", "lab", "shape", "weight", "cut", "polish", "simmetry", "sizes", "price"];
+        
         function $(parent, tag, ...html) {
             if (typeof parent === "string") parent = document.querySelector(parent);
             if (tag === undefined) return parent;
@@ -49,36 +50,53 @@
             let last = null;
             html.forEach(v => {
                 last = parent.appendChild(document.createElement(tag));
-                if (v) last.innerHTML = v;
+                // Исправлена ошибка с отображением нулей
+                if (v !== undefined && v !== null) last.innerHTML = v;
             });
             return last;
         }
+
         function render(gems, cart) {
+            let sum = 0, qts = 0;
             $("thead>tr", "th", "п/п", ...cols.map(k => gems[k]?.title || k), "Кол-во", "Сумма");
             const tbody = $("tbody");
-            let sum = 0, qts = 0;
+            
             cart.items.forEach((item, idx) => {
                 const rowSum = Number(item.price || 0) * item.qty;
                 sum += rowSum;
                 qts += item.qty;
-                const tr = $(tbody, null);
+                
+                const tr = $(tbody, "tr");
                 $(tr, "td", idx + 1);
+                
                 cols.forEach(k => {
                     let v = item[k], t = "th";
                     switch (k) {
-                        case "weigth": v = v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                        case "price": t = "td";
+                        case "weight":
+                            v = Number(v).toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                            t = "td";
+                            break;
+                        case "price":
+                            v = Number(v).toLocaleString("ru-RU");
+                            t = "td";
+                            break;
                     }
                     $(tr, t, v);
                 });
-                $(tr, "td", item.qty, rowSum);
+                $(tr, "td", item.qty.toLocaleString("ru-RU"), rowSum.toLocaleString("ru-RU"));
             });
             const tFoot = $("tfoot>tr");
-            $(tFoot, "td", "Итого:").colSpan = cols.length + 1;
-            $(tFoot, "td", qts, sum);
+            $(tFoot, "th", ...cols.map(() => null));
+            $(tFoot, "td", "Итого:", qts.toLocaleString("ru-RU"), sum.toLocaleString("ru-RU"));
+            const csv = `\uFEFF${$("caption").innerText}\r\n`
+            + Array(...document.querySelectorAll("tr")).map(
+                tr => Array(...tr.querySelectorAll("td,th")).map(t => t.innerText).join(";")
+            ).join("\r\n");
             $("#xls").href = URL.createObjectURL(cart.xls);
         }
+
         Gems.loadGems("https://citygems.ru/db/gems.json", 1).then(gems => {
+            window.gems = gems; // Публикуем в window для корректной работы автовыявления ключей в tbl2xls.js
             const cart = new Cart(gems, window.location.href);
             if (!cart.count) throw new Error("Заказ пуст или содержит поврежденные параметры!");
             else render(gems, cart);
