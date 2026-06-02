@@ -33,7 +33,7 @@
  */
 class Gems {
   #uri = { lab: "lab", img: "img" };
-  #rate = { val: 1, date: null };
+  rate = { val: 1, date: null };
 
   // Единый статический обработчик для всех колонок базы данных (вызывает ленивые вычисления)
   static #column = {
@@ -77,9 +77,8 @@ class Gems {
       this.#uri.img = uri + this.#uri.img;
     }
     this.length = db.id.rows.length;    
-    this.rate = db.rate || 1;
-    this.#rate.val = this.rate;
-    this.#rate.date = db.date ? new Date(db.date) : new Date();
+    this.rate.val = db.rate || 1;
+    this.rate.date = db.date ? new Date(db.date) : new Date();
     if (db.size1 && !db.sizes) {
       db.sizes = {
         title: "Размеры", 
@@ -95,7 +94,7 @@ class Gems {
       if (db[k]?.type) {
         switch (db[k].type) {
           case "money":
-            db[k].rate = this.#rate;
+            db[k].rate = this.rate;
             db[k].unit = "₽";
           case "number":
             db[k].isNum = true;
@@ -228,8 +227,7 @@ class Cart {
     if (typeof arg === "string") {
       this.#storKey = null;
       const ord = Cart.parseURL(arg);
-      this.gems.rate = ord?.rate || 1;
-      this.gems.date = ord?.date || null;
+      this.gems.rate = {val: ord?.rate || 1, date: new Date(ord?.date || null)};
       if (ord?.items) ord.items.forEach(i => this.#map.set(i.id, i.qt));
     } else {
       this.onChange = arg;
@@ -332,12 +330,12 @@ class Cart {
    * Экспорт содержимого корзины в csv (что б в Excel: bom = true, что б в русский Excel: ru = true).
    */
   toCSV(bom, ru) {
-    const cols = ["id", "lab", "shape", "weight", "color", "clarity", "cut", "polish", "symmetry", "sizes", "price"];
+    const cols = ["id", "lab", "shape", "weight", "color", "clarity", "cut", "polish", "simmetry", "sizes", "price"];
     const sep = ru ? ";" : ",";
     const ln = bom === undefined ? "\n" : "\r\n";
-    const val = (v) => {
+    const val = (v, sizes) => {
       if (v === undefined || v === null) return '';
-      return ru && !isNaN(v) && v !== '' ? v.toString().replace('.', ',') : v;
+      return ru && !isNaN(v) && v !== '' ? v.toString().replace('.', ',') : sizes && !ru ? v.toString().replaceAll(',', '.') : v;
     };
     let sum = 0, qts = 0;
     let csv = Array("п/п", ...cols.map(k => this.gems[k]?.title || k), "Кол-во", "Сумма").join(sep) + ln;
@@ -346,7 +344,7 @@ class Cart {
       const p = i.qty * Number(i.price || 0);
       sum += p;
       qts += i.qty;
-      return Array(n + 1, ...cols.map(k => val(i[k])), val(p)).join(sep);
+      return Array(n + 1, ...cols.map(k => val(i[k], k == "sizes")), val(p)).join(sep);
     }).join(ln);
     csv += `${ln}${sep.repeat(cols.length - 1)}Итого:${sep}${val(qts)}${sep}${val(sum)}${ln}`;
     if (bom === undefined) return csv;
