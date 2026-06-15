@@ -1,354 +1,295 @@
-/**
- * @typedef {Object} GemColumn
- * @description Описание структуры отдельной колонки базы данных драгоценных камней.
- * @property {string} title - Красивое отображаемое название колонки (например, "Вес", "Цвет")
- * @property {string} type - Тип данных в колонке ("id", "enum", "number", "money", "string")
- * @property {string} [unit] - Единица измерения (например, "ct", "₽", "$")
- * @property {string[]} [map] - Массив соответствий для типов "enum"
- * @property {Array<any>} rows - Массив сырых плоских данных для каждой строки таблицы
- */
+class GemSize {
+    constructor(l, w, d) { this.l = l; this.w = w; this.d = d; }
+    valueOf() { return [this.l, this.w, this.d]; }
+    toString() { return `${this.l} × ${this.w} × ${this.d}`; }
+    toLocaleString(locale, options) { 
+        const opt = options || { minimumFractionDigits: 2, maximumFractionDigits: 2 };
+        return `${this.l.toLocaleString(locale, opt)} × ${this.w.toLocaleString(locale, opt)} × ${this.d.toLocaleString(locale, opt)}`; 
+    }
+}
 
-/**
- * @typedef {Object} GemsSchema
- * @description Описание колонок, которые будут присутствовать в каталоге драгоценных камней:
- * @property {GemColumn} id - Уникальный номер камня (тип: "id")
- * @property {GemColumn} lab - Лаборатория, выдавшая сертификат (GIA, IGI, HRD) (тип: "enum")
- * @property {GemColumn} shape - Форма огранки камня (Круг, Овал, Груша...) (тип: "enum")
- * @property {GemColumn} weight - Вес камня в каратах (тип: "number", unit: "ct")
- * @property {GemColumn} color - Категория цвета камня (D, E, F...) (тип: "enum")
- * @property {GemColumn} clarity - Категория чистоты камня (IF, VVS1, VS2...) (тип: "enum")
- * @property {GemColumn} cut - Качество огранки (ID, EX, VG...) (тип: "enum")
- * @property {GemColumn} polish - Качество полировки (EX, VG...) (тип: "enum")
- * @property {GemColumn} simmetry - Качество симметрии (EX, VG...) (тип: "enum")
- * @property {GemColumn} size1 - Физическая длина камня в мм (тип: "number")
- * @property {GemColumn} size2 - Физическая ширина камня в мм (тип: "number")
- * @property {GemColumn} size3 - Физическая глубина камня в мм (тип: "number")
- * @property {GemColumn} price - Базовая стоимость камня в долларах США (тип: "money", unit: "$")
- */
-
-/**
- * Gems — Высокопроизводительная колоночная база данных драгоценных камней.
- * Оптимизирована для работы в браузере с тысячами строк. Минимизирует потребление памяти,
- * лениво форматирует данные "на лету" с помощью единого статического Proxy.
- */
 class Gems {
-  #uri = { lab: "lab", img: "img" };
-  rate = { val: 1, date: null };
-
-  // Единый статический обработчик для всех колонок базы данных (вызывает ленивые вычисления)
-  static #column = {
-    get(target, prop) {
-      const i = Number(prop);
-      if (isNaN(i))
-        return target[prop];
-      if (typeof target.get == "function")
-        return target.get(i);
-      if (target.type === "enum")
-        return target.map ? target.map[target.rows[i]] : target.rows[i];
-      if (target.type === "money" && target.rate)
-        return Math.round(target.rows[i] * target.rate.val / 10) * 10;
-      return target.rows[i];
-    }
-  };
-
-  // Единый статический обработчик для сборки полноценного объекта камня на лету по индексу строки
-  static #item = {
-    get(target, prop) {
-      const i = Number(prop);
-      if (isNaN(i)) return Reflect.get(target, prop);      
-      let o = { _index: i };
-      for (const k in target) {
-        if (target[k]?.type) {
-          const v = target[k][i];
-          if (v !== undefined && v !== null) o[k] = v;
-        }
-      }
-      return o;
-    }
-  };
-
-  /**
-   * @param {Object} db - Сырой объект базы данных из JSON
-   * @param {string} [uri] - Базовый URL-адрес для относительных путей картинок
-   */
-  constructor(db, uri) {
-    if (uri) {
-      this.#uri.lab = uri + this.#uri.lab;
-      this.#uri.img = uri + this.#uri.img;
-    }
-    this.length = db.id.rows.length;    
-    this.rate.val = db.rate || 1;
-    this.rate.date = db.date ? new Date(db.date) : new Date();
-    if (db.size1 && !db.sizes) {
-      db.sizes = {
-        title: "Размеры", 
-        type: "string", 
-        unit: db.size1.unit,
-        rows: ["size1", "size2", "size3"].map(k => db[k]?.rows || null).filter(v => v),
-        get: function(i) { 
-          return this.rows.map(r => r[i].toLocaleString("ru-RU", {minimumFractionDigits: 2, maximumFractionDigits: 2})).join(" × ");
-        } 
-      };
-    }
-    for (const k in db) {
-      if (db[k]?.type) {
-        switch (db[k].type) {
-          case "money":
-            db[k].rate = this.rate;
-            db[k].unit = "₽";
-          case "number":
-            db[k].isNum = true;
-            break;
-          case "id":
-            db[k].map = new Map();
-            for (let i = 0; i < this.length; i++) db[k].map.set(db[k].rows[i], i);
-            db[k].indexOf = function(id) { return this.map.has(id) ? this.map.get(id) : -1 };
-        }
-        this[k] = new Proxy(db[k], Gems.#column);
-      }
-    }
-    return new Proxy(this, Gems.#item);
-  }
-
-  /**
-   * Асинхронный загрузчик базы с автоматическим получением актуального курса ЦБ РФ.
-   */
-  static async loadGems(url, rate, date) {
-    const uri = url.slice(0, url.lastIndexOf("/") + 1);
-    const gemsPromise = fetch(url).then(d => {
-      if (d.ok) return d.json();
-      else throw new Error(`Get gems error: ${d.status} ${d.statusText}`);
-    });
-    if (rate) {
-      const db = await gemsPromise;
-      db.rate = rate;
-      db.date = date || new Date().toISOString().split('T')[0];
-      return new Gems(db, uri);
-    }
-    const [db, cb] = await Promise.all([
-      gemsPromise,
-      fetch("https://www.cbr-xml-daily.ru/daily_json.js").then(d => {
-        if (d.ok) return d.json();
-        else throw new Error(d.statusText);
-      }).then(d => {
-        if (d.Valute?.USD?.Value) return {rate: d.Valute.USD.Value, date: d.Date || ""};
-        else throw new Error("unknown structure of data received");
-      }).catch(e => {
-        console.warn("Get CB RF rates error:", e);
-        return null;
-      })
-    ]);
-    const sk = "citygems_rate";
-    const ls = JSON.parse(localStorage.getItem(sk) || "null");
-    if (ls && ls.rate) {
-      db.rate = ls.rate;
-      db.date = ls.date;
-    }
-    if (cb && cb.rate && (!db.rate || (cb.d = cb.rate / db.rate) < 0.90 || cb.d > 1.05)) {
-      db.rate = cb.rate;
-      db.date = cb.date;
-    }
-    if (!db.rate) throw new Error("There is no available rates for prices!");
-    if (!ls || ls.rate != db.rate) localStorage.setItem(sk, JSON.stringify({rate: db.rate, date: db.date || undefined}));
-    return new Gems(db, uri);
-  }
-
-  /**
-   * Быстрая фильтрация и сортировка на уровне индексов строк.
-   */
-  filter(setCols, sortBy = "price", desc = false) {
-    let result = Array.from(this.id.rows.keys());
-    if (setCols && Object.keys(setCols).length > 0) {
-      result = result.filter(i => {
-        for (const [colKey, rule] of Object.entries(setCols)) {
-          const col = this[colKey];
-          if (!col) continue;
-          const val = col[i];
-          if (Array.isArray(rule)) {
-            if (!rule.includes(val)) return false;
-          } else if (typeof rule === 'object' && rule !== null) {
-            if (rule.min !== undefined && val < rule.min) return false;
-            if (rule.max !== undefined && val > rule.max) return false;
-          } else {
-            if (val !== rule) return false;
-          }
-        }
-        return true;
-      });
-    }
-    const sortCol = this[sortBy];
-    if (sortCol) {
-      result.sort((a, b) => {
-        const valA = sortCol[a];
-        const valB = sortCol[b];
-        return desc ? valB - valA : valA - valB;
-      });
-    }
-    return new Pagenator(this, result);
-  }
-}
-
-/**
- * Pagenator — Класс постраничной разбивки данных.
- */
-class Pagenator {
-  static #page = {
-    get(target, prop) {
-      const p = Number(prop);
-      if (isNaN(p)) return target[prop];
-      target.page = Math.max(1, Math.min(target.pages, p));
-      const start = (target.page - 1) * target.offset;
-      return target.indices.slice(start, start + target.offset).map(i => target.gems[i]);
-    }
-  };
-  constructor(gems, indices) {
-    this.gems = gems;
-    this.indices = indices || [];
-    this.offset = 12;
-    this.page = 1;
-    return new Proxy(this, Pagenator.#page);
-  }
-  get total() { return this.indices.length; }
-  get pages() { return Math.ceil(this.total / this.offset); }
-  get items()  { return this.indices; }
-  get next()  { return this[this.page + 1]; }
-  get prev()  { return this[this.page - 1]; }
-}
-
-/**
- * Cart — Реактивный контроллер корзины покупок.
- */
-class Cart {
-  #storKey = "citygems_cart";
-  #map = new Map();
-
-  constructor(gems, arg = null) {
-    this.gems = gems;    
-    if (typeof arg === "string") {
-      this.#storKey = null;
-      const ord = Cart.parseURL(arg);
-      this.gems.rate = {val: ord?.rate || 1, date: new Date(ord?.date || null)};
-      if (ord?.items) ord.items.forEach(i => this.#map.set(i.id, i.qt));
-    } else {
-      this.onChange = arg;
-      this._load();
-    }
-  }
-
-  _save() {
-    if (!this.#storKey) return;
-    if (this.#map.size < 1) {
-      localStorage.removeItem(this.#storKey);
-    } else {
-      const rawData = {
-        id: Array.from(this.#map.keys()),
-        qt: Array.from(this.#map.values()),
-      };
-      localStorage.setItem(this.#storKey, JSON.stringify(rawData));
-    }
-    if (typeof this.onChange === "function") this.onChange(this.count);
-  }
-
-  _load() {
-    if (!this.#storKey) return;
-    const dataStr = localStorage.getItem(this.#storKey);
-    this.#map.clear();
-    if (!dataStr) return;
-
-    try {
-      const parsed = JSON.parse(dataStr);
-      if (parsed?.id && Array.isArray(parsed.id)) {
-        parsed.id.forEach((id, index) => {
-          if (this.gems.id.indexOf(id) >= 0) {
-            this.#map.set(id, parsed.qt[index] || 1);
-          }
+    constructor(gems, uri) {
+        this.length = gems.price?.row?.length || 0;
+        this.raw = gems;
+        this.uri = uri;
+        const shapes = gems.shape?.map || [];
+        const labs = gems.lab?.map || [];
+        const cuts = gems.cut?.map || [];
+        const colors = gems.color?.map || [];
+        const clarities = gems.clarity?.map || [];
+        const simmetries = gems.simmetry?.map || [];
+        this._gemPrototype = Object.create(null, {
+            size:  { get() { return new GemSize(this.sizeL, this.sizeW, this.sizeD); } },
+            image: { get() { return this._shapeStr ? uri + "img/" + this._shapeStr + ".png" : ""; } },
+            label: { get() { return this._labStr ? uri + "lab/" + this._labStr + ".png" : ""; } },
+            art:   { get() { return this.id.toString(36); } }
         });
-        if (this.#map.size !== parsed.id.length) this._save();
-      }
-    } catch (e) {
-      localStorage.removeItem(this.#storKey);
+        return new Proxy(this, {
+            get(target, prop) {
+                const i = Number(prop);
+                if (isNaN(i)) return target[prop] || gems[prop];
+                if (i < 0 || i >= target.length) return undefined;
+                const item = Object.create(target._gemPrototype);
+                
+                item.id = gems.id.row[i];
+                item.carat = gems.carat.row[i];
+                item.price = gems.price.row[i];
+                item.sizeL = gems.sizeL.row[i];
+                item.sizeW = gems.sizeW.row[i];
+                item.sizeD = gems.sizeD.row[i];
+                
+                item._shapeStr = shapes[gems.shape.row[i]] || "";
+                item._labStr = labs[gems.lab.row[i]] || "";
+                
+                item.shape = item._shapeStr;
+                item.lab = item._labStr;
+                item.cut = cuts[gems.cut.row[i]] || "";
+                item.color = colors[gems.color.row[i]] || "";
+                item.clarity = clarities[gems.clarity.row[i]] || "";
+                item.simmetry = simmetries[gems.simmetry.row[i]] || "";
+
+                return item;
+            }
+        });
     }
-  }
 
-  set(rowIndex, qty = 1) {
-    const id = this.gems.id[rowIndex];
-    if (!id) return;
-    if (qty > 0) {
-      this.#map.set(id, qty);
-    } else {
-      this.#map.delete(id);
+    static async load(uri = "db/", rate, date) {
+        const storeKey = "citygems_rate";
+        let fileDate = null;
+        
+        const prom = fetch(uri + "gems.db").then(d => {
+                if (d.ok) {
+                    const lastMod = d.headers.get("Last-Modified");
+                    if (lastMod) fileDate = new Date(lastMod);
+                    return d.json();
+                }
+                throw new Error(d.statusText);
+            }).catch(e => { throw new Error(`Не удалось загрузить каталог: ${e.message}`) });
+
+        let cbr = null;
+        if (!rate) {
+            cbr = await fetch("https://www.cbr-xml-daily.ru/daily_json.js")
+                .then(d => d.ok ? d.json() : Promise.reject(d.statusText))
+                .then(d => d.Valute?.USD?.Value ? { rate: d.Valute.USD.Value, date: d.Date || "" } : null)
+                .catch(e => {
+                    console.warn("Не удалось загрузить курсы валют ЦБ РФ:", e);
+                    return null;
+                });
+
+            const loc = JSON.parse(localStorage.getItem(storeKey) || "{}");
+            rate = cbr?.rate || 0;
+            date = cbr?.date || null;
+            
+            if (!rate && !loc.rate) throw new Error("Нет доступного курса валюты!");
+            
+            if (!rate) {
+                rate = loc.rate;
+                date = loc.date;
+            } else if (loc.rate) {
+                const dif = rate / loc.rate;
+                if (dif > 0.95 && dif < 1.05) {
+                    rate = loc.rate;
+                    date = loc.date;
+                } else {
+                    localStorage.setItem(storeKey, JSON.stringify(cbr));
+                }
+            } else {
+                localStorage.setItem(storeKey, JSON.stringify(cbr));
+            }
+        }
+
+        const gems = await prom;
+        
+        if (gems.price && Array.isArray(gems.price.row)) {
+            for (let i = 0; i < gems.price.row.length; i++) {
+                gems.price.row[i] = Math.round(gems.price.row[i] * rate / 10) * 10;
+            }
+        }
+        
+        gems.date = fileDate;
+        gems.rate = { val: rate, date: date ? new Date(date) : new Date() };
+        
+        return new Gems(gems, uri);
     }
-    this._save();
-  }
 
-  clear() {
-    this.#map.clear();
-    this._save();
-  }  
-
-  get(id) { return this.#map.get(id) || 0; }
-
-  get items() {
-    const r = [];
-    for (const [id, qty] of this.#map.entries()) {
-      const rowIdx = this.gems.id.indexOf(id);
-      if (rowIdx >= 0) {
-        const i = this.gems[rowIdx];
-        i.qty = qty;
-        r.push(i);
-      }
+    filter(criteria, orderBy, desc = false) {
+        const result = [];
+        const total = this.length;
+        const data = this.raw;
+        
+        // Поиск совпадений по сырым массивам чисел (работает мгновенно)
+        for (let i = 0; i < total; i++) {
+            let ok = true;
+            for (const [k, r] of Object.entries(criteria)) {
+                if (data[k]) {
+                    const v = data[k].row[i];
+                    if (typeof r === 'number' && r !== null) {
+                        ok = v === r;
+                    } else if (Array.isArray(r)) {
+                        ok = r.includes(v);
+                    } else if (r && typeof r.min === 'number' && typeof r.max === 'number') {
+                        ok = v >= r.min && v <= r.max;
+                    }
+                    if (!ok) break;
+                }
+            }
+            if (ok) result.push(i);
+        }
+        
+        if (orderBy && data[orderBy] && result.length > 1) {
+            const sortColumn = data[orderBy];
+            if (Array.isArray(sortColumn.map)) {
+                // Если колонка категориальная, сортируем по реальным строкам из словаря
+                const map = sortColumn.map;
+                if (desc) result.sort((a, b) => map[sortColumn.row[b]].localeCompare(map[sortColumn.row[a]]));
+                else result.sort((a, b) => map[sortColumn.row[a]].localeCompare(map[sortColumn.row[b]]));
+            } else {
+                // Если колонка числовая
+                const row = sortColumn.row;
+                if (desc) result.sort((a, b) => row[b] - row[a]);
+                else result.sort((a, b) => row[a] - row[b]);
+            }
+        }
+        
+        return new Proxy({
+            _indices: result,
+            _gems: this,
+            _cache: {},
+            offset: 12, 
+            page: 0,
+            get length(){ return this._indices.length; },
+            get pages()  { return Math.max(1, Math.ceil(this._indices.length / this.offset)); }
+        }, {
+            get(target, prop) {
+                const i = Number(prop);
+                if (isNaN(i)) return target[prop];
+                if (i < 0 || i >= target.pages) return undefined;
+                target.page = i;
+                if (target._cache[i]) return target._cache[i];
+                const start = i * target.offset;
+                const p = target._indices.slice(start, start + target.offset).map(idx => target._gems[idx]);
+                target._cache[i] = p;
+                return p;
+            }
+        });
     }
-    return r;
-  }
-  get count() { return this.#map.size; }
+}
 
-  get uri() {
-    const ts = this.gems.date instanceof Date ? this.gems.date.getTime() : (this.gems.date ? new Date(this.gems.date).getTime() : Date.now());
-    const ds = Math.floor(ts / 86400000) - 20600;
-    const ps = new URLSearchParams({ [`on${ds}`]: this.gems.rate });
-    for (const [id, qt] of this.#map) ps.append(id, qt);
-    return ps.toString();
-  }
-  
-  static parseURL(urlStr) {
-    const r = { date: null, rate: 0, items: [] };
-    const query = urlStr.includes('?') ? urlStr.split('?')[1] : urlStr;
-    const params = new URLSearchParams(query);
-    for (const [k, v] of params.entries()) {
-      if (k.startsWith("on")) {
-        const dayOffset = parseInt(k.substring(2)) || 0;
-        r.date = new Date((dayOffset + 20600) * 86400000);
-        r.rate = parseFloat(v);
-      } else {
-        r.items.push({ id: parseInt(k), qt: parseInt(v) || 1 });
-      }
+class Cart {
+    #storKey = 'citygems_cart';
+    #nosave = false;
+
+    constructor(gems, rawCart) {
+        this.gems = gems;
+        this.#nosave = !!rawCart;
+        this._load(rawCart);
     }
-    return r;
-  }
 
-  /**
-   * Экспорт содержимого корзины в csv (что б в Excel: bom = true, что б в русский Excel: ru = true).
-   */
-  toCSV(title, bom, ru) {
-    const cols = ["id", "lab", "shape", "weight", "color", "clarity", "cut", "polish", "simmetry", "sizes", "price"];
-    const sep = ru ? ";" : ",";
-    const ln = bom === undefined ? "\n" : "\r\n";
-    const val = (v, sizes) => {
-      if (v === undefined || v === null) return '';
-      return ru && !isNaN(v) && v !== '' ? v.toString().replace('.', ',') : sizes && !ru ? v.toString().replaceAll(',', '.') : v;
-    };
-    let sum = 0, qts = 0;
-    let csv = (title ? (title + ln) : "") + Array("п/п", ...cols.map(k => this.gems[k]?.title || k), "Кол-во", "Сумма").join(sep) + ln;
-    cols.push("qty");
-    csv += this.items.map((i, n) => {
-      const p = i.qty * Number(i.price || 0);
-      sum += p;
-      qts += i.qty;
-      return Array(n + 1, ...cols.map(k => val(i[k], k == "sizes")), val(p)).join(sep);
-    }).join(ln);
-    csv += `${ln}${sep.repeat(cols.length - 1)}Итого:${sep}${val(qts)}${sep}${val(sum)}${ln}`;
-    if (bom === undefined) return csv;
-    if (bom) csv = "\uFEFF" + csv;
-    return new Blob([csv], { type: 'text/csv;charset=utf-8;' }); // Исправлен баг с массивом [csv]
-  }
+    _load(raw) {
+        this.map = new Map();
+        let loc = raw;
+        if (!loc && !(loc = localStorage.getItem(this.#storKey))) return;
+        if (typeof loc === 'string') {
+            try { loc = JSON.parse(loc) || null; } catch { loc = null; }
+        }
+        if (loc && Array.isArray(loc.id) && Array.isArray(loc.qt)) {
+            const ids = new Map();
+            const row = this.gems.raw.id.row;
+            loc.id.forEach((id, i) => { if (loc.qt[i] > 0) ids.set(id, loc.qt[i]); });
+            for (let i = 0; i < row.length; i++) {
+                const id = row[i];
+                if (ids.has(id)) {
+                    this.map.set(i, ids.get(id));
+                    ids.delete(id);
+                    if (!ids.size) break;
+                }
+            }
+        } else if (!raw) {
+            localStorage.removeItem(this.#storKey);
+        }
+    }
+
+    _save(nosave) {
+        const c = { id: [], qt: [] };
+        const ids = this.gems.raw.id.row;
+        if (this.map?.size) {
+            for (const [i, q] of this.map.entries()) {
+                if (q > 0 && ids[i] !== undefined) {
+                    c.id.push(ids[i]);
+                    c.qt.push(q);
+                }
+            }
+        }
+        if (nosave) return c;       
+        if (c.id.length) localStorage.setItem(this.#storKey, JSON.stringify(c));
+        else localStorage.removeItem(this.#storKey);
+    }
+
+    set(i, q) {
+        if (!this.map) this._load();
+        if (isNaN(q) || q < 1) this.map.delete(i);
+        else this.map.set(i, q);
+        if (!this.#nosave) this._save();
+    }
+
+    get(i) { 
+        if (!this.map) this._load();
+        return this.map.get(i) || 0; 
+    }
+
+    get items() {
+        if (!this.map) this._load();
+        const items = [];
+        for (const [i, q] of this.map.entries()) {
+            const item = this.gems[i];
+            if (item && q > 0) {
+                item.qty = q;
+                items.push(item);
+            } else {
+                this.map.delete(i);
+            }
+        }
+        return items;
+    }
+
+    get uri() {
+        const c = this._save(true);
+        if (!c.id.length) return "";
+        
+        const datePart = Math.round((this.gems.raw.date || new Date()) / 86400000).toString(36);
+        const ratePart = Math.round(this.gems.raw.rate.val * 100).toString(36);
+        let u = `${datePart}=${ratePart}`;
+        
+        for (let i = 0; i < c.id.length; i++) {
+            u += `&${c.id[i].toString(36)}=${c.qt[i].toString(36)}`;
+        }
+        return u;
+    }
+
+    static async load(shareUrl, baseUri = "db/") {
+        const queryString = shareUrl.includes('?') ? shareUrl.substring(shareUrl.indexOf('?') + 1) : shareUrl;
+        const params = queryString.split("&");
+        const header = params.shift().split("=");
+        
+        const dateMs = parseInt(header[0], 36) * 86400000;
+        const rateVal = parseInt(header[1], 36) / 100;
+        
+        const c = { id: [], qt: [] };
+        params.forEach(p => {
+            const pair = p.split("=");
+            if (pair.length === 2) {
+                const id = parseInt(pair[0], 36);
+                const qt = parseInt(pair[1], 36);
+                if (!isNaN(id) && !isNaN(qt) && qt > 0) {
+                    c.id.push(id);
+                    c.qt.push(qt);
+                }
+            }
+        });
+        
+        const cleanUri = shareUrl.includes('/') ? shareUrl.substring(0, shareUrl.lastIndexOf('/') + 1) + baseUri : baseUri;
+        const gems = await Gems.load(cleanUri, rateVal, dateMs);
+        return new Cart(gems, c);
+    }
 }
