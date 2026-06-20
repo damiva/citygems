@@ -58,7 +58,7 @@ class Gems {
         const storeKey = "citygems_rate";
         let fileDate = null;
         
-        const prom = fetch(uri + "gems.db").then(d => {
+        const prom = fetch(uri + "gems.json").then(d => {
                 if (d.ok) {
                     const lastMod = d.headers.get("Last-Modified");
                     if (lastMod) fileDate = new Date(lastMod);
