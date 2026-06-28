@@ -294,17 +294,24 @@ class Cart {
     }
 }
 
-function LinkQR(contact, order, type, stg){
-    const s = typeof stg == "object" && stg || {};
-    let u = "";
-    if (typeof type == "string" && type) switch(type.toLowerCase()) {
-        case "t": u = "tg://resolve"; break;
-        case "m": u = "max://write"; break;
-        case "w": u = "whatsapp://send";
+class QRCode {
+    #m = "";
+    #t = "";
+    constructor(img, type, stg){
+        const u = type && typeof type == "string" && {t: "tg://resolve", m: "max://write", w: "whatsapp://send"}[type.toLowerCase()] || "";
+        this.img = typeof img == "object" && img.src !== undefined && img || undefined;
+        this.stg = typeof stg == "object" && stg || {};
+        this.#m = u ? `${u}?phone=${parseInt(this.#t, 36)}` : `mailto:${atob(this.#m)}?subject=${window.location.host}`;
+        this.#t = u ? "&text=" : "&body=";
     }
-    let o = order ? (u ? "&text=" : "&body=") + encodeURIComponent(`Мой заказ: ${window.location.origin}/order.html?${order}`) : ""; 
-    u = u ? `${u}?phone=${parseInt(contact, 36)}${o}` : `mailto:${this.#m}@${window.location.hostname}?subject=${window.location.host}${o}`;
-    s.data = encodeURIComponent(u);
-    o = "https://api.qrserver.com/v1/create-qr-code/?" + Object.keys(s).map(k => `${k}=${s[k]}`).join("&");ч
-    return {lnk: u, img: o};
+    set(order) {
+        let u = this.#m;
+        if(order) u += this.#t + encodeURIComponent(`Мой заказ: ${window.location.origin}/order.html?${order}`);
+        if(this.img) {
+            this.stg.data = u;
+            this.img.src = this.constructor.get(this.stg);
+        }
+        return u;
+    }
+    static get(stg) {return `https://api.qrserver.com/v1/create-qr-code/?${new URLSearchParams(stg).toString()}`}
 }
