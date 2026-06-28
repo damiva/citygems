@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CityGems — лабораторные бриллианты</title>
+  
+  <!-- Премиальные шрифты -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;1,400&display=swap">
+  
+  <link rel="stylesheet" href="index.css">
+  <script src="js/gems.js"></script>
+  <script src="js/index.js"></script>
+</head>
+<body>
+  <header>
+    <a href="#about" title="О нас">
+      <img src="favicon.ico" class="icon" alt="CityGems">
+      <img src="img/cgb.png" class="auto-hide">
+    </a>
+    <a href="#catalog">Каталог</a>
+    <a href="#cart"><svg></svg><span id="cart-count"></span></a>
+  </header>
+  <main>
+    <section id="about">
+      <h1>Камни, которые рассказывают историю</h1>
+      <p>Мы представляем изысканную коллекцию выращенных в лаборатории бриллиантов исключительного качества. Вся чистота, магия и сверкание природного алмаза, созданные в гармонии с инновационными технологиями завтрашнего дня.</p>
+      <a href="#catalog" class="btn-luxury">Перейти в каталог</a>
+    </section>
+
+    <section id="catalog" class="hidden">
+      <h1>Наш каталог</h1>
+      <aside>
+        <h2>Фильтры <button onclick="filterReset()">Сбросить всё</button></h2>
+        <ul id="filters">
+          <li id="filter-weight"><h3><button></button></h3><input type="range"></li>
+          <li id="filter-shape"><h3><button"></button></h3><div class="tags"></div></li>
+          <li id="filter-color"><h3><button"></button></h3><div class="tags"></div></li>
+          <li id="filter-clarity"><h3><button"></button></h3><div class="tags"></div></li>
+          <li id="filter-lab"><h3><button"></button></h3><div class="tags"></div></li>
+          <li id="filter-price"><h3><button></button></h3><input type="range"></li>
+        </ul>
+      </aside>
+      <div class="strech">
+        <span>Найдено: <b id="res-count">0</b></span>
+        <select id="filter-sort">
+          <option value="price"></option>
+          <option value="price" data-desc="true"></option>
+          <option value="weight"></option>
+          <option value="weight" data-desc="true"></option>
+        </select>
+      </div>
+      <ul id="catalog-list"></ul>
+    </section>        
+    
+    <section id="cart" class="hidden">
+      <h1>Ваша корзина</h1>
+      <ul id="cart-list"></ul>
+    </section>
+    </main>
+
+    <!-- Шаблон диапазонного фильтра (Range) -->
+    <template id="filter-range">
+        <div class="filter-group">
+            <div class="filter-header-row">
+                <span class="filter-label"></span>
+                <span class="filter-values"></span>
+            </div>
+            <div class="range-slider-container">
+                <div class="range-track"></div>
+                <input type="range" class="range-min" step="any">
+                <input type="range" class="range-max" step="any">
+            </div>
+        </div>
+    </template>
+
+    <!-- Шаблон тега (кнопки) множественного выбора -->
+    <template id="filter-tag-btn">
+        <button class="tag-btn" type="button"></button>
+    </template>
+
+    <!-- Шаблон карточки товара -->
+    <template id="catalog-card">
+        <li class="catalog-card">
+            <div class="card-image-wrapper">
+                <img class="card-img" src="" alt="Бриллиант">
+                <span class="card-badge-status" style="display: none;">В корзине</span>
+            </div>
+            <div class="card-info">
+                <h3 class="card-title"></h3>
+                <div class="card-meta">
+                    <span class="card-weight"></span>
+                    <span class="card-color"></span>
+                    <span class="card-clarity"></span>
+                </div>
+                <div class="card-price-row">
+                    <span class="card-price"></span>
+                    <button class="card-btn-buy" type="button">В корзину</button>
+                </div>
+            </div>
+        </li>
+    </template>
+
+    <!-- Шаблон товара в корзине -->
+    <template id="order-card">
+        <li class="order-card">
+            <img class="order-img" src="" alt="">
+            <div class="order-info">
+                <h4 class="order-title"></h4>
+                <div class="order-meta"></div>
+                <span class="order-price"></span>
+            </div>
+            <div class="order-qty-control">
+                <button class="qty-btn dec" type="button">-</button>
+                <span class="qty-val">1</span>
+                <button class="qty-btn inc" type="button">+</button>
+            </div>
+            <button class="order-remove" type="button">&times;</button>
+        </li>
+    </template>
+
+    <!-- ДИОЛОГИ -->
+    <dialog id="question">
+        <h2 id="q-title">Подтверждение</h2>
+        <p id="q-text">Вы уверены?</p>
+        <div class="buttons">
+            <button type="submit" id="q-submit">Подтвердить</button>
+            <button type="button" onclick="this.closest('dialog').close()">Отменить</button>
+        </div>
+    </dialog>
+</body>
+</html>

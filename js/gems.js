@@ -293,3 +293,18 @@ class Cart {
         return new Cart(gems, c);
     }
 }
+
+function LinkQR(contact, order, type, stg){
+    const s = typeof stg == "object" && stg || {};
+    let u = "";
+    if (typeof type == "string" && type) switch(type.toLowerCase()) {
+        case "t": u = "tg://resolve"; break;
+        case "m": u = "max://write"; break;
+        case "w": u = "whatsapp://send";
+    }
+    let o = order ? (u ? "&text=" : "&body=") + encodeURIComponent(`Мой заказ: ${window.location.origin}/order.html?${order}`) : ""; 
+    u = u ? `${u}?phone=${parseInt(contact, 36)}${o}` : `mailto:${this.#m}@${window.location.hostname}?subject=${window.location.host}${o}`;
+    s.data = encodeURIComponent(u);
+    o = "https://api.qrserver.com/v1/create-qr-code/?" + Object.keys(s).map(k => `${k}=${s[k]}`).join("&");ч
+    return {lnk: u, img: o};
+}
